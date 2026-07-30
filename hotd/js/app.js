@@ -1757,6 +1757,10 @@
   document.addEventListener("click", (e) => {
     if (!seasonItem.contains(e.target)) seasonItem.classList.remove("open");
   });
+  /* the one-step arrows either side of the badge */
+  const storyPrev = byId("story-prev"), storyNext = byId("story-next");
+  if (storyPrev) storyPrev.addEventListener("click", (e) => { e.stopPropagation(); stepStory(-1); });
+  if (storyNext) storyNext.addEventListener("click", (e) => { e.stopPropagation(); stepStory(1); });
 
   /* where a journey stands at the end of episode `ep` (fractional stop index) */
   function fractionForEpisode(journey, ep) {
@@ -1825,6 +1829,41 @@
   /* the tale always stands somewhere: with no episode/chapter chosen (or a
      point left over from the other telling), default to S1·E1 in the show's
      telling and Book 1 · Ch. 1 in the books' */
+  /* Step one episode or one chapter at a time, rolling over the ends of a
+     season or a book. Picking a story point otherwise means opening the season
+     dropdown and hitting a small target — fine with a mouse, poor on a phone,
+     which is why these two buttons sit beside the badge. */
+  function stepStory(dir) {
+    if (state.book && state.chapter) {
+      const book = bookByN[state.book];
+      if (!book) return;
+      let b = state.book, ch = state.chapter + dir;
+      if (ch < 1) {
+        const prev = bookByN[b - 1];
+        if (!prev) return;
+        b -= 1; ch = prev.chapters;
+      } else if (ch > book.chapters) {
+        if (!bookByN[b + 1]) return;
+        b += 1; ch = 1;
+      }
+      selectChapter(b, ch);
+      return;
+    }
+    const seasonN = state.season || 1;
+    const season = seasonByN[seasonN];
+    if (!season) return;
+    let s = seasonN, e = (state.episode || 1) + dir;
+    if (e < 1) {
+      const prev = seasonByN[s - 1];
+      if (!prev) return;
+      s -= 1; e = prev.episodes.length;
+    } else if (e > season.episodes.length) {
+      if (!seasonByN[s + 1]) return;
+      s += 1; e = 1;
+    }
+    selectEpisode(s, e);
+  }
+
   function selectDefaultStoryPoint() {
     if (state.lore === "book") {
       if (!(state.book && state.chapter)) selectChapter(1, 1);

@@ -408,9 +408,26 @@ html { height: auto; overflow-y: auto; }
 }
 .home-quote-note a { color: var(--gold-dim); }
 
+/* ---- density on a phone --------------------------------------------------
+   These grids used to fall to a single column, which turned the home page into
+   a very tall ribbon you had to scroll a long way to read. Two across fits
+   comfortably at 360px and roughly halves the page height. The three sagas
+   deliberately stay one per row — they are the hero's main choice and want the
+   width — but everything below them pairs up. */
 @media (max-width: 720px) {
-  .home-sagas { grid-template-columns: 1fr; }
-  .home-featured { grid-template-columns: 1fr; }
+  .home-sagas { grid-template-columns: 1fr; gap: 10px; }
+  .home-sagas .home-saga { flex-direction: row; text-align: left; padding: 12px 14px; gap: 12px; }
+  .home-featured { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .home-portals { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .home-stats { grid-template-columns: repeat(3, 1fr); }
+  .home-section { padding-left: 12px; padding-right: 12px; }
+  .home-section-title { font-size: 17px; }
+  .home-hero { padding-top: 26px; padding-bottom: 26px; }
+}
+@media (max-width: 420px) {
+  /* the portal cards carry a title plus sub-links; below this they need the
+     full width or the links wrap into an unreadable stack */
+  .home-portals { grid-template-columns: 1fr; }
 }
 
 /* ---- day theme ---- */

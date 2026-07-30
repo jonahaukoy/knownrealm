@@ -299,6 +299,25 @@ a.wk-row:hover { background: rgba(201,161,90,0.12); }
   .wiki-topbar .search-wrap { display: none; }
 }
 
+/* ---- reading density on a phone ------------------------------------------
+   Every one of these grids had a minimum track wider than a phone screen, so
+   auto-fit could only ever place ONE card per row. The result was a very long
+   single file of cards that had to be scrolled past to reach anything — the
+   "everything is zoomed in and I scroll forever" complaint. Dropping the
+   minimum below half the screen lets two sit side by side, which roughly
+   halves the height of every index in the wiki. */
+@media (max-width: 620px) {
+  .wk-cats { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; }
+  .wk-grid { grid-template-columns: repeat(auto-fill, minmax(142px, 1fr)); gap: 8px; }
+  .wk-col-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+  .wk-col-card { flex-direction: column; align-items: flex-start; gap: 8px; padding: 10px; }
+  .wiki-main { padding-left: 12px; padding-right: 12px; }
+  .wk-side { max-width: none; }
+  .wk-face-big, .wk-sigil-big { width: 116px; height: 116px; }
+  .wk-para { font-size: 15px; line-height: 1.65; }
+  .wk-h3 { font-size: 15px; margin-top: 20px; }
+}
+
 /* ===== the collections: dragons, Valyrian steel, direwolves, Kingsguard, battles, prophecies ===== */
 .wk-col-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 10px; margin-top: 4px; }
 .wk-col-card { display: flex; align-items: center; gap: 13px; padding: 12px 14px; }

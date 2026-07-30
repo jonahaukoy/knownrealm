@@ -70,8 +70,15 @@ button { font-family: inherit; cursor: pointer; }
 .realm-bar {
   display: flex;
   align-items: center;
+  /* Wrap at EVERY width, not just under 880px. The bar was a fixed-height,
+     non-wrapping row, so on any screen too narrow to hold every franchise
+     dropdown plus the singles — a 1280px laptop, for instance — the right-hand
+     entries (Gallery, Credits, the search) simply sat off the edge with no way
+     to reach them. It must never clip: see the standing rule against putting
+     `overflow` on this bar, which hides the dropdowns. */
+  flex-wrap: wrap;
   gap: 4px;
-  height: 50px;
+  min-height: 50px;
   padding: 0 20px;
   background: linear-gradient(180deg, #12100b, #0d0b08);
   border-bottom: 1px solid #34291b;
@@ -1404,6 +1411,76 @@ body.site-wordle .wordle-screen { display: block; }
     width: 100%; flex: 0 0 auto; max-height: none; overflow: visible;
     border-right: none; border-top: 1px solid #4a3c28;
   }
+
+  /* ---- the map's own top bar ----------------------------------------
+     It was a single 62px-tall non-wrapping flex row holding the brand, three
+     mode buttons, a wide search field and the season badge. On a phone that
+     is far more than fits, and because nothing wraps and nothing scrolls, the
+     overflow was simply unreachable: "Regions" and the story badge sat off the
+     right edge of the screen with no way to get at them.
+
+     The bar now grows to as many rows as it needs. The brand keeps the first
+     row, the three mode buttons get a full row of their own, and the story
+     controls get another — so every control is reachable at 360px. */
+  body:has(.map-stage) .topbar {
+    height: auto; min-height: 0; flex-wrap: wrap;
+    align-items: center; gap: 6px 10px; padding: 6px 10px;
+  }
+  body:has(.map-stage) .modes {
+    order: 3; flex-basis: 100%; width: 100%; height: auto;
+    gap: 2px; border-top: 1px solid rgba(201, 161, 90, 0.16); padding-top: 2px;
+  }
+  body:has(.map-stage) .mode-btn {
+    flex: 1; padding: 9px 4px; font-size: 11px; letter-spacing: 0.5px;
+    text-align: center; white-space: nowrap;
+  }
+  /* the dropdowns hang off the row rather than the individual button, so a
+     long menu is not pinned to a 100px-wide column */
+  body:has(.map-stage) .mode-item { position: static; flex: 1; display: flex; }
+  body:has(.map-stage) .modes .dropdown {
+    left: 8px; right: 8px; width: auto; min-width: 0;
+    max-height: 60vh; overflow-y: auto;
+  }
+  body:has(.map-stage) .topbar-right {
+    order: 4; flex-basis: 100%; width: 100%;
+    display: flex; align-items: center; gap: 8px;
+  }
+  /* The map's search field is the widest thing in the bar and the reason the
+     rest was pushed off-screen. The realm bar's own search (the magnifier, or
+     "/") reaches every page in all three sagas, so nothing is lost that a
+     phone user cannot still get to. */
+  body:has(.map-stage) .topbar-right .search-wrap { display: none; }
+  body:has(.map-stage) .season-item { flex: 1; min-width: 0; }
+  body:has(.map-stage) .season-badge { width: 100%; justify-content: center; }
+
+  /* ---- the journey player along the bottom ----
+     Same problem: a fixed row that ran off the screen, so the scrubber and the
+     stop label were unreachable. It wraps now, and the scrubber keeps a row. */
+  body:has(.map-stage) .journey-player {
+    flex-wrap: wrap; height: auto; gap: 6px 10px; padding: 8px 10px;
+  }
+  body:has(.map-stage) .journey-player .scrubber-wrap { flex-basis: 100%; order: 5; }
+  body:has(.map-stage) .player-info { min-width: 0; flex: 1; }
+  body:has(.map-stage) .player-stop { flex-basis: 100%; order: 6; text-align: center; }
+}
+
+/* the one-step arrows either side of the story badge (all three maps) */
+.story-step {
+  flex-shrink: 0;
+  width: 30px; height: 30px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(201, 161, 90, 0.07);
+  border: 1px solid rgba(201, 161, 90, 0.4);
+  border-radius: 7px;
+  color: var(--gold); font-size: 14px; line-height: 1;
+  cursor: pointer; transition: background 0.16s, border-color 0.16s;
+}
+.story-step:hover { background: rgba(201, 161, 90, 0.2); border-color: var(--gold); color: var(--gold-bright); }
+.story-step:active { background: rgba(201, 161, 90, 0.3); }
+@media (max-width: 820px) {
+  /* a proper thumb target on a touchscreen, where dragging the scrubber's
+     little circle to change episode is close to impossible */
+  .story-step { width: 40px; height: 38px; font-size: 17px; }
 }
 
 #map-svg { width: 100%; height: 100%; display: block; cursor: grab; }
