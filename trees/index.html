@@ -3,66 +3,94 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>House Family Trees — The Lineages of the Great Houses</title>
+<title>The Family Trees — under improvement</title>
+<meta name="description" content="The family trees of the great houses are being reworked and will return shortly." />
+<meta name="robots" content="noindex" />
 <link rel="preload" href="../css/fonts/cinzel-400-latin.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="preload" href="../css/fonts/cinzel-600-latin.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="preload" href="../css/fonts/ebgaramond-400-latin.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="stylesheet" href="../css/fonts.css" />
 <link rel="stylesheet" href="../css/style.css" />
-<link rel="stylesheet" href="trees.css" />
 <script>try{var t=localStorage.getItem("kwTheme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
+<style>
+  /* base style.css pins the page for the map; this one scrolls like a document */
+  html { height: auto; overflow-y: auto; }
+  body.wip-body {
+    min-height: 100vh; display: flex; flex-direction: column;
+    background:
+      linear-gradient(180deg, rgba(12, 10, 7, 0.9), rgba(12, 10, 7, 0.97)),
+      url("../assets/ASOIAF_map.jpg") center 30% / cover no-repeat;
+    color: var(--text-light);
+  }
+  .wip-main {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    padding: 40px 16px 60px;
+  }
+  .wip-card {
+    max-width: 560px; width: 100%; text-align: center;
+    padding: 40px 28px 34px; border-radius: 16px;
+    background: linear-gradient(180deg, rgba(22, 18, 12, 0.94), rgba(14, 11, 8, 0.96));
+    border: 1px solid rgba(201, 161, 90, 0.42);
+    box-shadow: 0 22px 60px rgba(0, 0, 0, 0.6);
+  }
+  .wip-crest { font-size: 40px; color: var(--gold); line-height: 1; margin-bottom: 6px; }
+  .wip-kicker {
+    font-family: var(--serif-body); font-style: italic; font-size: 14px;
+    color: var(--gold); opacity: 0.9; margin-bottom: 4px;
+  }
+  .wip-card h1 {
+    font-family: var(--serif-display); font-size: 30px; letter-spacing: 1.5px;
+    margin: 0 0 14px; color: #f0e6d2;
+  }
+  .wip-card p {
+    font-family: var(--serif-body); font-size: 15.5px; line-height: 1.7;
+    color: #cdbf9f; margin: 0 auto 12px; max-width: 430px;
+  }
+  .wip-links { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 22px; }
+  .wip-links a {
+    font-family: var(--serif-display); font-size: 12px; letter-spacing: 1.1px;
+    text-decoration: none; padding: 11px 16px; border-radius: 8px;
+    color: var(--gold-bright); background: rgba(201, 161, 90, 0.1);
+    border: 1px solid rgba(201, 161, 90, 0.42);
+    transition: background 0.16s, border-color 0.16s;
+  }
+  .wip-links a:hover { background: rgba(201, 161, 90, 0.22); border-color: var(--gold); }
+  @media (max-width: 560px) {
+    .wip-card { padding: 30px 16px 26px; }
+    .wip-card h1 { font-size: 23px; }
+    .wip-card p { font-size: 14px; }
+    .wip-links a { font-size: 11px; padding: 10px 12px; }
+  }
+</style>
 </head>
-<body class="trees-body">
+<body class="wip-body">
 
 <header class="topbar">
   <a class="brand home-brand" href="../index.html" style="text-decoration:none;color:var(--text-light)">
     <span class="brand-icon">&#10022;</span>
-    <span class="brand-name">HOUSE FAMILY TREES</span>
+    <span class="brand-name">THE FAMILY TREES</span>
   </a>
   <div style="flex:1"></div>
-  <button class="trees-topbtn" id="tree-rail-toggle" aria-label="The houses">&#9776; The houses</button>
-  <button class="trees-topbtn" id="tree-progress-open"><span class="progress-eye">&#128065;</span> <span id="tree-progress-label">Everything</span></button>
 </header>
 
-<!-- the whole page: a house rail on the left, the parchment on the right -->
-<div class="trees-layout" id="trees-layout">
-
-  <!-- the houses, listed down the left as a table of lineages -->
-  <aside class="tree-rail" id="tree-rail">
-    <div class="tree-rail-head">The Book of Lineages</div>
-    <nav class="tree-rail-list" id="tree-rail-list"></nav>
-    <p class="tree-rail-note">Cross-checked against <i>The World of Ice &amp; Fire</i> and
-      <i>Fire &amp; Blood</i>. Where the show and books diverge, the show is followed.</p>
-  </aside>
-
-  <!-- the parchment sheet: crest, words and blood all printed on one surface -->
-  <section class="tree-parchment" id="tree-parchment">
-    <div class="tree-sheet trees-stage" id="trees-stage">
-      <!-- everything inside the surface scales together, as ink on one page -->
-      <div class="tree-surface" id="tree-surface">
-        <div class="tree-intro" id="tree-header"></div>
-        <div class="trees-canvas" id="trees-canvas"></div>
-      </div>
+<main class="wip-main">
+  <div class="wip-card">
+    <div class="wip-crest">&#127794;</div>
+    <div class="wip-kicker">The maesters are at work</div>
+    <h1>Under improvement</h1>
+    <p>The family trees are being redrawn &mdash; the blood of the great houses,
+      set out afresh. They will open again shortly.</p>
+    <p>Everything else in the realm is where you left it.</p>
+    <div class="wip-links">
+      <a href="../index.html">&#8962; The Known Realm</a>
+      <a href="../wiki.html">The Wiki</a>
+      <a href="../map.html">The Map</a>
+      <a href="../timeline.html">The Timeline</a>
+      <a href="../trivia/index.html">Games &amp; Trivia</a>
     </div>
+  </div>
+</main>
 
-    <!-- zoom controls, so the reader is never forced to scroll-zoom to fit -->
-    <div class="tree-zoombar" id="tree-zoombar">
-      <button class="tree-zoombtn" id="tree-zoom-out" title="Smaller" aria-label="Zoom out">&minus;</button>
-      <button class="tree-zoombtn" id="tree-zoom-fit" title="Fit the page" aria-label="Fit">&#9635;</button>
-      <button class="tree-zoombtn" id="tree-zoom-in" title="Larger" aria-label="Zoom in">&#43;</button>
-    </div>
-
-    <div class="tree-hint" id="tree-hint">Scroll to zoom &middot; drag to move &middot; click a face for their card</div>
-  </section>
-</div>
-
-<aside class="char-card tree-card hidden" id="tree-card"></aside>
-
-<script src="../js/shield.js"></script>
-<script src="trees-data.js"></script>
-<script src="trees-combined.js"></script>
-<script src="trees-bios.js"></script>
-<script src="trees.js"></script>
 <script src="../js/realm-nav.js" data-root="../"></script>
 </body>
 </html>

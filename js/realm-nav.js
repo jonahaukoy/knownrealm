@@ -63,14 +63,28 @@
     `fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round">` +
     `<circle cx="10.2" cy="10.2" r="6.3"/><line x1="15.1" y1="15.1" x2="20.6" y2="20.6"/></svg>`;
 
-  /* the right-hand controls that ride the bar on every page */
+  /* The right-hand controls that ride the bar on every page.
+     Order left-to-right is shield, then search, so that reading in from the
+     RIGHT edge a phone shows: hamburger in the corner, then search, then
+     shield — evenly spaced. The day/night toggle is NOT here: it lives inside
+     the collapsible menu (see themeHTML) so that on a phone it drops to the
+     bottom of the opened menu instead of crowding the bar. */
   const controlsHTML = () =>
     `<span class="realm-spacer"></span>` +
-    `<button class="realm-search-btn" type="button" id="gs-open" title="Search the realm (press /)">` +
-      `${magnifierSVG("realm-search-icon")}<span class="realm-search-label">Search</span><kbd>/</kbd></button>` +
     `<button class="realm-shield-btn" type="button" id="kw-shield-open" title="Spoiler shield — how far you have come">` +
       `<span class="realm-shield-icon">&#128737;</span><span class="realm-shield-label">Shield</span></button>` +
-    `<button class="realm-theme-btn" type="button" id="kw-theme" title="Switch between day and night"></button>`;
+    `<button class="realm-search-btn" type="button" id="gs-open" title="Search the realm (press /)">` +
+      `${magnifierSVG("realm-search-icon")}<span class="realm-search-label">Search</span><kbd>/</kbd></button>` +
+    themeHTML("bar");
+
+  /* Lives as the LAST child of .realm-collapse. On desktop that wrapper is
+     display:contents, so this is a direct flex item of the bar and `order:99`
+     parks it at the far right as before. On a phone the wrapper is the folded
+     menu, so it becomes the last row of that menu — and vanishes with it when
+     the menu is closed, which is exactly what was asked for. */
+  const themeHTML = (where) =>
+    `<button class="realm-theme-btn realm-theme-${where}" type="button" data-theme-toggle ` +
+    `title="Switch between day and night"></button>`;
 
   function groupHTML(g) {
     return `<div class="realm-group">
@@ -97,6 +111,7 @@
         `<a class="realm-single" href="${root}timeline.html">Timeline</a>` +
         `<a class="realm-single" href="${root}gallery.html">Gallery</a>` +
         `<a class="realm-single" href="${root}credits.html">Credits</a>` +
+        themeHTML("menu") +
       `</div>` +
       `<button class="realm-burger" type="button" id="home-burger" aria-label="Menu" aria-expanded="false" aria-controls="home-collapse">&#9776;</button>`;
     /* the home bar is already crowded — the controls ride on its right-hand side,
@@ -129,6 +144,7 @@
       `<div class="realm-collapse" id="realm-collapse">` +
         GROUPS.map(groupHTML).join("") +
         SINGLES.map(([label, href]) => `<a class="realm-single" href="${href}">${label}</a>`).join("") +
+        themeHTML("menu") +
       `</div>` +
       controlsHTML() +
       `<button class="realm-burger" type="button" id="realm-burger" aria-label="Menu" aria-expanded="false" aria-controls="realm-collapse">&#9776;</button>`;
@@ -177,24 +193,30 @@
      The realm is dark by default — that is its face. A reader who prefers
      parchment can say so, and we remember it. (A tiny script in each page's
      <head> applies the stored choice before first paint, so there is no flash.) */
+  /* There are TWO of these now, and CSS shows exactly one at a time: the copy
+     in the bar on desktop, the copy at the foot of the folded menu on a phone.
+     Two are needed rather than one because on the home page the bar's controls
+     and the menu are different flex containers, so no amount of `order` could
+     move a single button between them. Both are driven from here. */
   const THEME_KEY = "kwTheme";
-  const themeBtn = document.getElementById("kw-theme");
+  const themeBtns = document.querySelectorAll("[data-theme-toggle]");
   function paintThemeBtn() {
-    if (!themeBtn) return;
     const light = document.documentElement.getAttribute("data-theme") === "light";
-    themeBtn.innerHTML = light ? "&#9788;" : "&#9789;";
-    themeBtn.setAttribute("aria-label", light ? "Switch to night" : "Switch to day");
+    themeBtns.forEach((b) => {
+      b.innerHTML = light ? "&#9788;" : "&#9789;";
+      b.setAttribute("aria-label", light ? "Switch to night" : "Switch to day");
+    });
   }
   paintThemeBtn();
-  if (themeBtn) {
-    themeBtn.addEventListener("click", (e) => {
+  themeBtns.forEach((b) => {
+    b.addEventListener("click", (e) => {
       e.stopPropagation();
       const light = document.documentElement.getAttribute("data-theme") === "light";
       document.documentElement.setAttribute("data-theme", light ? "dark" : "light");
       try { localStorage.setItem(THEME_KEY, light ? "dark" : "light"); } catch (err) {}
       paintThemeBtn();
     });
-  }
+  });
 
   /* ================= the global search =================
      One box for the whole realm: people, places, houses, orders, episodes,

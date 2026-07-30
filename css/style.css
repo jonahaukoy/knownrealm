@@ -1817,6 +1817,26 @@ body.site-wordle .wordle-screen { display: block; }
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 .play-btn:hover { background: var(--red-bright); }
+/* The play button is retired from the player bar in favour of the two step
+   arrows below. It is kept in the DOM rather than deleted because the journey
+   playback code writes its label from seven places; hiding it keeps every one
+   of those paths working without a null check. */
+.play-btn { display: none; }
+
+/* step one episode or chapter, from the bar along the bottom */
+.player-step {
+  width: 42px; height: 42px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  background: rgba(201, 161, 90, 0.1);
+  border: 1px solid rgba(201, 161, 90, 0.45);
+  color: var(--gold); font-size: 17px; line-height: 1; cursor: pointer;
+  transition: background 0.16s, border-color 0.16s, color 0.16s;
+}
+.player-step:hover { background: rgba(201, 161, 90, 0.24); border-color: var(--gold); color: var(--gold-bright); }
+.player-step:active { background: rgba(201, 161, 90, 0.34); }
+#player-prev { margin-right: 2px; }
+#player-next { margin-right: 8px; }
 
 .player-info { width: 220px; flex-shrink: 0; }
 .player-character {
@@ -2400,7 +2420,42 @@ body.site-wordle .wordle-screen { display: block; }
   width: 32px; height: 32px; margin-left: 8px; flex-shrink: 0;
 }
 .realm-theme-btn:hover { color: var(--gold-bright); border-color: var(--gold); background: rgba(201, 161, 90, 0.14); }
-@media (max-width: 880px) { .realm-search-label, .realm-search-btn kbd { display: none; } }
+/* The day/night toggle is rendered twice — once in the bar, once at the foot
+   of the folded menu — and exactly one is ever shown. On the home page the
+   bar's controls and the menu are separate flex containers, so a single button
+   could not be moved between them by `order` alone. */
+.realm-theme-menu { display: none; }
+
+@media (max-width: 880px) {
+  .realm-search-label, .realm-search-btn kbd { display: none; }
+  /* on a phone the bar copy steps aside and the menu copy takes over */
+  .realm-theme-bar { display: none; }
+  .realm-theme-menu { display: flex; }
+  /* One row, everything on it. Reading in from the right edge: hamburger in
+     the corner, then search, then shield — evenly spaced by a single gap. */
+  .realm-bar { flex-wrap: nowrap; gap: 0; padding: 0 8px; min-height: 46px; }
+  .realm-home { font-size: 12px; letter-spacing: 0.6px; padding: 6px 0; margin-right: 0;
+                border-right: none; flex: 0 0 auto; }
+  .realm-spacer { flex: 1 1 auto; min-width: 4px; }
+  .realm-bar .realm-shield-btn,
+  .realm-bar .realm-search-btn { margin-left: 8px; flex: 0 0 auto; }
+  .realm-bar .realm-burger { margin-left: 8px; padding: 0; flex: 0 0 auto; }
+
+  /* inside the opened menu it becomes an ordinary full-width row at the bottom */
+  .realm-bar.open .realm-collapse .realm-theme-menu,
+  .home-nav.open .realm-collapse .realm-theme-menu {
+    width: 100%; height: auto; border-radius: 0;
+    margin: 4px 0 0; padding: 13px 8px;
+    display: flex; align-items: center; gap: 8px;
+    border: none; border-top: 1px solid rgba(201, 161, 90, 0.18);
+    background: transparent; font-size: 15px; text-align: left;
+  }
+  .realm-bar.open .realm-collapse .realm-theme-menu::after,
+  .home-nav.open .realm-collapse .realm-theme-menu::after {
+    content: "Day / night"; font-family: var(--serif-display);
+    font-size: 14px; letter-spacing: 1px; color: #c3b491;
+  }
+}
 
 /* ---------------- the spoiler shield button + dialog ---------------- */
 .realm-shield-btn {

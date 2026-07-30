@@ -1021,6 +1021,10 @@
     btn.addEventListener("click", (e) => {
       e.stopPropagation();
       const mi = btn.closest(".mode-item");
+      /* Pressing the same button again puts the menu away. It used to always
+         re-open, so on a phone — where the menu covers most of the screen —
+         there was no way to dismiss it with the control you had just used. */
+      const wasOpen = mi.classList.contains("open");
       if (btn.dataset.mode === "regions" && state.selectedRegionId) {
         state.selectedRegionId = null;
         if (state.season && state.episode) renderEpisodePanel(state.season, state.episode);
@@ -1033,7 +1037,7 @@
          menu. It now only switches mode and opens the dropdown; the full reset
          lives on the brand square in the top-left, which exists for that. */
       closeDropdowns();
-      mi.classList.add("open"); // a click always shows (and keeps) the dropdown
+      if (!wasOpen) mi.classList.add("open");
     });
   });
 
@@ -1806,6 +1810,13 @@
   document.addEventListener("click", (e) => {
     if (!seasonItem.contains(e.target)) seasonItem.classList.remove("open");
   });
+  /* the one-step arrows on the player bar along the bottom — they replace the
+     play button, which is now hidden: stepping the story a chapter at a time is
+     what people actually wanted from that corner of the screen */
+  const playerPrev = byId("player-prev"), playerNext = byId("player-next");
+  if (playerPrev) playerPrev.addEventListener("click", (e) => { e.stopPropagation(); stepStory(-1); });
+  if (playerNext) playerNext.addEventListener("click", (e) => { e.stopPropagation(); stepStory(1); });
+
   /* the one-step arrows either side of the badge */
   const storyPrev = byId("story-prev"), storyNext = byId("story-next");
   if (storyPrev) storyPrev.addEventListener("click", (e) => { e.stopPropagation(); stepStory(-1); });

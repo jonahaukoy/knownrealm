@@ -307,13 +307,22 @@ html { height: auto; overflow-y: auto; }
      buttons onto a second row. Below 880px the nav is folded behind the
      hamburger and its open sheet is absolutely positioned, so nothing here
      needs to wrap and nothing gets clipped. */
-  .topbar.home-topbar { flex-wrap: nowrap; gap: 6px; padding: 4px 10px; min-height: 0; row-gap: 0; }
-  .home-brand .brand-name { font-size: 11.5px; letter-spacing: 1px; }
-  .home-brand { min-width: 0; flex-shrink: 1; overflow: hidden; }
-  .home-topbar .topbar-right { order: 2; margin-left: auto; flex-shrink: 0; }
-  .home-nav { display: flex; order: 3; margin-left: 0; flex-shrink: 0; }
+  /* The whole site name must be readable — it was being clipped to "THE KNOWN R".
+     The brand is allowed its natural width and never shrinks; the icon buttons
+     are what give way, and they are small and evenly spaced.
+     Order from the right: hamburger in the corner, then search, then shield. */
+  .topbar.home-topbar {
+    flex-wrap: nowrap; gap: 0; padding: 4px 8px; min-height: 0; row-gap: 0;
+  }
+  .home-brand { flex: 0 0 auto; min-width: 0; overflow: visible; margin-right: auto; }
+  .home-brand .brand-name { font-size: 11px; letter-spacing: 0.6px; white-space: nowrap; }
+  .home-topbar .topbar-right {
+    order: 2; margin-left: 0; flex: 0 0 auto;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .home-nav { display: flex; order: 3; margin-left: 8px; flex: 0 0 auto; }
   .home-nav .realm-collapse { display: none; }
-  .home-nav .realm-burger { display: inline-flex; align-items: center; padding: 6px; }
+  .home-nav .realm-burger { display: inline-flex; align-items: center; padding: 0; }
 
   .home-nav.open .realm-collapse {
     display: flex; flex-direction: column;
@@ -422,26 +431,61 @@ html { height: auto; overflow-y: auto; }
 }
 .home-quote-note a { color: var(--gold-dim); }
 
-/* ---- density on a phone --------------------------------------------------
-   These grids used to fall to a single column, which turned the home page into
-   a very tall ribbon you had to scroll a long way to read. Two across fits
-   comfortably at 360px and roughly halves the page height. The three sagas
-   deliberately stay one per row — they are the hero's main choice and want the
-   width — but everything below them pairs up. */
+/* ---- the phone layout ----------------------------------------------------
+   The rule throughout: put things side by side so the page is short, but never
+   at the cost of a card becoming unreadable. */
 @media (max-width: 720px) {
-  .home-sagas { grid-template-columns: 1fr; gap: 10px; }
-  .home-sagas .home-saga { flex-direction: row; text-align: left; padding: 12px 14px; gap: 12px; }
-  .home-featured { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-  .home-portals { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-  .home-stats { grid-template-columns: repeat(3, 1fr); }
+  /* THE THREE SAGAS, three across — each keeps its portrait shape: the crest
+     on top, the name, its line, then "enter the map | wiki" underneath. They
+     are the first choice on the page and reading them at a glance matters more
+     than the type being large. */
+  .home-sagas { grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 18px; }
+  .home-sagas .home-saga {
+    flex-direction: column; text-align: center;
+    padding: 10px 5px 9px; gap: 5px; border-radius: 10px;
+  }
+  .home-saga-face { gap: 4px; }
+  .home-saga-medal { width: 46px; height: 46px; }
+  .home-saga-name { font-size: 11px; letter-spacing: 0.2px; line-height: 1.15; }
+  .home-saga-sub { font-size: 9px; line-height: 1.25; opacity: 0.75; }
+  .home-saga-links { flex-direction: column; gap: 3px; width: 100%; }
+  .home-saga-links::before { display: none; }   /* the "|" divider has no room */
+  .home-saga-go, .home-saga-alt { font-size: 9.5px; letter-spacing: 0.3px; padding: 3px 2px; }
+
+  /* CHOOSE YOUR ROAD, two across. The paragraph under each title is what made
+     these cards tall; on a phone the title and its links say enough. */
+  .home-portals { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .home-portal { padding: 12px 10px; gap: 6px; }
+  .home-portal-sub { display: none; }
+  .home-portal-medal { width: 34px; height: 34px; font-size: 17px; }
+  .home-portal-title { font-size: 13px; line-height: 1.2; }
+  .home-portal-links { gap: 3px 8px; }
+  .home-portal-links a { font-size: 10.5px; }
+
+  /* THE REALM AT A GLANCE — three tiles a row rather than one.
+     This list is a FLEX row, not a grid, and each tile carries min-width:150px,
+     which is what forced one per line at 390px. Switching it to a grid and
+     releasing the minimum is what actually makes them sit together. */
+  .home-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+  .home-stat { min-width: 0; padding: 10px 5px; }
+  .home-stat b { font-size: 18px; }
+  .home-stat span { font-size: 9.5px; line-height: 1.2; }
+
+  /* SOUL OF THE DAY / WORDS OF THE DAY stay stacked, one above the other.
+     Side by side squeezed a portrait and a pull-quote into half a phone
+     screen each and both became unreadable — this was a mistake, put back. */
+  .home-featured { grid-template-columns: 1fr; gap: 10px; }
+
+  .home-about-grid { grid-template-columns: 1fr; }
   .home-section { padding-left: 12px; padding-right: 12px; }
   .home-section-title { font-size: 17px; }
   .home-hero { padding-top: 26px; padding-bottom: 26px; }
+  .home-hero h1 { font-size: 32px; }
 }
-@media (max-width: 420px) {
-  /* the portal cards carry a title plus sub-links; below this they need the
-     full width or the links wrap into an unreadable stack */
-  .home-portals { grid-template-columns: 1fr; }
+@media (max-width: 380px) {
+  /* the very narrowest phones: the saga crests give up a little more */
+  .home-saga-medal { width: 40px; height: 40px; }
+  .home-saga-name { font-size: 10px; }
 }
 
 /* ---- day theme ---- */
