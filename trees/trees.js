@@ -44,16 +44,17 @@
   /* the order the arrow keys step through — every house (the combined "all" page
      was removed on request) */
   const HOUSE_ORDER = TREE_HOUSES.map((h) => h.id);
-  let progress = { mode: "show", n: 0 };
   let reg = [], nodeIndex = new Map(), keyedLNs = {};
 
-  /* ---------- spoiler reveal logic ---------- */
-  function reach(th) {
-    if (!th) return true;
-    if (progress.mode === "all") return true;
-    if (progress.mode === "show") return th.s == null ? true : progress.n >= th.s;
-    return th.b == null ? true : progress.n >= th.b;
-  }
+  /* ---------- spoiler reveal logic ----------
+     The trees used to keep their own localStorage["trees-progress"], which knew
+     only Game of Thrones and could hold ONE place at a time — show OR book,
+     never both. It now reads the site-wide shield (js/shield.js, the same
+     record the games, the timeline and the home page use), so telling any one
+     page how far you have come counts everywhere. The thresholds in
+     trees-data.js are {s, b} against Game of Thrones, and either telling
+     unlocks a fact, since either way the reader already knows it. */
+  function reach(th) { return KWShield.reachGot(th); }
   function shown(o) { return (!o.reveal || reach(o.reveal)) && (!o.until || !reach(o.until)); }
   function effective(node) {
     const e = { n: node.n, t: node.t, king: node.king, note: node.note, img: node.img, bastard: node.bastard };
@@ -526,9 +527,13 @@
   }
 
   function progressLabel() {
-    if (progress.mode === "all") return "Everything &mdash; no spoilers hidden";
-    if (progress.mode === "show") return "The Show &middot; through Season " + progress.n;
-    return "The Books &middot; through " + (BOOK_SHORT[progress.n] || ("Book " + progress.n));
+    const s = KWShield.get();
+    if (s.gotS >= 8 && s.gotB >= 5) return "Everything &mdash; no spoilers hidden";
+    const parts = [];
+    if (s.gotS > 0) parts.push("Season " + s.gotS);
+    if (s.gotB > 0) parts.push(BOOK_SHORT[s.gotB] || ("Book " + s.gotB));
+    if (!parts.length) return "Nothing yet &mdash; everything late is hidden";
+    return "Through " + parts.join(" &middot; ");
   }
   function updateProgressBox() {
     const lab = byId("tree-progress-label"); if (!lab) return;
@@ -543,7 +548,7 @@
       '<div class="gate-card">' +
       '<div class="gate-kicker">Before you trace the blood</div>' +
       '<div class="gate-title">How far along are you?</div>' +
-      '<p class="gate-note">These trees hide what you have not yet reached &mdash; the truth of Jon Snow&rsquo;s parents, the fates that become titles, and more. Choose your place in the story; you can change it any time.</p>' +
+      '<p class="gate-note">These trees hide what you have not yet reached &mdash; the truth of Jon Snow&rsquo;s parents, the fates that become titles, and more. Set how far you have come in each telling; pick from both if you have watched <i>and</i> read. This is remembered across the whole site, so the games and the chronicle will hide the same things.</p>' +
       '<div class="gate-cols">' +
         '<div class="gate-col"><div class="gate-col-head">&#128250; The Show</div><div class="gate-chips" id="gate-show"></div></div>' +
         '<div class="gate-col"><div class="gate-col-head">&#128214; The Books</div><div class="gate-chips" id="gate-book"></div></div>' +
@@ -551,23 +556,51 @@
       '<button class="gate-all" id="gate-all" data-mode="all">I have finished the tale &mdash; show me everything</button>' +
       '<button class="gate-close" id="gate-close" title="Close">&times;</button></div>';
     document.body.appendChild(g);
+    /* The two columns are now INDEPENDENT — the shield holds a season and a
+       book at once, so a reader who has watched to S5 and read to ACOK can say
+       exactly that instead of having to pick one and lose the other. Tapping
+       a chip that is already chosen clears that telling back to nothing. */
     const showBox = g.querySelector("#gate-show");
-    for (let s = 1; s <= 8; s++) showBox.appendChild(chip("S" + s, "show", s, () => setProgress({ mode: "show", n: s })));
+    for (let s = 1; s <= 8; s++) showBox.appendChild(chip("S" + s, "show", s, () => setOne("gotS", s)));
     const bookBox = g.querySelector("#gate-book");
-    for (let b = 1; b <= 5; b++) bookBox.appendChild(chip(BOOK_SHORT[b], "book", b, () => setProgress({ mode: "book", n: b })));
-    g.querySelector("#gate-all").addEventListener("click", () => setProgress({ mode: "all", n: 0 }));
-    g.querySelector("#gate-close").addEventListener("click", closeGate);
+    for (let b = 1; b <= 5; b++) bookBox.appendChild(chip(BOOK_SHORT[b], "book", b, () => setOne("gotB", b)));
+    g.querySelector("#gate-all").addEventListener("click", () => {
+      KWShield.setAll(); afterShieldChange(); closeGate();
+    });
+    g.querySelector("#gate-close").addEventListener("click", () => { markAnswered(); closeGate(); });
   }
   function chip(label, mode, n, fn) { const b = document.createElement("button"); b.className = "gate-chip"; b.dataset.mode = mode; b.dataset.n = n; b.textContent = label; b.addEventListener("click", fn); return b; }
-  function openGate() {
-    const g = byId("spoiler-gate"); g.classList.remove("hidden");
-    /* mark the place already chosen so it reads as the current selection */
-    g.querySelectorAll(".gate-chip.sel, .gate-all.sel").forEach((el) => el.classList.remove("sel"));
-    if (progress.mode === "all") { const a = byId("gate-all"); if (a) a.classList.add("sel"); }
-    else { const cur = g.querySelector('.gate-chip[data-mode="' + progress.mode + '"][data-n="' + progress.n + '"]'); if (cur) cur.classList.add("sel"); }
+
+  function setOne(key, n) {
+    const cur = KWShield.get()[key];
+    const patch = {}; patch[key] = cur === n ? 0 : n;   /* tap again to unset */
+    KWShield.set(patch);
+    afterShieldChange();
   }
+  /* a reader who closes the gate without choosing has still answered ("none of
+     it"), so the gate does not ambush them again on the next visit */
+  function markAnswered() { if (!KWShield.has()) KWShield.set({}); }
+
+  function afterShieldChange() {
+    paintGate();
+    updateProgressBox();
+    if (state.house) showHouse(state.house);
+  }
+  function paintGate() {
+    const g = byId("spoiler-gate"); if (!g) return;
+    const s = KWShield.get();
+    g.querySelectorAll(".gate-chip.sel, .gate-all.sel").forEach((el) => el.classList.remove("sel"));
+    const selShow = g.querySelector('.gate-chip[data-mode="show"][data-n="' + s.gotS + '"]');
+    if (selShow) selShow.classList.add("sel");
+    const selBook = g.querySelector('.gate-chip[data-mode="book"][data-n="' + s.gotB + '"]');
+    if (selBook) selBook.classList.add("sel");
+    if (s.gotS >= 8 && s.gotB >= 5) { const a = byId("gate-all"); if (a) a.classList.add("sel"); }
+  }
+  function openGate() { byId("spoiler-gate").classList.remove("hidden"); paintGate(); }
   function closeGate() { byId("spoiler-gate").classList.add("hidden"); }
-  function setProgress(p) { progress = p; localStorage.setItem("trees-progress", JSON.stringify(p)); closeGate(); updateProgressBox(); if (state.house) showHouse(state.house); }
+
+  /* another page (or another tab) moved the shield — follow it */
+  window.addEventListener("kw-shield", () => { updateProgressBox(); if (state.house) showHouse(state.house); });
 
   /* ---------- pan & zoom — window-level, NO pointer capture (so clicks work) ---------- */
   /* zoom the WHOLE surface (crest, words, blurb and trees together) so the page
@@ -658,11 +691,15 @@
     else if (e.key === "ArrowRight") flipHouse(1);
   });
   const hp = new URLSearchParams(location.hash.slice(1));
+  /* The deep-link forms still work and now write to the shared shield, so a
+     link that says "#season=5" sets the reader's place for the whole site.
+     With nothing in the link, the gate is shown only to someone who has never
+     answered anywhere — a shield set in the games or the timeline counts. */
   let gated = false;
-  if (hp.get("spoil") === "all") progress = { mode: "all", n: 0 };
-  else if (hp.get("season")) progress = { mode: "show", n: parseInt(hp.get("season"), 10) };
-  else if (hp.get("book")) progress = { mode: "book", n: parseInt(hp.get("book"), 10) };
-  else { const saved = localStorage.getItem("trees-progress"); if (saved) { try { progress = JSON.parse(saved); } catch (x) {} } else gated = true; }
+  if (hp.get("spoil") === "all") KWShield.setAll();
+  else if (hp.get("season")) KWShield.set({ gotS: parseInt(hp.get("season"), 10) || 0 });
+  else if (hp.get("book")) KWShield.set({ gotB: parseInt(hp.get("book"), 10) || 0 });
+  else if (!KWShield.has()) gated = true;
   updateProgressBox();
   showHouse(houseById[hp.get("house")] ? hp.get("house") : "targaryen");
   if (hp.get("sel")) selectNode(parseInt(hp.get("sel"), 10));

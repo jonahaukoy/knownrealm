@@ -168,7 +168,7 @@ const TREE_HOUSES = [
                                   { n: "Sansa", t: "the eldest daughter, a little bird", img: "got/sansa-stark.jpg",
                                     spoil: { s: 8, b: 99, t: "Queen in the North", king: true } },
                                   { n: "Arya", t: "the she-wolf", img: "got/arya-stark.jpg",
-                                    spoil: { s: 6, t: "the she-wolf, No One" } },
+                                    spoil: { s: 6, b: 4, t: "the she-wolf, No One" } },
                                   { n: "Bran", t: "the climber, the dreamer", img: "got/bran-stark.jpg",
                                     spoil: { s: 8, b: 99, t: "the Three-Eyed Raven, the Broken King", king: true } },
                                   { n: "Rickon", t: "the youngest wolf", img: "got/rickon-stark.jpg" },

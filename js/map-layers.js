@@ -31,8 +31,8 @@
   var MAPS = [
     {
       id: "classic",
-      label: "The Mariner's Survey",
-      desc: "Drawn by hand for this site — coast, mountain and road across the known world",
+      label: "The Known World",
+      desc: "My own hand-drawn map of the realm",
       file: "ASOIAF_map_redrawn_v6.jpg",
       thumb: "ASOIAF_map_redrawn_v6_preview.jpg"
     }
