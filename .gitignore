@@ -32,6 +32,9 @@ assets/ASOIAF_map_redrawn_v3*.jpg
 assets/ASOIAF_map_redrawn_v4*.jpg
 assets/ASOIAF_map_redrawn_v5*.jpg
 
+# the 4.7 MB master the favicon-*.png / favicon.ico were cut from — unreferenced
+assets/favicon-weirwood.png
+
 # ── scratch ──────────────────────────────────────────────────────────
 _*.html
 *.tmp
