@@ -1423,27 +1423,47 @@ body.site-wordle .wordle-screen { display: block; }
      row, the three mode buttons get a full row of their own, and the story
      controls get another — so every control is reachable at 360px. */
   body:has(.map-stage) .topbar {
+    /* MUST be positioned: the mode dropdowns below are anchored to this bar
+       rather than to their own narrow button, so this is their containing
+       block. Without it they escape to the page and open hundreds of pixels
+       below the fold, invisible. */
+    position: relative;
     height: auto; min-height: 0; flex-wrap: wrap;
-    align-items: center; gap: 6px 10px; padding: 6px 10px;
+    align-items: center; gap: 4px 8px; padding: 5px 8px;
   }
+  body:has(.map-stage) .brand-name { font-size: 11px; letter-spacing: 0.8px; }
+  body:has(.map-stage) .brand-button { padding: 5px 8px; }
   body:has(.map-stage) .modes {
     order: 3; flex-basis: 100%; width: 100%; height: auto;
     gap: 2px; border-top: 1px solid rgba(201, 161, 90, 0.16); padding-top: 2px;
   }
   body:has(.map-stage) .mode-btn {
-    flex: 1; padding: 9px 4px; font-size: 11px; letter-spacing: 0.5px;
-    text-align: center; white-space: nowrap;
+    flex: 1; padding: 8px 2px; font-size: 10.5px; letter-spacing: 0.2px;
+    text-align: center; white-space: nowrap; border-bottom-width: 2px;
   }
-  /* the dropdowns hang off the row rather than the individual button, so a
-     long menu is not pinned to a 100px-wide column */
+  /* The dropdown spans the bar's full width instead of being pinned to a
+     ~117px column, and is capped so a long menu scrolls inside itself rather
+     than running off the bottom of the screen. */
   body:has(.map-stage) .mode-item { position: static; flex: 1; display: flex; }
   body:has(.map-stage) .modes .dropdown {
-    left: 8px; right: 8px; width: auto; min-width: 0;
-    max-height: 60vh; overflow-y: auto;
+    position: absolute; top: 100%; left: 6px; right: 6px;
+    width: auto; min-width: 0; max-width: none;
+    max-height: 56vh; overflow-y: auto;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.6);
   }
   body:has(.map-stage) .topbar-right {
     order: 4; flex-basis: 100%; width: 100%;
-    display: flex; align-items: center; gap: 8px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  /* the story dropdown is the single most important control on a phone — it
+     is how you pick the episode or chapter — so it gets the full width too
+     and is never allowed off either edge */
+  body:has(.map-stage) .season-item { position: static; }
+  body:has(.map-stage) .season-dropdown {
+    position: absolute; top: 100%; left: 6px; right: 6px;
+    width: auto; min-width: 0; max-width: none;
+    max-height: 60vh; overflow-y: auto;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.65);
   }
   /* The map's search field is the widest thing in the bar and the reason the
      rest was pushed off-screen. The realm bar's own search (the magnifier, or
@@ -2381,6 +2401,89 @@ body.site-wordle .wordle-screen { display: block; }
 }
 .realm-theme-btn:hover { color: var(--gold-bright); border-color: var(--gold); background: rgba(201, 161, 90, 0.14); }
 @media (max-width: 880px) { .realm-search-label, .realm-search-btn kbd { display: none; } }
+
+/* ---------------- the spoiler shield button + dialog ---------------- */
+.realm-shield-btn {
+  display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0;
+  background: rgba(140, 32, 32, 0.16);
+  border: 1px solid rgba(190, 80, 70, 0.45);
+  border-radius: 999px; color: #e8b9a8;
+  font-family: var(--serif-display); font-size: 11.5px; letter-spacing: 1px;
+  padding: 6px 12px; margin-left: 8px; cursor: pointer;
+  transition: background 0.16s, border-color 0.16s, color 0.16s;
+}
+.realm-shield-btn:hover { background: rgba(160, 44, 40, 0.3); border-color: #c6564a; color: #f3d6c8; }
+.realm-shield-icon { font-size: 12px; line-height: 1; }
+@media (max-width: 880px) { .realm-shield-label { display: none; } .realm-shield-btn { padding: 6px 9px; margin-left: 5px; } }
+
+.kws-overlay {
+  display: none; position: fixed; inset: 0; z-index: 400;
+  background: rgba(8, 6, 4, 0.78); backdrop-filter: blur(3px);
+  align-items: flex-start; justify-content: center;
+  padding: 6vh 14px 24px; overflow-y: auto;
+}
+.kws-overlay.open { display: flex; }
+.kws-panel {
+  position: relative; width: 100%; max-width: 620px;
+  background: linear-gradient(180deg, #efe4c9, #e2d4b4);
+  color: #2c2418; border: 1px solid #8a7043; border-radius: 14px;
+  padding: 26px 26px 22px; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+}
+.kws-close {
+  position: absolute; top: 10px; right: 12px;
+  background: none; border: none; font-size: 24px; line-height: 1;
+  color: #6d5a38; cursor: pointer;
+}
+.kws-close:hover { color: #2c2418; }
+.kws-kicker {
+  font-family: var(--serif-body); font-style: italic; font-size: 13px;
+  color: #8a2f2f; text-align: center; margin-bottom: 2px;
+}
+.kws-title {
+  font-family: var(--serif-display); font-size: 25px; letter-spacing: 1px;
+  text-align: center; margin: 0 0 10px; color: #2c2418;
+}
+.kws-note {
+  font-family: var(--serif-body); font-size: 13.5px; line-height: 1.6;
+  text-align: center; margin: 0 auto 18px; max-width: 470px; color: #4a3c28;
+}
+.kws-saga { margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid rgba(122, 96, 48, 0.25); }
+.kws-saga:last-child { border-bottom: none; margin-bottom: 6px; }
+.kws-saga-name {
+  font-family: var(--serif-display); font-size: 14px; letter-spacing: 1px;
+  color: #5b4523; margin-bottom: 7px;
+}
+.kws-line { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.kws-tag {
+  font-family: var(--serif-body); font-size: 12px; color: #6d5a38;
+  flex: 0 0 84px; white-space: nowrap;
+}
+.kws-chips { display: flex; flex-wrap: wrap; gap: 5px; flex: 1; min-width: 0; }
+.kws-chip {
+  background: rgba(255, 255, 255, 0.5); border: 1px solid rgba(122, 96, 48, 0.4);
+  border-radius: 7px; color: #4a3c28; cursor: pointer;
+  font-family: var(--serif-display); font-size: 11.5px; letter-spacing: 0.6px;
+  padding: 7px 11px; transition: background 0.14s, border-color 0.14s, color 0.14s;
+}
+.kws-chip:hover { background: rgba(255, 255, 255, 0.85); border-color: #8a7043; }
+.kws-chip.sel { background: #8a2f2f; border-color: #6d2020; color: #f6ecd8; }
+.kws-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+.kws-all, .kws-none {
+  width: 100%; padding: 11px 14px; border-radius: 8px; cursor: pointer;
+  font-family: var(--serif-display); font-size: 12px; letter-spacing: 1px;
+}
+.kws-all { background: #5b4523; border: 1px solid #40300f; color: #f6ecd8; }
+.kws-all:hover { background: #6d5429; }
+.kws-none { background: rgba(255, 255, 255, 0.45); border: 1px solid rgba(122, 96, 48, 0.4); color: #4a3c28; }
+.kws-none:hover { background: rgba(255, 255, 255, 0.8); }
+@media (max-width: 560px) {
+  .kws-panel { padding: 20px 14px 16px; }
+  .kws-title { font-size: 20px; }
+  .kws-note { font-size: 12.5px; }
+  .kws-line { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .kws-tag { flex: none; font-size: 11px; }
+  .kws-chip { padding: 8px 10px; font-size: 11px; }
+}
 
 /* ================= The global search palette ================= */
 

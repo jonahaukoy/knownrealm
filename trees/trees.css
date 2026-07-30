@@ -409,6 +409,30 @@ button.tn-sp-chip:hover { background: rgba(122, 96, 48, 0.28); }
   .tree-house-name { font-size: 1.9rem; }
   .char-card.tree-card { width: auto; left: 10px; right: 10px; }
 }
+
+/* ---------------- the top bar on a phone ----------------
+   The two buttons ran past the right edge (the shield reached x=435 on a
+   390px screen) and wrapped to three lines inside themselves. They are now
+   small, tight and side by side, and the bar is allowed to use a second row
+   rather than pushing anything off the edge. */
+@media (max-width: 560px) {
+  .trees-body .topbar {
+    height: auto; min-height: 0; flex-wrap: wrap;
+    gap: 4px 6px; padding: 5px 8px;
+  }
+  .trees-body .topbar .brand-name { font-size: 11px; letter-spacing: 0.8px; }
+  .trees-topbtn {
+    margin-left: 0; padding: 7px 9px;
+    font-size: 0.6rem; letter-spacing: 0.05em;
+    white-space: nowrap; flex: 0 0 auto;
+  }
+  /* the shield label can be long ("Through ACOK · Season 5") — let it shrink
+     with an ellipsis instead of forcing the button off-screen */
+  #tree-progress-open { flex: 1 1 auto; min-width: 0; display: inline-flex; align-items: center; gap: 5px; }
+  #tree-progress-label {
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;
+  }
+}
 /* ---------------- sidebar: All Houses button + coloured active accents ---------------- */
 .house-roll-btn.all-houses {
   margin: 4px 0 2px; font-weight: 600;

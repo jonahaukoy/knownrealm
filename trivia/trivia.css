@@ -235,6 +235,19 @@ html { height: auto; overflow-y: auto; }
 @media (max-width: 620px) {
   .tv-answers { grid-template-columns: 1fr; }
   .tv-setup h1 { font-size: 30px; }
+
+  /* The game gallery used minmax(210px), so at 390px only ONE card fitted per
+     row, and each was a tall centred column with a 40px emoji. Eight games
+     meant eight screens of scrolling. Two per row, compact. */
+  .tv-games { grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 18px; }
+  .tv-game-card { padding: 13px 8px 11px; gap: 4px; border-radius: 11px; border-width: 1px; }
+  .tv-game-emoji { font-size: 26px; }
+  .tv-game-card b { font-size: 12.5px; letter-spacing: 0.2px; line-height: 1.2; }
+  .tv-game-card span { font-size: 10.5px; line-height: 1.35; }
+  .tv-game-card i { font-size: 9.5px; letter-spacing: 0.5px; }
+  .tv-game-flag { padding: 3px 8px 4px; font-size: 8px !important; letter-spacing: 1px; }
+  .tv-hub-h1 { font-size: 26px; letter-spacing: 1.5px; }
+  .tv-streak { margin-bottom: 14px; padding: 6px 14px; font-size: 12.5px; }
 }
 
 /* daily-streak badge on the hub */

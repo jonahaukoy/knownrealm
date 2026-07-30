@@ -68,6 +68,8 @@
     `<span class="realm-spacer"></span>` +
     `<button class="realm-search-btn" type="button" id="gs-open" title="Search the realm (press /)">` +
       `${magnifierSVG("realm-search-icon")}<span class="realm-search-label">Search</span><kbd>/</kbd></button>` +
+    `<button class="realm-shield-btn" type="button" id="kw-shield-open" title="Spoiler shield — how far you have come">` +
+      `<span class="realm-shield-icon">&#128737;</span><span class="realm-shield-label">Shield</span></button>` +
     `<button class="realm-theme-btn" type="button" id="kw-theme" title="Switch between day and night"></button>`;
 
   function groupHTML(g) {
@@ -223,6 +225,134 @@
        <div class="gs-foot"><span class="gs-count" id="gs-count"></span></div>
      </div>`;
   document.body.appendChild(overlay);
+
+  /* ================= the spoiler shield, everywhere =================
+     One dialog for all three sagas, reachable from the bar on every page.
+     It writes the single shared record (js/shield.js), so a place set here is
+     the place the games, the trees, the chronicle and the words of the day all
+     read. Each saga carries both tellings and they are independent — a reader
+     may have watched all of Game of Thrones and read none of it.
+
+     The module is loaded on demand: most pages have no need of it until the
+     button is pressed, and several pages already load it themselves. */
+  const SHIELD_SAGAS = [
+    { name: "Game of Thrones", s: "gotS", b: "gotB", sMax: 8, bMax: 5,
+      books: ["", "A Game of Thrones", "A Clash of Kings", "A Storm of Swords", "A Feast for Crows", "A Dance with Dragons"] },
+    { name: "House of the Dragon", s: "hotdS", b: "hotdB", sMax: 2, bMax: 1,
+      books: ["", "Fire &amp; Blood"] },
+    { name: "A Knight of the Seven Kingdoms", s: "knightS", b: "knightB", sMax: 1, bMax: 3,
+      books: ["", "The Hedge Knight", "The Sworn Sword", "The Mystery Knight"] }
+  ];
+
+  let shieldEl = null;
+
+  /* Fetched as soon as the bar is built rather than on the first press. It is
+     a couple of kilobytes, several pages load it themselves anyway, and doing
+     it lazily meant the very first tap on the Shield button did nothing at all
+     while the script was still in flight. */
+  (function preloadShield() {
+    if (window.KWShield || document.querySelector('script[data-kw-shield]')) return;
+    const s = document.createElement("script");
+    s.src = root + "js/shield.js";
+    s.setAttribute("data-kw-shield", "1");
+    document.head.appendChild(s);
+  })();
+
+  function ensureShieldModule(then) {
+    if (window.KWShield) { then(); return; }
+    const tag = document.querySelector('script[data-kw-shield]');
+    if (tag) { tag.addEventListener("load", then, { once: true }); return; }
+    const s = document.createElement("script");
+    s.src = root + "js/shield.js";
+    s.setAttribute("data-kw-shield", "1");
+    s.onload = then;
+    s.onerror = () => {};
+    document.head.appendChild(s);
+  }
+
+  function shieldRowHTML(sg) {
+    const st = window.KWShield.get();
+    const showChips = [];
+    for (let i = 1; i <= sg.sMax; i++) {
+      showChips.push(`<button type="button" class="kws-chip${st[sg.s] === i ? " sel" : ""}" data-k="${sg.s}" data-n="${i}">S${i}</button>`);
+    }
+    const bookChips = [];
+    for (let i = 1; i <= sg.bMax; i++) {
+      const label = sg.bMax === 1 ? "Read it" : (sg.books[i] || ("Book " + i));
+      const short = sg.bMax > 3 ? ["", "AGOT", "ACOK", "ASOS", "AFFC", "ADWD"][i] : label;
+      bookChips.push(`<button type="button" class="kws-chip${st[sg.b] === i ? " sel" : ""}" data-k="${sg.b}" data-n="${i}" title="${label}">${short}</button>`);
+    }
+    return `<div class="kws-saga">
+        <div class="kws-saga-name">${sg.name}</div>
+        <div class="kws-line"><span class="kws-tag">&#128250; Watched</span><div class="kws-chips">${showChips.join("")}</div></div>
+        <div class="kws-line"><span class="kws-tag">&#128214; Read</span><div class="kws-chips">${bookChips.join("")}</div></div>
+      </div>`;
+  }
+
+  function paintShield() {
+    if (!shieldEl) return;
+    shieldEl.querySelector("#kws-body").innerHTML = SHIELD_SAGAS.map(shieldRowHTML).join("");
+  }
+
+  function buildShield() {
+    shieldEl = document.createElement("div");
+    shieldEl.className = "kws-overlay";
+    shieldEl.innerHTML =
+      `<div class="kws-panel" role="dialog" aria-modal="true" aria-label="Spoiler shield">
+         <button class="kws-close" id="kws-close" type="button" aria-label="Close">&times;</button>
+         <div class="kws-kicker">&#128737; The spoiler shield</div>
+         <h2 class="kws-title">How far have you come?</h2>
+         <p class="kws-note">Say where you are in each telling and the whole realm will keep its
+           counsel — the games, the family trees, the chronicle and the words of the day all hide
+           what you have not yet reached. Tap a chosen mark again to unset it. You may change this
+           whenever you like.</p>
+         <div id="kws-body"></div>
+         <div class="kws-actions">
+           <button class="kws-all" id="kws-all" type="button">I have finished every tale &mdash; hide nothing</button>
+           <button class="kws-none" id="kws-none" type="button">I am at the very beginning</button>
+         </div>
+       </div>`;
+    document.body.appendChild(shieldEl);
+
+    shieldEl.addEventListener("click", (e) => {
+      if (e.target === shieldEl) closeShield();
+      const chip = e.target.closest && e.target.closest(".kws-chip");
+      if (chip) {
+        const k = chip.dataset.k, n = parseInt(chip.dataset.n, 10);
+        const cur = window.KWShield.get()[k];
+        const patch = {}; patch[k] = cur === n ? 0 : n;   /* tap again to unset */
+        window.KWShield.set(patch);
+        paintShield();
+      }
+    });
+    shieldEl.querySelector("#kws-close").addEventListener("click", closeShield);
+    shieldEl.querySelector("#kws-all").addEventListener("click", () => { window.KWShield.setAll(); paintShield(); });
+    shieldEl.querySelector("#kws-none").addEventListener("click", () => { window.KWShield.clear(); paintShield(); });
+  }
+
+  function openShield() {
+    ensureShieldModule(() => {
+      if (!shieldEl) buildShield();
+      paintShield();
+      shieldEl.classList.add("open");
+    });
+  }
+  function closeShield() { if (shieldEl) shieldEl.classList.remove("open"); }
+
+  const shieldBtn = document.getElementById("kw-shield-open");
+  if (shieldBtn) shieldBtn.addEventListener("click", (e) => { e.preventDefault(); openShield(); });
+
+  /* Anything on any page can open it — the words of the day link on the home
+     page and the "change what you have seen" buttons in the game gates all
+     call this rather than growing dialogs of their own. */
+  window.KWShieldUI = { open: openShield, close: closeShield };
+  document.addEventListener("click", (e) => {
+    const t = e.target.closest && e.target.closest("[data-open-shield]");
+    if (t) { e.preventDefault(); openShield(); }
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && shieldEl && shieldEl.classList.contains("open")) closeShield();
+  });
 
   const gsInput = overlay.querySelector("#gs-input");
   const gsResults = overlay.querySelector("#gs-results");

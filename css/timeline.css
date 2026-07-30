@@ -275,6 +275,13 @@ html { height: auto; overflow-y: auto; }
   .tl-hero-text { padding: 34px 18px 30px; }
   .tl-item-thumb { width: 48px; height: 34px; }
   .tl-footart img { height: 150px; }
+  /* the era cards are the chapter picker — seven of them, one per row at
+     minmax(168px), made the whole chronicle start a screen and a half down */
+  .tl-eras { grid-template-columns: repeat(2, 1fr); gap: 7px; margin-bottom: 16px; }
+  .tl-era-body { padding: 8px 9px; }
+  .tl-era-name { font-size: 12px; letter-spacing: 0.4px; line-height: 1.25; }
+  .tl-era-when, .tl-era-count { font-size: 10px; }
+  .tl-era-art { height: 52px; }
   /* the bar keeps its own row so the two step arrows stay full thumb-size
      beside it; the shield drops underneath rather than squeezing them */
   .tl-player { flex-wrap: wrap; gap: 10px; }

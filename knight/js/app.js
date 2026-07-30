@@ -985,7 +985,10 @@
         else renderWelcome();
       }
       setMode(btn.dataset.mode);
-      if (btn.dataset.mode === "map") { renderWelcome(); mapView.reset(); }
+      /* "The Map" used to also re-centre and zoom the whole map right out, which
+         threw away wherever the reader had got to just because they wanted the
+         menu. It now only switches mode and opens the dropdown; the full reset
+         lives on the brand square in the top-left, which exists for that. */
       closeDropdowns();
       mi.classList.add("open"); // a click always shows (and keeps) the dropdown
     });

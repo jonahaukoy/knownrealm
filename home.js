@@ -148,7 +148,9 @@
   /* an honest nudge: with no shield set, the daily pair stays in the shallows */
   const note = byId("feature-quote-note");
   if (note && !shield) {
+    /* opens the site-wide shield dialog rather than sending the reader off to
+       the games page to find a gate — realm-nav.js listens for the attribute */
     note.innerHTML = `Only the earliest words are shown. ` +
-      `<a href="trivia/index.html">Tell the maesters how far you have come</a> and this deepens.`;
+      `<a href="#" data-open-shield>Tell the maesters how far you have come</a> and this deepens.`;
   }
 })();

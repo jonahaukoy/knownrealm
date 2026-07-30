@@ -31,10 +31,23 @@
      on someone who never told us how far along they are — matching Trivia. A
      shield set here, in Trivia, or in Who Said It (same localStorage key) wins. */
   let shield = { gotS: 0, gotB: 0, hotdS: 0, hotdB: 0, knightS: 0, knightB: 0 };
-  try {
-    const raw = localStorage.getItem("tvShield");
-    if (raw) shield = Object.assign(shield, JSON.parse(raw));
-  } catch (e) {}
+  function readShield() {
+    try {
+      const raw = localStorage.getItem("tvShield");
+      if (raw) shield = Object.assign(shield, JSON.parse(raw));
+    } catch (e) {}
+  }
+  readShield();
+  /* the gate now offers a button that opens the site-wide shield dialog, so
+     the answer can change while this page is open — re-read it and let the
+     reader straight back in if their new mark clears the council they wanted */
+  window.addEventListener("kw-shield", () => {
+    readShield();
+    const gate = $("sc-gate");
+    if (gate && !gate.classList.contains("hidden") && pending && allowed(pending)) {
+      begin(pending, pendingDaily);
+    }
+  });
   function allowed(p) {
     if (p.s == null && p.b == null) return true;
     if (p.s != null && (shield[p.saga + "S"] || 0) >= p.s) return true;

@@ -57,9 +57,16 @@
   /* on a phone a justified row would squeeze six banners into nothing, so the
      rows wrap and each piece keeps a usable minimum width */
   @media (max-width: 620px) {
-    .gal-row { flex-wrap: wrap; }
-    .gal-row-scene > * { flex-basis: 100%; }
-    .gal-row-sigil > * { flex-basis: 28%; }
+    .gal-row { flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+    /* scenes were one per row at full width, so the gallery ran to an enormous
+       length. Two across still reads clearly at 390px and halves the scroll. */
+    .gal-row-scene > * { flex-basis: calc(50% - 4px); }
+    .gal-row-sigil > * { flex-basis: calc(33.333% - 6px); }
+    .gal-hero h1 { font-size: 26px; }
+    .gal-hero { padding: 8px 0 4px; }
+    .gal-h2 { font-size: 13px; letter-spacing: 1.1px; }
+    .gal-h2-note { font-size: 11.5px; margin-bottom: 12px; }
+    .gal-sigil-label { font-size: 10px; }
   }
 
   .gal-count { font-size: 12px; color: var(--gold); letter-spacing: 1px; }

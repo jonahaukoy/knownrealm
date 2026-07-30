@@ -307,10 +307,20 @@ a.wk-row:hover { background: rgba(201,161,90,0.12); }
    minimum below half the screen lets two sit side by side, which roughly
    halves the height of every index in the wiki. */
 @media (max-width: 620px) {
-  .wk-cats { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; }
+  .wk-cats { grid-template-columns: repeat(2, 1fr); gap: 8px; }
   .wk-grid { grid-template-columns: repeat(auto-fill, minmax(142px, 1fr)); gap: 8px; }
-  .wk-col-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+  .wk-col-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
   .wk-col-card { flex-direction: column; align-items: flex-start; gap: 8px; padding: 10px; }
+
+  /* The category tiles were tall centred columns — a 54px emblem over a title
+     over a count, with 24px of padding above and below. Two of those still
+     made a very long page. On a phone they become short, tight tiles: the
+     emblem shrinks, the padding halves, and the type comes down a step. */
+  .wk-cat { padding: 12px 8px 11px; gap: 5px; border-radius: 10px; }
+  .wk-cat-emblem { width: 34px; height: 34px; font-size: 16px; margin-bottom: 0; }
+  .wk-cat-name { font-size: 12.5px; letter-spacing: 0.6px; line-height: 1.25; }
+  .wk-cat-sub { font-size: 10.5px; }
+  .wk-col-glyph { width: 30px; height: 30px; font-size: 15px; }
   .wiki-main { padding-left: 12px; padding-right: 12px; }
   .wk-side { max-width: none; }
   .wk-face-big, .wk-sigil-big { width: 116px; height: 116px; }
