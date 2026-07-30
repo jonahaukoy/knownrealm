@@ -284,7 +284,19 @@ a.wk-row:hover { background: rgba(201,161,90,0.12); }
 
 @media (max-width: 760px) {
   .wk-article { grid-template-columns: 1fr; }
-  .wk-side { max-width: 260px; margin: 0 auto; width: 100%; }
+  /* position:static is the important half. The single-column rules used to
+     leave `position: sticky` in place from the desktop rule above, so the
+     portrait and its meta box pinned themselves to the top of the viewport and
+     floated over the article text for the whole length of the page. */
+  .wk-side { max-width: 260px; margin: 0 auto 4px; width: 100%; position: static; top: auto; }
+}
+
+/* The wiki's own "Seek a page…" field has no room left in the top bar on a
+   phone — it pushed past the right edge of the screen. The global search
+   (the magnifier in the realm bar, or "/") covers the same ground and more,
+   since it reaches all three sagas, so the per-page field simply steps aside. */
+@media (max-width: 760px) {
+  .wiki-topbar .search-wrap { display: none; }
 }
 
 /* ===== the collections: dragons, Valyrian steel, direwolves, Kingsguard, battles, prophecies ===== */

@@ -149,6 +149,13 @@ html { height: auto; overflow-y: auto; }
   cursor: pointer; transition: background 0.16s, border-color 0.16s;
 }
 .tl-btn:hover { background: rgba(201, 161, 90, 0.16); border-color: var(--gold); }
+/* the one-step arrows that flank the scrubber — square, thumb-sized, and kept
+   next to the bar so they can be pressed without leaving the chronicle */
+.tl-step {
+  width: 40px; padding: 0; font-size: 17px; letter-spacing: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.tl-step:active { background: rgba(201, 161, 90, 0.26); }
 .tl-shield:hover { background: rgba(160, 44, 40, 0.32); border-color: #c6564a; color: #f3d6c8; }
 .tl-shield { background: rgba(140, 32, 32, 0.20); border-color: rgba(190, 80, 70, 0.5); color: #e8b9a8; align-self: flex-start; }
 .tl-bar-hint { text-align: center; font-size: 11.5px; color: var(--text-muted); font-style: italic; margin: 0 0 4px; }
@@ -268,6 +275,13 @@ html { height: auto; overflow-y: auto; }
   .tl-hero-text { padding: 34px 18px 30px; }
   .tl-item-thumb { width: 48px; height: 34px; }
   .tl-footart img { height: 150px; }
+  /* the bar keeps its own row so the two step arrows stay full thumb-size
+     beside it; the shield drops underneath rather than squeezing them */
+  .tl-player { flex-wrap: wrap; gap: 10px; }
+  .tl-bar { flex: 1 1 auto; order: 1; }
+  #tl-prev { order: 0; }
+  #tl-next { order: 2; }
+  .tl-shield { order: 3; flex: 1 1 100%; align-self: stretch; }
 }
 
 /* ---- day theme ---- */

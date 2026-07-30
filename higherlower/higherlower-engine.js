@@ -59,21 +59,52 @@
     });
   }
 
-  /* ---- draw a metric + two distinct things from it ---- */
-  function drawPair() {
-    /* pick a deck, preferring one different from last round for variety */
+  /* ---- the chain ----------------------------------------------------------
+     The thing you just uncovered does not leave the board: it slides into the
+     left slot and becomes the next round's known quantity, and a new challenger
+     is drawn against it. That is what makes a run feel like one continuous
+     thread rather than a series of unrelated questions.
+
+     The measure is held CONSTANT for the length of a chain, because "higher"
+     only means something when both sides are counted in the same unit — 15
+     kills against 11 name-days is not a question anyone can reason about. When
+     the chain ends the game announces the change of measure and starts a new
+     one, so the variety of the decks is kept without breaking the thread.
+     ---------------------------------------------------------------------- */
+  var CHAIN_MAX = 5;   /* rounds on one measure before it changes */
+
+  /* pick a fresh measure and the opening pair on it */
+  function startChain() {
     var idx = Math.floor(state.rand() * DECKS.length);
     if (DECKS.length > 1 && DECKS[idx].id === state.lastDeckId) idx = (idx + 1) % DECKS.length;
     var deck = DECKS[idx];
-    state.lastDeckId = deck.id;
     var items = deck.items;
     var a = Math.floor(state.rand() * items.length);
     var b = Math.floor(state.rand() * items.length);
     if (b === a) b = (b + 1) % items.length;
+    state.lastDeckId = deck.id;
     state.deck = deck;
     state.known = items[a];
     state.mystery = items[b];
     state.max = items.reduce(function (m, it) { return Math.max(m, it.v); }, 1);
+    state.used = [a, b];
+    state.chain = 0;
+    state.chained = false;   /* false = this round opens a new measure */
+  }
+
+  /* keep the revealed thing, draw a new challenger against it */
+  function advanceChain() {
+    var deck = state.deck, items = deck.items;
+    if (state.chain + 1 >= CHAIN_MAX || state.used.length >= items.length) { startChain(); return; }
+    var pool = [];
+    for (var i = 0; i < items.length; i++) if (state.used.indexOf(i) < 0) pool.push(i);
+    if (!pool.length) { startChain(); return; }
+    var pick = pool[Math.floor(state.rand() * pool.length)];
+    state.known = state.mystery;        /* the one just uncovered holds the field */
+    state.mystery = items[pick];
+    state.used.push(pick);
+    state.chain++;
+    state.chained = true;
   }
 
   /* ================================================== HOME =============== */
@@ -111,14 +142,16 @@
     state.mode = "daily";
     state.rand = mulberry32((DailyRealm ? DailyRealm.dayNumber() : 0) * 2654435761 >>> 0 || 1);
     state.round = 0; state.streak = 0; state.lastDeckId = null; state.locked = false;
-    drawPair();
+    state.roundsPlayed = 0;
+    startChain();
     renderRound();
   }
   function startUnlimited() {
     state.mode = "unlimited";
     state.rand = Math.random;
     state.streak = 0; state.best = loadBest(); state.lastDeckId = null; state.locked = false;
-    drawPair();
+    state.roundsPlayed = 0;
+    startChain();
     renderRound();
   }
 
@@ -152,11 +185,19 @@
         '<span class="hl-score-lbl">streak</span>' +
         '<span class="hl-score-best">Best ' + Math.max(state.best, state.streak) + '</span></div></div>';
 
-    $("hl-play").innerHTML = hud +
+    /* when a chain ends, say so plainly — the player must know the unit moved */
+    var switchLine = (!state.chained && state.roundsPlayed > 0)
+      ? '<div class="hl-newmetric">&#10022; The measure changes &mdash; now we weigh <b>' +
+        esc(d.name.toLowerCase()) + '</b></div>'
+      : '';
+
+    $("hl-play").innerHTML = hud + switchLine +
       '<div class="hl-metricline"><span class="hl-metricline-emoji">' + d.emoji + '</span>' + esc(d.prompt) + '</div>' +
       '<div class="hl-metrictag">' + esc(d.name) + ' &middot; ' + esc(d.tag) + '</div>' +
       '<div class="hl-arena" id="hl-arena">' +
-        '<div class="hl-card hl-card-known" id="hl-known">' + cardInner(state.known, true) + '</div>' +
+        '<div class="hl-card hl-card-known' + (state.chained ? ' hl-card-held' : '') + '" id="hl-known">' +
+          (state.chained ? '<span class="hl-held-tag">still standing</span>' : '') +
+          cardInner(state.known, true) + '</div>' +
         '<div class="hl-mid">' +
           '<div class="hl-vs">vs</div>' +
           '<div class="hl-choices" id="hl-choices">' +
@@ -213,7 +254,8 @@
 
   function nextRound() {
     state.locked = false;
-    drawPair();
+    state.roundsPlayed++;
+    advanceChain();
     renderRound(true);
   }
 

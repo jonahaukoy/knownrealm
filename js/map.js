@@ -236,7 +236,12 @@ class MapView {
         touchState = { mode: "pan", startX: e.touches[0].clientX, startY: e.touches[0].clientY, origX: this.state.x, origY: this.state.y };
       } else if (e.touches.length === 2) {
         const [a, b] = e.touches;
-        touchState = { mode: "pinch", startDist: Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY), origScale: this.state.scale };
+        touchState = {
+          mode: "pinch",
+          lastDist: Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY),
+          lastMidX: (a.clientX + b.clientX) / 2,
+          lastMidY: (a.clientY + b.clientY) / 2
+        };
       }
     });
     svg.addEventListener(
@@ -253,16 +258,58 @@ class MapView {
           this._clampPan();
           this._applyTransform();
         } else if (touchState.mode === "pinch" && e.touches.length === 2) {
+          /* Pinch must grow the map around the point BETWEEN the fingers.
+             This used to assign this.state.scale directly and leave x/y alone,
+             which meant the content only ever scaled about its own origin — so
+             on a phone every pinch dragged the map toward the top-left corner
+             and every spread pushed it away. zoomAt() already does the correct
+             arithmetic for the mouse wheel (it keeps the point under the cursor
+             pinned), so the fingers' midpoint is simply fed to the same method,
+             frame by frame. The midpoint's own movement is applied as a pan, so
+             two fingers can drag and zoom in one gesture the way they do in
+             every native map. */
           const [a, b] = e.touches;
           const dist = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
-          this.state.scale = clamp(touchState.origScale * (dist / touchState.startDist), MIN_SCALE, MAX_SCALE);
-          this._clampPan();
-          this._applyTransform();
+          const midX = (a.clientX + b.clientX) / 2;
+          const midY = (a.clientY + b.clientY) / 2;
+          if (touchState.lastDist > 0) {
+            /* Order matters: the map point the fingers hold is still sitting
+               under the PREVIOUS midpoint, so translate it to the new midpoint
+               first, and only then scale about that point. Zooming first would
+               pivot about a spot the fingers have already left, and the error
+               accumulates over a long gesture. */
+            const rect = svg.getBoundingClientRect();
+            const unitsPerPx = this._unitsPerPx(rect);
+            this.state.x += (midX - touchState.lastMidX) * unitsPerPx;
+            this.state.y += (midY - touchState.lastMidY) * unitsPerPx;
+            const factor = dist / touchState.lastDist;
+            if (isFinite(factor) && factor > 0) this.zoomAt(midX, midY, factor);
+            if (this.onUserPan) this.onUserPan();
+            this._clampPan();
+            this._applyTransform();
+          }
+          touchState.lastDist = dist;
+          touchState.lastMidX = midX;
+          touchState.lastMidY = midY;
+          this._suppressNextClick = true;
         }
       },
       { passive: false }
     );
-    svg.addEventListener("touchend", () => (touchState = null));
+    svg.addEventListener("touchend", (e) => {
+      /* Lifting one finger of a pinch used to kill the gesture outright, so the
+         map froze until both fingers were lifted and put down again. Hand the
+         remaining finger back to panning instead. */
+      if (e.touches.length === 1) {
+        touchState = {
+          mode: "pan",
+          startX: e.touches[0].clientX, startY: e.touches[0].clientY,
+          origX: this.state.x, origY: this.state.y
+        };
+      } else if (e.touches.length === 0) {
+        touchState = null;
+      }
+    });
   }
 
   _unitsPerPx(rect) {

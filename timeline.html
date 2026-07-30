@@ -40,10 +40,12 @@
   <section class="tl-focus" id="tl-focus"></section>
 
   <div class="tl-player">
+    <button class="tl-btn tl-step" id="tl-prev" type="button" title="The moment before (or press &larr;)" aria-label="Earlier moment">&#8592;</button>
     <div class="tl-bar">
       <input type="range" id="tl-scrub" min="0" max="0" step="1" value="0" aria-label="Scrub the whole timeline" />
       <div class="tl-bar-ends" id="tl-bar-ends"><span>&#8592; earlier</span><span>later &#8594;</span></div>
     </div>
+    <button class="tl-btn tl-step" id="tl-next" type="button" title="The moment after (or press &rarr;)" aria-label="Later moment">&#8594;</button>
     <button class="tl-btn tl-shield" id="tl-shield" title="Set how far you have come">&#128737; Spoiler shield</button>
   </div>
   <p class="tl-bar-hint">Drag the bar to sweep the years, or step with the <kbd>&larr;</kbd> <kbd>&rarr;</kbd> keys.</p>

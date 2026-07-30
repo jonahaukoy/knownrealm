@@ -54,11 +54,20 @@
     ["Credits", root + "credits.html"],
   ];
 
+  /* A real magnifying glass, drawn rather than typed. The old &#9906; is U+26B2
+     NEUTER — it only resembles a magnifier, stands bolt upright, and is drawn
+     differently by every platform's font. An inline SVG is identical everywhere
+     and tilts the way a lens actually hangs. */
+  const magnifierSVG = (cls) =>
+    `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true" focusable="false" ` +
+    `fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round">` +
+    `<circle cx="10.2" cy="10.2" r="6.3"/><line x1="15.1" y1="15.1" x2="20.6" y2="20.6"/></svg>`;
+
   /* the right-hand controls that ride the bar on every page */
   const controlsHTML = () =>
     `<span class="realm-spacer"></span>` +
     `<button class="realm-search-btn" type="button" id="gs-open" title="Search the realm (press /)">` +
-      `<span class="realm-search-icon">&#9906;</span><span class="realm-search-label">Search</span><kbd>/</kbd></button>` +
+      `${magnifierSVG("realm-search-icon")}<span class="realm-search-label">Search</span><kbd>/</kbd></button>` +
     `<button class="realm-theme-btn" type="button" id="kw-theme" title="Switch between day and night"></button>`;
 
   function groupHTML(g) {
@@ -74,17 +83,39 @@
   if (homeNav) {
     /* the home page: fill its own nav slot with the franchise dropdowns */
     homeNav.classList.add("realm-inline");
+    /* Same collapsible structure the realm bar uses on every other page: the
+       links live in a .realm-collapse that is display:contents on desktop and
+       folds behind a hamburger on phones. Without this the home page was the
+       one page whose nav had nowhere to go on a narrow screen. */
     homeNav.innerHTML =
-      GROUPS.map(groupHTML).join("") +
-      `<a class="realm-single" href="${root}trees/index.html">Family Trees</a>` +
-      `<a class="realm-single" href="${root}trivia/index.html">Games &amp; Trivia</a>` +
-      `<a class="realm-single" href="${root}timeline.html">Timeline</a>` +
-      `<a class="realm-single" href="${root}gallery.html">Gallery</a>` +
-      `<a class="realm-single" href="${root}credits.html">Credits</a>`;
+      `<div class="realm-collapse" id="home-collapse">` +
+        GROUPS.map(groupHTML).join("") +
+        `<a class="realm-single" href="${root}trees/index.html">Family Trees</a>` +
+        `<a class="realm-single" href="${root}trivia/index.html">Games &amp; Trivia</a>` +
+        `<a class="realm-single" href="${root}timeline.html">Timeline</a>` +
+        `<a class="realm-single" href="${root}gallery.html">Gallery</a>` +
+        `<a class="realm-single" href="${root}credits.html">Credits</a>` +
+      `</div>` +
+      `<button class="realm-burger" type="button" id="home-burger" aria-label="Menu" aria-expanded="false" aria-controls="home-collapse">&#9776;</button>`;
     /* the home bar is already crowded — the controls ride on its right-hand side,
        beside the page's own search field, rather than wrapping the nav into the hero */
     const right = document.querySelector(".home-topbar .topbar-right") || document.querySelector(".topbar-right");
     if (right) right.insertAdjacentHTML("afterbegin", controlsHTML());
+
+    const hBurger = document.getElementById("home-burger");
+    if (hBurger) hBurger.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const open = homeNav.classList.toggle("open");
+      hBurger.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+    homeNav.querySelectorAll(".realm-collapse a").forEach((a) =>
+      a.addEventListener("click", () => homeNav.classList.remove("open")));
+    document.addEventListener("click", (e) => {
+      if (!homeNav.contains(e.target)) {
+        homeNav.classList.remove("open");
+        if (hBurger) hBurger.setAttribute("aria-expanded", "false");
+      }
+    });
   } else {
     /* every other page: a slim bar above the page's own top bar */
     const bar = document.createElement("nav");
@@ -177,7 +208,7 @@
   overlay.innerHTML =
     `<div class="gs-panel" role="dialog" aria-modal="true" aria-label="Search the realm">
        <div class="gs-inputwrap">
-         <span class="gs-icon">&#9906;</span>
+         <span class="gs-icon">${magnifierSVG("gs-icon-svg")}</span>
          <input id="gs-input" type="text" autocomplete="off" spellcheck="false"
                 placeholder="Seek a soul, a castle, a banner, an episode, a chapter&hellip;" />
          <button class="gs-close" id="gs-close" type="button" aria-label="Close">&times;</button>

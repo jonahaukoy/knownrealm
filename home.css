@@ -291,7 +291,34 @@ html { height: auto; overflow-y: auto; }
 }
 
 @media (max-width: 880px) {
-  .home-nav { display: none; } /* the portal cards carry navigation on small screens */
+  /* The home nav used to be removed outright on phones, which left this the one
+     page in the realm with no menu at all — you could only leave it through a
+     portal card. It now folds behind the same hamburger every other page uses.
+     The open sheet is absolutely positioned under the bar (the sticky topbar is
+     its containing block) so it never has to fight the top bar's flex row.
+     NB: no `overflow` on this element — it would clip the franchise dropdowns. */
+  .home-nav { display: flex; margin-left: auto; }
+  .home-nav .realm-collapse { display: none; }
+  .home-nav .realm-burger { display: inline-flex; align-items: center; }
+
+  .home-nav.open .realm-collapse {
+    display: flex; flex-direction: column;
+    position: absolute; top: 100%; left: 0; right: 0; z-index: 60;
+    padding: 6px 12px 10px;
+    background: linear-gradient(180deg, #16120c 0%, #120f0a 100%);
+    border-top: 1px solid rgba(201, 161, 90, 0.28);
+    border-bottom: 1px solid rgba(201, 161, 90, 0.4);
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.55);
+  }
+  .home-nav.open .realm-group { width: 100%; }
+  .home-nav.open .realm-group-btn,
+  .home-nav.open .realm-single {
+    display: block; width: 100%; text-align: left;
+    padding: 13px 8px; font-size: 15px; border-radius: 0;
+    border: none; border-bottom: 1px solid rgba(201, 161, 90, 0.12);
+  }
+  .home-nav.open .realm-collapse > :last-child { border-bottom: none; }
+
   .home-hero h1 { font-size: 36px; }
   .home-featured, .home-about-grid { grid-template-columns: 1fr; }
   .home-search-wrap { min-width: 150px; }

@@ -223,6 +223,12 @@
 
   /* ---------------- wiring ---------------- */
   $("tl-scrub").addEventListener("input", (e) => { goTo(parseInt(e.target.value, 10)); });
+  /* Stepping one moment at a time. The arrow keys already did this, but a phone
+     has no arrow keys and dragging a slider thumb accurately is a poor way to
+     move one step, so the buttons carry the same job onto the touchscreen.
+     goTo() already clamps to the ends, so no bounds check is needed here. */
+  $("tl-prev").addEventListener("click", () => goTo(idx - 1, true));
+  $("tl-next").addEventListener("click", () => goTo(idx + 1, true));
   $("tl-shield").addEventListener("click", openGate);
   $("tl-gate-close").addEventListener("click", () => { closeGate(); });
   $("tl-gate-save").addEventListener("click", () => {

@@ -372,6 +372,40 @@ html:has(.hl-body) { height: auto; overflow-y: auto; }
   100% { transform: scale(1); opacity: 1; }
 }
 
+/* ---- the chain -----------------------------------------------------------
+   A card that survived the last round slides ACROSS from the challenger's
+   side, so the eye follows the same face from right to left and the run reads
+   as one continuous thread. */
+.hl-card-held { animation: hl-crossover 0.46s cubic-bezier(0.2, 0.8, 0.25, 1); }
+@keyframes hl-crossover {
+  from { transform: translateX(38px) scale(0.97); opacity: 0.35; }
+  to   { transform: translateX(0) scale(1); opacity: 1; }
+}
+.hl-card-known { position: relative; }
+.hl-held-tag {
+  position: absolute; top: 8px; left: 8px; z-index: 3;
+  font-family: var(--serif-display, "Cinzel", serif);
+  font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 3px 8px; border-radius: 999px;
+  color: #f0e2bd; background: rgba(24, 18, 10, 0.78);
+  border: 1px solid rgba(201, 165, 92, 0.55);
+  pointer-events: none;
+}
+
+/* the beat between chains: the unit is about to change, and that must be loud
+   enough that nobody compares kills against name-days by accident */
+.hl-newmetric {
+  margin: 0 0 10px; padding: 9px 14px; text-align: center;
+  font-family: var(--serif-display, "Cinzel", serif);
+  font-size: 13px; letter-spacing: 0.06em;
+  color: #f0e2bd;
+  background: linear-gradient(90deg, rgba(201,165,92,0) 0%, rgba(201,165,92,0.17) 50%, rgba(201,165,92,0) 100%);
+  border-top: 1px solid rgba(201, 165, 92, 0.28);
+  border-bottom: 1px solid rgba(201, 165, 92, 0.28);
+  animation: hl-slidein 0.42s cubic-bezier(0.2, 0.8, 0.25, 1);
+}
+.hl-newmetric b { color: var(--gold, #c9a55c); font-weight: 600; }
+
 /* ===================================================== GAME OVER ========= */
 #hl-over { margin: auto 0; text-align: center; }
 .hl-over-card {
@@ -454,6 +488,7 @@ html:has(.hl-body) { height: auto; overflow-y: auto; }
 
 /* honor reduced-motion */
 @media (prefers-reduced-motion: reduce) {
-  .hl-slidein, .hl-verdict-on, .hl-over-card { animation: none; }
+  .hl-slidein, .hl-verdict-on, .hl-over-card,
+  .hl-card-held, .hl-newmetric { animation: none; }
   .hl-bar-fill { transition: none; }
 }

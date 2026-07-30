@@ -2288,7 +2288,10 @@ body.site-wordle .wordle-screen { display: block; }
   white-space: nowrap;
 }
 .realm-search-btn:hover { color: var(--gold-bright); border-color: var(--gold); background: rgba(201, 161, 90, 0.16); }
-.realm-search-icon { font-size: 14px; }
+/* the magnifier is an inline SVG (see magnifierSVG in realm-nav.js), so it is
+   sized in px rather than by font-size and inherits the button's colour */
+.realm-search-icon { width: 14px; height: 14px; flex-shrink: 0; display: block; }
+.gs-icon-svg { width: 15px; height: 15px; display: block; }
 .realm-search-btn kbd {
   font-family: var(--serif-body); font-size: 11px; line-height: 1;
   border: 1px solid rgba(201, 161, 90, 0.4); border-radius: 4px;
