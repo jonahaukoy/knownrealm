@@ -1,0 +1,330 @@
+/* THE KNOWN WORLD — wiki pages, on top of css/style.css */
+
+html { height: auto; overflow-y: auto; }
+.wiki-body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  height: auto;
+  overflow: visible;
+  background:
+    radial-gradient(1200px 620px at 50% -8%, rgba(201, 161, 90, 0.09), transparent 62%),
+    radial-gradient(900px 500px at 100% 0%, rgba(120, 40, 40, 0.06), transparent 60%),
+    #14100d;
+  color: #e8dfcc;
+}
+.wiki-main { flex: 1; max-width: 1060px; width: 100%; margin: 0 auto; padding: 34px 22px 90px; box-sizing: border-box; }
+
+.wiki-topbar .brand-name { font-size: 15px; }
+#wiki-search {
+  background: transparent; border: none; outline: none;
+  color: var(--text-light); font-family: var(--serif-body);
+  font-style: italic; font-size: 14px; width: 100%;
+}
+#wiki-search::placeholder { color: var(--text-muted); }
+.wiki-topbar .search-results a { text-decoration: none; display: flex; }
+
+.wk-hero { text-align: center; padding: 20px 0 8px; }
+.wk-hero h1 { font-family: var(--serif-display); font-size: 38px; letter-spacing: 2px; color: #f0e6d2; margin: 0 0 12px; text-shadow: 0 2px 18px rgba(0,0,0,0.5); }
+.wk-hero p { max-width: 580px; margin: 0 auto; opacity: 0.82; line-height: 1.65; font-size: 15px; }
+
+/* ornamental gold flourish — a slim rule with a centred star */
+.wk-flourish {
+  display: flex; align-items: center; justify-content: center; gap: 14px;
+  color: var(--gold); font-size: 13px; margin: 4px auto 16px; max-width: 320px;
+}
+.wk-flourish::before, .wk-flourish::after {
+  content: ""; height: 1px; flex: 1;
+  background: linear-gradient(90deg, transparent, rgba(201,161,90,0.55));
+}
+.wk-flourish::after { transform: scaleX(-1); }
+
+/* ===== picture placeholder frame — an elegant empty slot for art to come ===== */
+.wk-imgframe {
+  position: relative;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+  border: 1px solid rgba(201,161,90,0.30);
+  border-radius: 12px;
+  background:
+    radial-gradient(130% 150% at 50% 0%, rgba(201,161,90,0.12), transparent 58%),
+    linear-gradient(180deg, rgba(44,35,24,0.55), rgba(20,16,12,0.55));
+  overflow: hidden;
+}
+.wk-imgframe::after {
+  content: ""; position: absolute; inset: 7px;
+  border: 1px solid rgba(201,161,90,0.16); border-radius: 8px; pointer-events: none;
+}
+/* a filled slot shows the WHOLE picture, whatever its shape — the frame grows to
+   the image instead of cropping it (higher specificity beats the fixed .wk-banner
+   / .wk-hero-banner heights). Landscape scenes sit at natural ratio; very tall art
+   is capped and letterboxed on the dark frame. */
+.wk-imgframe.wk-imgframe-filled { padding: 0; height: auto; min-height: 0; background: #0c0a07; }
+.wk-imgframe-filled::after { inset: 0; border-color: rgba(201,161,90,0.35); }
+.wk-imgframe-filled img { width: 100%; height: auto; max-height: 600px; object-fit: contain; display: block; margin: 0 auto; }
+.wk-imgframe-crest { font-size: 30px; color: rgba(224,189,124,0.42); line-height: 1; }
+.wk-imgframe-label {
+  font-family: var(--serif-display); font-size: 10.5px; letter-spacing: 2px;
+  text-transform: uppercase; color: rgba(224,189,124,0.5);
+}
+.wk-hero-banner { width: 100%; max-width: 720px; height: 200px; margin: 0 auto 18px; }
+.wk-banner { width: 100%; height: 168px; margin: 2px 0 26px; }
+.wk-portrait-frame { width: 100%; min-height: 190px; }
+
+.wk-cats { display: grid; grid-template-columns: repeat(auto-fit, minmax(184px, 1fr)); gap: 16px; margin-top: 22px; }
+.wk-cat {
+  display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center;
+  padding: 24px 14px 22px; border-radius: 12px; text-decoration: none;
+  background: linear-gradient(180deg, rgba(240,230,210,0.06), rgba(240,230,210,0.015));
+  border: 1px solid rgba(201,161,90,0.30); color: #e8dfcc;
+  transition: transform .16s ease, border-color .2s ease, box-shadow .2s ease;
+}
+.wk-cat:hover { transform: translateY(-4px); border-color: var(--gold-bright); box-shadow: 0 14px 30px rgba(0,0,0,0.4); }
+.wk-cat-emblem {
+  display: flex; align-items: center; justify-content: center;
+  width: 54px; height: 54px; margin-bottom: 2px; border-radius: 50%;
+  font-size: 24px;
+  background: radial-gradient(circle at 50% 35%, rgba(201,161,90,0.22), rgba(201,161,90,0.05));
+  border: 1px solid rgba(201,161,90,0.4);
+}
+.wk-cat-title { font-family: var(--serif-display); font-size: 17px; color: #f0e6d2; }
+.wk-cat-sub { font-size: 12px; opacity: 0.65; }
+
+.wk-crumbs { font-size: 12.5px; margin-bottom: 20px; opacity: 0.85; }
+.wk-crumbs a { color: var(--gold); text-decoration: none; }
+.wk-crumbs a:hover { color: var(--gold-bright); }
+.wk-crumbs span { opacity: 0.8; }
+
+.wk-h3 {
+  font-family: var(--serif-display); font-size: 14px; letter-spacing: 1.5px;
+  color: var(--gold); margin: 30px 0 14px; text-transform: uppercase;
+  display: flex; align-items: center; gap: 12px;
+}
+.wk-h3::after {
+  content: ""; height: 1px; flex: 1;
+  background: linear-gradient(90deg, rgba(201,161,90,0.42), transparent);
+}
+.wk-h4 {
+  font-family: var(--serif-display); font-size: 13px; letter-spacing: 1.1px;
+  color: var(--gold-dim); margin: 20px 0 8px; text-transform: uppercase;
+}
+.wk-bigbtn {
+  display: inline-flex; align-items: center; gap: 10px; margin: 6px 0 2px;
+  padding: 12px 20px; border: 1px solid var(--gold-dim); border-radius: 4px;
+  background: rgba(201,161,90,0.08); color: var(--gold-bright);
+  font-family: var(--serif-display); letter-spacing: 1.2px; font-size: 14px;
+  text-decoration: none; transition: background 0.18s, border-color 0.18s;
+}
+.wk-bigbtn:hover { background: rgba(201,161,90,0.18); border-color: var(--gold); }
+/* grouped category sections (characters by house, places by region) */
+.wk-catsec { margin-bottom: 2px; }
+.wk-h3 .wk-sigil { width: 24px; height: 24px; }
+.wk-h3 em {
+  font-style: normal; font-size: 11px; letter-spacing: 1px;
+  color: var(--gold-dim); font-family: var(--serif-body); margin-left: 5px;
+}
+.wk-card-type {
+  display: block; font-family: var(--serif-display);
+  font-size: 9px; letter-spacing: 1.4px; text-transform: uppercase;
+  color: var(--gold-dim); margin-bottom: 2px;
+}
+
+.wk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; }
+.wk-card {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px; border-radius: 8px; text-decoration: none; color: #e8dfcc;
+  background: rgba(240,230,210,0.035); border: 1px solid rgba(201,161,90,0.18);
+  font-size: 13.5px;
+}
+.wk-card:hover { border-color: var(--gold-bright); background: rgba(201,161,90,0.12); }
+.wk-card-plain:hover { border-color: rgba(201,161,90,0.18); background: rgba(240,230,210,0.035); }
+.wk-card-loc { flex-direction: column; align-items: flex-start; gap: 2px; }
+.wk-card-sub { font-size: 11px; opacity: 0.6; }
+.wk-rows { display: flex; flex-direction: column; gap: 4px; }
+.wk-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 8px 12px; border-radius: 6px; text-decoration: none; color: #e8dfcc;
+  background: rgba(240,230,210,0.03); font-size: 14px;
+}
+a.wk-row:hover { background: rgba(201,161,90,0.12); }
+.wk-row-num { font-family: var(--serif-display); font-size: 11px; color: var(--gold); min-width: 64px; }
+.wk-row-plain { cursor: default; }
+.wk-note { opacity: 0.6; font-size: 12.5px; }
+
+/* ===== chapters: collapsible tomes ===== */
+.wk-books-lead { margin: 4px 0 22px; }
+.wk-books { display: flex; flex-direction: column; gap: 14px; }
+.wk-book {
+  border: 1px solid rgba(201,161,90,0.22); border-radius: 10px; overflow: hidden;
+  background: linear-gradient(180deg, rgba(240,230,210,0.05), rgba(240,230,210,0.02));
+}
+.wk-book.open { border-color: rgba(201,161,90,0.5); }
+.wk-book-head {
+  display: flex; align-items: center; gap: 16px; width: 100%;
+  padding: 12px 16px; background: none; border: 0; text-align: left; color: #ece3cf;
+  font-family: inherit; cursor: pointer; transition: background 0.18s;
+}
+.wk-book-head:hover { background: rgba(201,161,90,0.08); }
+.wk-book-cover {
+  flex: 0 0 auto; width: 58px; height: 78px; border-radius: 4px; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(20,16,12,0.5); border: 1px solid rgba(201,161,90,0.3);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.35);
+}
+.wk-book-cover img { width: 100%; height: 100%; object-fit: cover; }
+.wk-book-cover-crest { font-size: 26px; opacity: 0.5; }
+.wk-book-headtext { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+.wk-book-name { font-family: var(--serif-display); font-size: 19px; color: var(--gold-bright); letter-spacing: 0.4px; }
+.wk-book-meta { font-size: 12px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--gold-dim); }
+.wk-book-chev { font-size: 15px; color: var(--gold); transition: transform 0.3s ease; }
+.wk-book.open .wk-book-chev { transform: rotate(180deg); }
+
+/* the panel unfurls via animatable grid rows (no fixed max-height needed) */
+.wk-book-panel { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.34s ease; }
+.wk-book.open .wk-book-panel { grid-template-rows: 1fr; }
+.wk-book-panel-inner { overflow: hidden; min-height: 0; }
+.wk-book.open .wk-book-panel-inner {
+  padding: 4px 12px 12px; display: flex; flex-direction: column; gap: 4px;
+  border-top: 1px solid rgba(201,161,90,0.16);
+}
+.wk-chrow {
+  display: flex; align-items: center; gap: 14px; padding: 7px 10px; border-radius: 7px;
+  text-decoration: none; color: #e8dfcc; background: rgba(240,230,210,0.03);
+  transition: background 0.16s;
+}
+.wk-chrow:hover { background: rgba(201,161,90,0.13); }
+.wk-chrow-thumb {
+  flex: 0 0 auto; width: 60px; height: 40px; border-radius: 4px; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(20,16,12,0.45); border: 1px solid rgba(201,161,90,0.18);
+}
+.wk-chrow-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.wk-chrow-crest { font-size: 14px; opacity: 0.4; }
+.wk-chrow-num { font-family: var(--serif-display); font-size: 11px; color: var(--gold); min-width: 58px; flex: 0 0 auto; }
+.wk-chrow-title { flex: 1; font-size: 14px; }
+.wk-chrow-go { color: var(--gold-dim); font-size: 18px; opacity: 0; transition: opacity 0.16s; }
+.wk-chrow:hover .wk-chrow-go { opacity: 1; }
+@media (max-width: 560px) {
+  .wk-book-cover { width: 46px; height: 62px; }
+  .wk-chrow-thumb { width: 48px; height: 34px; }
+  .wk-chrow-num { min-width: 44px; font-size: 10px; }
+}
+
+.wk-face { width: 34px; height: 34px; border-radius: 50%; overflow: hidden; flex-shrink: 0;
+  border: 1px solid var(--gold-dim); background: #2a2118;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-family: var(--serif-display); font-size: 12px; color: #f0e6d2; }
+.wk-face img { width: 100%; height: 100%; object-fit: cover; }
+.wk-face-big { width: 150px; height: 150px; font-size: 40px; border-width: 2px; border-color: var(--gold); margin: 0 auto; display: flex; }
+.wk-sigil { width: 34px; height: 34px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center;
+  background: #f4ecda; border-radius: 6px; border: 1px solid var(--gold-dim); padding: 3px; }
+.wk-sigil img { width: 100%; height: 100%; object-fit: contain; }
+.wk-sigil-big { width: 150px; height: 150px; border-radius: 12px; padding: 12px; margin: 0 auto; display: flex; border-color: var(--gold); }
+
+.wk-article { display: grid; grid-template-columns: 220px 1fr; gap: 30px; align-items: start; }
+.wk-side { display: flex; flex-direction: column; gap: 14px; position: sticky; top: 18px; align-self: start; }
+.wk-meta { border: 1px solid rgba(201,161,90,0.25); border-radius: 10px; padding: 6px 12px;
+  background: linear-gradient(180deg, rgba(240,230,210,0.05), rgba(240,230,210,0.02)); }
+.wk-meta-row { display: flex; justify-content: space-between; gap: 10px; padding: 7px 0; font-size: 13px;
+  border-bottom: 1px solid rgba(201,161,90,0.12); }
+.wk-meta-row:last-child { border-bottom: none; }
+.wk-meta-row span { opacity: 0.6; flex-shrink: 0; }
+.wk-meta-row b { font-weight: 500; text-align: right; }
+.wk-mapbtn {
+  display: block; text-align: center; text-decoration: none;
+  font-family: var(--serif-display); font-size: 11.5px; letter-spacing: 1px;
+  color: var(--gold); border: 1px solid var(--gold); border-radius: 8px; padding: 10px;
+}
+.wk-mapbtn:hover { background: var(--gold); color: #241c12; }
+.wk-body h1 { font-family: var(--serif-display); font-size: 32px; color: #f0e6d2; margin: 0 0 12px; text-shadow: 0 2px 14px rgba(0,0,0,0.45); }
+.wk-wide { max-width: 780px; margin: 0 auto; }
+.wk-badges { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.wk-badge {
+  font-size: 12px; padding: 4px 11px; border-radius: 999px; text-decoration: none;
+  color: var(--gold-bright); border: 1px solid rgba(201,161,90,0.5);
+}
+.wk-badge:hover { background: rgba(201,161,90,0.15); }
+.wk-badge-flat { color: #cbbfa5; border-color: rgba(203,191,165,0.35); }
+.wk-lead { font-size: 15.5px; line-height: 1.7; }
+.wk-para { font-size: 14.5px; line-height: 1.75; margin: 0 0 14px; }
+.wk-para-lead { font-family: var(--serif-display); font-size: 13px; letter-spacing: 1px; color: var(--gold); }
+.wk-link { color: var(--gold-bright); text-decoration: none; border-bottom: 1px dotted rgba(224,189,124,0.5); }
+.wk-link:hover { border-bottom-style: solid; }
+.wk-list { padding-left: 20px; line-height: 1.7; font-size: 14.5px; }
+.wk-list li { margin-bottom: 6px; }
+.wk-road { display: flex; flex-wrap: wrap; gap: 8px; }
+.wk-road-stop { font-size: 12.5px; padding: 5px 10px; border-radius: 6px; background: rgba(240,230,210,0.05);
+  border: 1px solid rgba(201,161,90,0.2); }
+.wk-spoiler { margin: 22px 0; border: 1px solid rgba(156,59,59,0.5); border-radius: 8px; background: rgba(156,59,59,0.08); }
+.wk-spoiler summary { cursor: pointer; padding: 11px 14px; font-family: var(--serif-display); font-size: 12.5px;
+  letter-spacing: 1px; color: var(--red-bright); }
+.wk-spoiler > div, .wk-spoiler > ul { padding: 0 16px 12px; line-height: 1.65; font-size: 14px; }
+.wk-pager { display: flex; justify-content: space-between; gap: 12px; margin-top: 30px; flex-wrap: wrap; }
+.wk-pager a { color: var(--gold); text-decoration: none; font-size: 13.5px; }
+.wk-pager a:hover { color: var(--gold-bright); }
+.wk-missing { font-style: italic; opacity: 0.7; }
+.wk-credit {
+  font-size: 10.5px;
+  line-height: 1.5;
+  opacity: 0.55;
+  text-align: center;
+  margin-top: -6px;
+}
+.wk-credit a { color: var(--gold); text-decoration: none; }
+.wk-credit a:hover { text-decoration: underline; }
+.wiki-footer {
+  margin-top: 40px;
+  padding: 18px 24px;
+  border-top: 1px solid #3a2f22;
+  text-align: center;
+  font-size: 11.5px;
+  opacity: 0.55;
+  line-height: 1.6;
+}
+.wiki-footer a { color: var(--gold); }
+
+@media (max-width: 760px) {
+  .wk-article { grid-template-columns: 1fr; }
+  .wk-side { max-width: 260px; margin: 0 auto; width: 100%; }
+}
+
+/* ===== the collections: dragons, Valyrian steel, direwolves, Kingsguard, battles, prophecies ===== */
+.wk-col-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 10px; margin-top: 4px; }
+.wk-col-card { display: flex; align-items: center; gap: 13px; padding: 12px 14px; }
+.wk-col-glyph {
+  flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%; font-size: 19px;
+  display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(circle at 50% 35%, rgba(201,161,90,0.22), rgba(201,161,90,0.05));
+  border: 1px solid rgba(201,161,90,0.4);
+}
+.wk-col-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.wk-col-text b { font-family: var(--serif-display); font-size: 14.5px; color: #f0e6d2; font-weight: 500; }
+.wk-col-text i { font-size: 12px; opacity: 0.68; font-style: normal; }
+.wk-col-emblem {
+  width: 92px; height: 92px; margin: 0 auto; border-radius: 50%; font-size: 40px;
+  display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(circle at 50% 35%, rgba(201,161,90,0.2), rgba(201,161,90,0.04));
+  border: 1px solid var(--gold);
+}
+:root[data-theme="light"] .wk-col-text b { color: #33281a; }
+:root[data-theme="light"] .wk-col-glyph,
+:root[data-theme="light"] .wk-col-emblem {
+  background: radial-gradient(circle at 50% 35%, rgba(138,106,44,0.2), rgba(138,106,44,0.05));
+  border-color: rgba(138,106,44,0.45);
+}
+
+/* A collection entry's own picture in place of the category glyph (the
+   direwolves, and any collection illustrated the same way later). The card is a
+   flex row, so the thumb must not be allowed to shrink. */
+.wk-col-card-art { padding: 8px 14px 8px 8px; }
+.wk-col-thumb {
+  flex: 0 0 auto; width: 64px; height: 78px; border-radius: 8px; overflow: hidden;
+  background: #0c0a07; border: 1px solid rgba(201, 161, 90, 0.3);
+}
+/* These are full-length portraits, so a plain cover crop shows a small animal a
+   long way off. Zooming about the upper third puts the head in the frame, which
+   is the only part that reads at this size. */
+.wk-col-thumb img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  transform: scale(1.55); transform-origin: 50% 24%;
+}
+.wk-card:hover .wk-col-thumb { border-color: var(--gold-bright); }

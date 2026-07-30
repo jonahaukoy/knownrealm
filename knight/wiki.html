@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>A Knight of the Seven Kingdoms Wiki — Dunk and Egg</title>
+<link rel="preload" href="../css/fonts/cinzel-400-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="../css/fonts/cinzel-600-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="../css/fonts/ebgaramond-400-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="stylesheet" href="../css/fonts.css" />
+<link rel="stylesheet" href="../css/style.css" />
+<link rel="stylesheet" href="../css/wiki.css" />
+<script>try{var t=localStorage.getItem("kwTheme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
+</head>
+<body class="wiki-body">
+
+<header class="topbar wiki-topbar">
+  <a class="brand home-brand" href="wiki.html" style="text-decoration:none;color:var(--text-light)">
+    <span class="brand-icon">&#10022;</span>
+    <span class="brand-name">A KNIGHT OF THE SEVEN KINGDOMS WIKI</span>
+  </a>
+  <div style="flex:1"></div>
+  <div class="topbar-right">
+    <div class="search-wrap">
+      <span class="search-icon">&#128269;</span>
+      <input id="wiki-search" type="text" placeholder="Seek a page&hellip;" autocomplete="off" />
+      <div class="search-results hidden" id="wiki-search-results"></div>
+    </div>
+  </div>
+</header>
+
+<main class="wiki-main" id="wiki-content"></main>
+
+<footer class="wiki-footer">
+  Unofficial companion — not affiliated with, endorsed, sponsored, or approved by George R.R. Martin, HBO,
+  or Warner Bros. Discovery. All chronicle text is original to this site.
+  <a href="../credits.html">Credits &amp; licenses</a>.
+</footer>
+
+<script>
+window.WIKI_CONFIG = {
+  title: "A Knight of the Seven Kingdoms Wiki",
+  sub: "The age of Dunk & Egg: hedge knights, secret princes, the tourney at Ashford and the black dragon's shadow — linked into the living map.",
+  mapHref: "index.html",
+  peopleDir: "assets/people/",
+  sigilDir: "assets/sigils/",
+  creditsHref: "../credits.html",
+};
+/* wiki page pictures — the hero of the knight wiki is Ser Hugh's tilt */
+window.WIKI_IMAGES = {
+  "home": "../assets/scenes/ser-hughs-tilt.webp",
+};
+</script>
+<script src="js/data.js"></script>
+<script src="js/seasons.js"></script>
+<script src="js/whereabouts.js"></script>
+<script src="js/deaths.js"></script>
+<script src="js/books.js"></script>
+<script src="js/people.js"></script>
+<script src="js/characters.js"></script>
+<script src="js/groups.js"></script>
+<script src="js/wiki-extra.js"></script>
+<script src="js/wiki-x/chars.js"></script>
+<script src="js/wiki-x/houses.js"></script>
+<script src="js/wiki-x/places.js"></script>
+<script src="js/wiki-x/episodes.js"></script>
+<script src="js/wiki-x/chapters.js"></script>
+<script src="../js/sigil-art.js"></script>
+<script src="../js/wiki-engine.js"></script>
+<script>
+window.KW_PRERENDER_CFG = {
+  siteName: "A Knight of the Seven Kingdoms Wiki",
+  assetBase: "/knight/",
+  spaHref: "/knight/wiki.html",
+  outRoot: "p/knight",
+  origin: "https://knownrealm.com",
+  css: ["/css/fonts.css", "/css/style.css", "/css/wiki.css"],
+};
+</script>
+<script src="../js/prerender-driver.js"></script>
+<script src="../js/realm-nav.js" data-root="../"></script>
+</body>
+</html>

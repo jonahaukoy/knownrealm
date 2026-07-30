@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Wordle of the Realm — The Known Realm</title>
+<link rel="preload" href="../css/fonts/cinzel-400-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="../css/fonts/cinzel-600-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="../css/fonts/ebgaramond-400-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="stylesheet" href="../css/fonts.css" />
+<link rel="stylesheet" href="../css/style.css" />
+<link rel="stylesheet" href="../css/daily-realm.css" />
+<link rel="stylesheet" href="wordle.css" />
+<script>try{var t=localStorage.getItem("kwTheme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
+</head>
+<body class="wd-body">
+
+<header class="topbar">
+  <a class="brand home-brand" href="../trivia/index.html" style="text-decoration:none;color:var(--text-light)">
+    <span class="brand-icon">&#128214;</span>
+    <span class="brand-name">WORDLE OF THE REALM</span>
+  </a>
+  <div style="flex:1"></div>
+  <button class="wd-help" id="wd-rules-open" title="How to play" aria-label="How to play">?</button>
+</header>
+
+<main class="wd-stage">
+
+  <div class="wd-head" id="wd-head">
+    <div class="wd-kicker" id="wd-mode-label">Today's word</div>
+    <p class="wd-sub" id="wd-sub"></p>
+  </div>
+
+  <!-- choose length and mode — hidden until the daily is met or unlimited chosen -->
+  <div class="wd-controls hidden" id="wd-controls">
+    <div class="wd-lens" id="wd-lens">
+      <button class="wd-len" data-len="4">4</button>
+      <button class="wd-len active" data-len="5">5</button>
+      <button class="wd-len" data-len="6">6</button>
+      <span class="wd-controls-label">letters</span>
+    </div>
+    <div class="wd-modes" id="wd-modes">
+      <button class="wd-mode active" data-mode="daily">Daily</button>
+      <button class="wd-mode" data-mode="unlimited">Unlimited</button>
+    </div>
+  </div>
+
+  <!-- the daily is what you meet first; this frees the other modes -->
+  <button class="wd-unlimited-gate hidden" id="wd-unlimited-gate">or play unlimited instead &rarr;</button>
+
+  <div class="wd-msg" id="wd-msg"></div>
+  <div class="wd-board" id="wd-board"></div>
+
+  <!-- the daily's congratulations / too-bad scene -->
+  <section class="wd-daily-result hidden" id="wd-daily-result"></section>
+
+  <section class="wd-result hidden" id="wd-result"></section>
+
+  <button class="wd-btn wd-new hidden" id="wd-new">Next word &rarr;</button>
+
+  <div class="wd-keys" id="wd-keys"></div>
+
+  <button class="wd-giveup hidden" id="wd-giveup">Give up &amp; see the word</button>
+
+  <!-- reserved ad slot (inert until body.ads-enabled) -->
+  <div class="ad-slot ad-slot-rect" data-ad="wordle-result"><div class="ad-slot-fill"></div></div>
+
+  <p class="game-backlink"><a href="../trivia/index.html">&larr; All the games of the realm</a></p>
+</main>
+
+<!-- ============ the rules, shown once ============ -->
+<div class="wd-rules hidden" id="wd-rules">
+  <div class="wd-rules-card">
+    <button class="wd-rules-close" id="wd-rules-close" title="Close">&times;</button>
+    <h2>How to play</h2>
+    <p class="wd-rules-lead">Guess the word in <b>six</b> tries.</p>
+    <ul class="wd-rules-list">
+      <li>Each guess must be a real word of the chosen length &mdash; and <b>never a name</b>.</li>
+      <li>The colour of the tiles shows how close your guess was.</li>
+    </ul>
+    <div class="wd-rules-ex">
+      <div class="wd-ex-row">
+        <span class="wd-ex-cell correct">C</span><span class="wd-ex-cell">R</span><span class="wd-ex-cell">O</span><span class="wd-ex-cell">W</span><span class="wd-ex-cell">N</span>
+      </div>
+      <p><b>C</b> is in the word and in the right spot.</p>
+      <div class="wd-ex-row">
+        <span class="wd-ex-cell">S</span><span class="wd-ex-cell present">T</span><span class="wd-ex-cell">E</span><span class="wd-ex-cell">E</span><span class="wd-ex-cell">L</span>
+      </div>
+      <p><b>T</b> is in the word but in the wrong spot.</p>
+      <div class="wd-ex-row">
+        <span class="wd-ex-cell">R</span><span class="wd-ex-cell">A</span><span class="wd-ex-cell absent">V</span><span class="wd-ex-cell">E</span><span class="wd-ex-cell">N</span>
+      </div>
+      <p><b>V</b> is not in the word at all.</p>
+    </div>
+    <div class="wd-rules-foot">
+      A new <b>daily</b> word for each length arrives at midnight &mdash; or play <b>unlimited</b> any time.
+    </div>
+  </div>
+</div>
+
+<script src="../js/streak.js"></script>
+<script src="../js/daily-realm.js"></script>
+<script src="words.js"></script>
+<script src="../js/people.js"></script>
+<script src="wordle-engine.js"></script>
+<script src="../js/realm-nav.js" data-root="../"></script>
+</body>
+</html>

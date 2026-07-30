@@ -1,0 +1,373 @@
+/* ============================================================================
+   THE WHITE BOOK — the Book of the Brothers, open on the table.
+
+   The page is a FIXED size. Everything below follows from that: the spread has a
+   set aspect ratio, the leaves are absolutely placed inside it, and the turning
+   arrows sit at a constant height because nothing can stretch them. Text is
+   flowed into these leaves by the engine, which measures rather than guesses.
+
+   Three papers are used, oldest first: spread-worn for the early reigns,
+   spread-used through the middle of the book, spread-fresh for the last names.
+   ========================================================================== */
+
+html { height: auto; overflow-y: auto; }
+/* style.css makes <body> a 100vh flex column for the map pages; this page needs
+   to grow and scroll instead */
+body.wb-body {
+  display: flex; flex-direction: column;
+  min-height: 100vh; height: auto; overflow: visible;
+  background: var(--ink);
+}
+.wb-body .hidden { display: none !important; }
+
+.wb-topbtn {
+  font-family: var(--serif-display); font-size: 11.5px; letter-spacing: 1.1px;
+  color: var(--gold); text-decoration: none; border: 1px solid rgba(201,161,90,0.35);
+  padding: 7px 13px; border-radius: 3px; white-space: nowrap;
+}
+.wb-topbtn:hover { background: rgba(201,161,90,0.12); }
+
+/* `margin: 0 auto` on a flex item shrinks it to fit its content — the width and
+   box-sizing are what keep the book full-width inside the column. */
+.wb-main {
+  flex: 1; width: 100%; max-width: 1320px; margin: 0 auto;
+  padding: 22px 14px 10px; box-sizing: border-box;
+}
+
+/* ---------------------------------------------------------------- the stage */
+.wb-stage {
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  perspective: 2600px;
+}
+/* Every page occupies the SAME box, cover included — the arrows are centred on
+   this wrap, so if the cover were shorter than a spread they would jump up when
+   you opened the book and back down when you closed it. Giving the wrap the
+   spread's own ratio pins them for good. */
+.wb-bookwrap {
+  position: relative; flex: 1; max-width: 1180px; min-width: 0;
+  aspect-ratio: 1500 / 1058;
+  display: flex; align-items: center; justify-content: center;
+}
+.wb-shadow {
+  position: absolute; left: 5%; right: 5%; bottom: -16px; height: 26px;
+  background: radial-gradient(ellipse at center, rgba(0,0,0,0.6), transparent 70%);
+  pointer-events: none;
+}
+.wb-book { position: relative; transform-style: preserve-3d; width: 100%; height: 100%; }
+
+/* ---------------------------------------------------------------- the arrows
+   Fixed to the middle of a fixed-height book, so they never wander. */
+.wb-arrow {
+  flex: 0 0 auto; width: 54px; height: 104px;
+  background: rgba(20,16,11,0.74);
+  border: 1px solid rgba(201,161,90,0.34); border-radius: 6px;
+  color: var(--gold); font-size: 25px; line-height: 1; cursor: pointer;
+  transition: background 0.18s, border-color 0.18s, color 0.18s;
+}
+.wb-arrow:hover { background: rgba(201,161,90,0.18); border-color: var(--gold); color: var(--gold-bright); }
+.wb-arrow[disabled] { opacity: 0.2; cursor: default; }
+.wb-arrow[disabled]:hover { background: rgba(20,16,11,0.74); border-color: rgba(201,161,90,0.34); color: var(--gold); }
+
+/* =========================================================== THE COVER ==== */
+/* the cover is centred inside that same box and shrinks to fit it, so opening
+   the book changes what is on the page and nothing else */
+.wb-cover {
+  position: relative; margin: 0 auto; max-width: 620px; height: 100%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.wb-cover-img {
+  display: block; width: auto; max-width: 100%;
+  min-height: 0; flex: 0 1 auto;
+  filter: drop-shadow(0 26px 54px rgba(0,0,0,0.7));
+}
+.wb-cover-plate { text-align: center; padding: 22px 20px 4px; }
+.wb-cover-title {
+  font-family: var(--serif-display); color: var(--gold-bright);
+  font-size: 23px; letter-spacing: 4px; text-transform: uppercase; margin: 0;
+}
+.wb-cover-sub {
+  font-family: var(--serif-body); color: var(--text-muted); font-style: italic;
+  font-size: 14.5px; margin: 10px auto 0; max-width: 520px; line-height: 1.6;
+}
+.wb-cover-open {
+  margin-top: 20px; cursor: pointer;
+  background: rgba(201,161,90,0.10); border: 1px solid var(--gold-dim); border-radius: 3px;
+  padding: 12px 26px; color: var(--gold-bright);
+  font-family: var(--serif-display); font-size: 12.5px; letter-spacing: 2px; text-transform: uppercase;
+  transition: background 0.18s;
+}
+.wb-cover-open:hover { background: rgba(201,161,90,0.2); }
+
+/* =========================================================== THE SPREAD === */
+/* the paper images are ~1500 × 1058, so the open book keeps that ratio */
+.wb-spread {
+  position: relative; width: 100%; aspect-ratio: 1500 / 1058;
+  border-radius: 4px; overflow: hidden;
+  background-color: #efe6d2;
+  background-size: 100% 100%; background-repeat: no-repeat;
+  box-shadow: 0 30px 70px rgba(0,0,0,0.66);
+}
+.wb-paper-worn  .wb-spread { background-image: url("../assets/whitebook/spread-worn.webp"); }
+.wb-paper-used  .wb-spread { background-image: url("../assets/whitebook/spread-used.webp"); }
+.wb-paper-fresh .wb-spread { background-image: url("../assets/whitebook/spread-fresh.webp"); }
+
+/* the shadow that always falls into the fold of an open book */
+.wb-gutter {
+  position: absolute; top: 0; bottom: 0; left: 50%; width: 9%;
+  transform: translateX(-50%); pointer-events: none;
+  background: linear-gradient(90deg,
+    rgba(60,44,24,0) 0%, rgba(60,44,24,0.16) 38%, rgba(60,44,24,0.30) 50%,
+    rgba(60,44,24,0.16) 62%, rgba(60,44,24,0) 100%);
+}
+
+/* ------------------------------------------------------------- the leaves --
+   Inset to sit inside the printed border of the paper images. */
+/* Inset to clear the printed frame on the owner's paper — including the corner
+   flourishes, which reach further in than the straight rule does. The bottom is
+   the most generous, because a full page of text always runs right to it. */
+.wb-leaf {
+  position: absolute; top: 8%; bottom: 12%;
+  width: 34.5%; overflow: hidden; color: #2a2318;
+}
+.wb-leaf-l { left: 7.5%; }
+.wb-leaf-r { right: 7.5%; }
+.wb-leaf-inner { height: 100%; }
+
+/* the offscreen twin the engine measures against — same box, no paint */
+.wb-measure {
+  position: absolute; top: 8%; bottom: 12%; left: 7.5%; width: 34.5%;
+  visibility: hidden; pointer-events: none; overflow: hidden;
+}
+
+.wb-folio {
+  position: absolute; right: 4px; bottom: -2px;
+  font-family: var(--serif-body); font-style: italic; font-size: 12px; color: #8a7a58;
+}
+.wb-leaf-l .wb-folio { right: auto; left: 4px; }
+
+/* --------------------------------------------------------- a knight's page */
+.wb-head { margin-bottom: 4px; }
+.wb-arms { float: left; width: 104px; margin: 0 16px 8px 0; text-align: center; }
+.wb-arms-shield {
+  position: relative; width: 92px; height: 106px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(180deg, rgba(255,255,255,0.34), rgba(216,204,178,0.24));
+  border: 1.5px solid rgba(122,100,58,0.7);
+  border-radius: 5px 5px 46px 46px / 5px 5px 60px 60px;
+  overflow: hidden;
+}
+.wb-arms-shield img {
+  width: 86%; height: 86%; object-fit: contain;
+  filter: sepia(0.16) saturate(0.82) contrast(0.95);
+}
+.wb-arms-glyph {
+  font-size: 32px; color: rgba(122,100,58,0.75);
+  filter: grayscale(1) sepia(0.75) saturate(0.6) brightness(0.85);
+}
+.wb-arms-blazon {
+  margin-top: 6px; font-family: var(--serif-body); font-style: italic;
+  font-size: 10px; line-height: 1.4; color: #6c5c3f;
+}
+
+.wb-knight-name {
+  font-family: var(--serif-display); font-weight: 600;
+  font-size: 22px; line-height: 1.16; color: #3a2c17; margin: 0 0 2px;
+  letter-spacing: 0.4px;
+}
+.wb-knight-of { font-family: var(--serif-display); font-size: 13px; color: #6b5a34; margin: 0 0 3px; }
+.wb-knight-epithet {
+  font-family: var(--serif-body); font-style: italic; font-size: 12.5px;
+  color: #7a6a4a; margin: 0 0 10px;
+}
+.wb-cont {
+  font-family: var(--serif-body); font-style: italic; font-size: 12.5px;
+  color: #7a6a4a; margin: 0 0 8px;
+}
+.wb-rule {
+  height: 1px; margin: 0 0 12px; clear: both;
+  background: linear-gradient(90deg, rgba(122,100,58,0.6), rgba(122,100,58,0.08) 80%, transparent);
+}
+.wb-p {
+  font-family: var(--serif-body); font-size: 14px; line-height: 1.62;
+  margin: 0 0 10px; color: #241d12; text-align: justify; hyphens: auto;
+}
+.wb-head + .wb-p::first-letter {
+  font-family: var(--serif-display); font-size: 34px; line-height: 0.9;
+  float: left; padding: 3px 6px 0 0; color: #7a6231;
+}
+.wb-served {
+  clear: both; margin-top: 12px; padding-top: 9px;
+  border-top: 1px solid rgba(122,100,58,0.28);
+  font-family: var(--serif-body); font-size: 11.5px; color: #5f5138;
+  display: flex; flex-wrap: wrap; gap: 3px 16px;
+}
+.wb-served b {
+  font-family: var(--serif-display); font-size: 9.5px; letter-spacing: 1px;
+  text-transform: uppercase; color: #7a6231; margin-right: 5px;
+}
+
+.wb-fold { clear: both; margin-top: 12px; }
+.wb-fold-src { display: none; }
+.wb-fold-btn {
+  display: block; width: 100%; text-align: left; cursor: pointer;
+  padding: 8px 12px; border: 1px solid rgba(122,100,58,0.35); border-radius: 3px;
+  background: rgba(197,178,134,0.16);
+  font-family: var(--serif-display); font-size: 10px; letter-spacing: 1.1px;
+  text-transform: uppercase; color: #6b5a34; transition: color 0.15s, background 0.15s;
+}
+.wb-fold-btn::before { content: "\271D"; margin-right: 7px; }
+.wb-fold-btn:hover { color: #4d3f1f; background: rgba(197,178,134,0.3); }
+
+/* the popover: sits OVER the whole book, so it is never cut off by a page */
+.wb-fold-modal {
+  position: fixed; inset: 0; z-index: 120;
+  background: rgba(12, 9, 6, 0.66); backdrop-filter: blur(2px);
+  display: flex; align-items: center; justify-content: center; padding: 24px;
+  opacity: 0; transition: opacity 0.2s ease;
+}
+.wb-fold-modal.open { opacity: 1; }
+.wb-fold-panel {
+  position: relative; width: min(520px, 94vw); max-height: 82vh; overflow-y: auto;
+  background: linear-gradient(180deg, #efe4c8, #e6d8b6);
+  border: 1px solid #a98a54; border-radius: 8px;
+  box-shadow: 0 24px 70px rgba(0,0,0,0.6); padding: 26px 28px 24px; color: #2a2318;
+  transform: translateY(8px); transition: transform 0.2s ease;
+}
+.wb-fold-modal.open .wb-fold-panel { transform: none; }
+.wb-fold-close {
+  position: absolute; top: 8px; right: 12px; background: none; border: none;
+  font-size: 1.6rem; line-height: 1; color: #8a7444; cursor: pointer; padding: 2px 6px;
+}
+.wb-fold-close:hover { color: #3a3020; }
+.wb-fold-kicker {
+  font-family: var(--serif-display); font-size: 11px; letter-spacing: 1.4px;
+  text-transform: uppercase; color: #8a1420; margin: 0 0 12px; padding-right: 20px;
+}
+.wb-fold-body p {
+  font-family: var(--serif-body); font-size: 14px; line-height: 1.62; margin: 0 0 11px; color: #3a3122;
+}
+.wb-fold-body p:last-child { margin-bottom: 0; }
+
+.wb-links { clear: both; margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px; }
+.wb-link {
+  font-family: var(--serif-display); font-size: 9.5px; letter-spacing: 1px;
+  text-transform: uppercase; text-decoration: none;
+  color: #6b5a34; border: 1px solid rgba(122,100,58,0.45);
+  padding: 6px 11px; border-radius: 3px;
+}
+.wb-link:hover { background: rgba(122,100,58,0.12); }
+
+/* ------------------------------------------------------------ the contents */
+.wb-contents-title {
+  font-family: var(--serif-display); font-size: 30px; color: #2f2413;
+  margin: 0 0 4px; text-align: center; letter-spacing: 1px;
+}
+.wb-contents-rule {
+  height: 1px; margin: 0 auto 10px; width: 62%;
+  background: linear-gradient(90deg, transparent, rgba(122,100,58,0.7), transparent);
+}
+.wb-contents-note {
+  font-family: var(--serif-body); font-style: italic; font-size: 11.5px;
+  color: #6b5a34; margin: 0 0 12px; line-height: 1.5; text-align: center;
+}
+.wb-search {
+  display: block; width: 100%; margin: 0 0 10px; box-sizing: border-box;
+  padding: 7px 11px; border-radius: 3px;
+  border: 1px solid rgba(122,100,58,0.5);
+  background: rgba(255,255,255,0.4); color: #2a2318;
+  font-family: var(--serif-body); font-size: 13px;
+}
+.wb-search:focus { outline: none; border-color: rgba(122,100,58,0.9); background: rgba(255,255,255,0.65); }
+
+.wb-era {
+  font-family: var(--serif-display); font-size: 10px; letter-spacing: 1.4px;
+  text-transform: uppercase; color: #7a6231;
+  margin: 12px 0 5px; display: flex; align-items: center; gap: 8px;
+}
+.wb-era::after { content: ""; flex: 1; height: 1px; background: rgba(122,100,58,0.32); }
+
+.wb-toc {
+  display: flex; align-items: baseline; gap: 6px;
+  padding: 2px 2px; text-decoration: none; color: #241d12;
+  font-family: var(--serif-body); font-size: 13.5px;
+}
+.wb-toc:hover { color: #6b4a12; }
+.wb-toc-name { white-space: nowrap; flex: 0 0 auto; }
+.wb-toc-dots {
+  flex: 1; min-width: 14px;
+  border-bottom: 1px dotted rgba(122,100,58,0.55); transform: translateY(-3px);
+}
+.wb-toc-note {
+  font-style: italic; font-size: 10.5px; color: #6f6046;
+  white-space: nowrap; flex: 0 1 auto; min-width: 0; max-width: 46%;
+  overflow: hidden; text-overflow: ellipsis; text-align: right;
+}
+.wb-empty {
+  text-align: center; font-family: var(--serif-body); font-style: italic;
+  color: #7f7052; padding: 26px 0;
+}
+
+/* -------------------------------------------------------- turning the leaf */
+@keyframes wb-turn-next {
+  from { transform: rotateY(0deg); opacity: 1; }
+  to   { transform: rotateY(-9deg); opacity: 0; }
+}
+@keyframes wb-turn-back {
+  from { transform: rotateY(0deg); opacity: 1; }
+  to   { transform: rotateY(9deg); opacity: 0; }
+}
+@keyframes wb-turn-in {
+  from { transform: rotateY(7deg); opacity: 0; }
+  to   { transform: rotateY(0deg); opacity: 1; }
+}
+.wb-book { transform-origin: center center; }
+.wb-book.wb-turning-next { animation: wb-turn-next 0.20s ease-in forwards; }
+.wb-book.wb-turning-prev { animation: wb-turn-back 0.20s ease-in forwards; }
+.wb-book.wb-arriving     { animation: wb-turn-in 0.26s ease-out; }
+@media (prefers-reduced-motion: reduce) {
+  .wb-book.wb-turning-next, .wb-book.wb-turning-prev, .wb-book.wb-arriving { animation: none; }
+}
+
+/* --------------------------------------------------------------- the foot */
+.wb-footline {
+  text-align: center; margin: 20px auto 0; max-width: 760px;
+  font-family: var(--serif-body); font-size: 13px; color: var(--text-muted); line-height: 1.6;
+}
+.wb-footline b { color: var(--gold-dim); font-weight: 400; }
+.wb-footline kbd {
+  font-family: var(--serif-display); font-size: 11px; padding: 2px 7px;
+  border: 1px solid rgba(201,161,90,0.35); border-radius: 3px; color: var(--gold);
+}
+.wb-footer {
+  text-align: center; padding: 28px 20px 40px; margin-top: 18px;
+  font-family: var(--serif-body); font-size: 12.5px; color: var(--text-muted); line-height: 1.7;
+}
+.wb-footer a { color: var(--gold-dim); }
+
+/* -------------------------------------------------------------- day theme */
+:root[data-theme="light"] body.wb-body {
+  background: linear-gradient(180deg, #d8cbaf 0%, #cdbf9f 100%);
+}
+:root[data-theme="light"] .wb-arrow { background: rgba(255,255,255,0.72); }
+:root[data-theme="light"] .wb-arrow:hover { background: rgba(201,161,90,0.24); }
+:root[data-theme="light"] .wb-cover-title { color: #6b5a34; }
+
+/* ------------------------------------------------------------ narrow view --
+   Below this width a two-page spread is unreadable, so the book lies open as
+   one column: the two leaves stack, still in reading order. */
+@media (max-width: 900px) {
+  .wb-main { padding: 14px 8px 6px; }
+  .wb-stage { gap: 5px; }
+  .wb-arrow { width: 34px; height: 78px; font-size: 17px; }
+  /* stacked leaves have no fixed height, so the wrap must let go of the ratio too */
+  .wb-bookwrap { aspect-ratio: auto; display: block; }
+  .wb-book { height: auto; }
+  .wb-cover { height: auto; }
+  .wb-cover-img { flex: none; }
+  .wb-spread { aspect-ratio: auto; display: flex; flex-direction: column; gap: 10px; padding: 14px 0; }
+  .wb-leaf { position: relative; top: auto; bottom: auto; left: auto; right: auto; width: 88%; margin: 0 auto; }
+  .wb-leaf-blank { display: none; }
+  .wb-gutter { display: none; }
+  .wb-knight-name { font-size: 20px; }
+  .wb-p { font-size: 13.5px; text-align: left; }
+}

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Game of Thrones Map — The Known Realm</title>
+<link rel="preload" href="css/fonts/cinzel-400-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="css/fonts/cinzel-600-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="css/fonts/ebgaramond-400-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="stylesheet" href="css/fonts.css" />
+<link rel="stylesheet" href="css/style.css" />
+<script>try{var t=localStorage.getItem("kwTheme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="site-switcher" id="site-switcher">
+    <button class="brand brand-button" id="site-switcher-btn" aria-haspopup="true" aria-expanded="false">
+      <span class="brand-icon">&#10022;</span>
+      <span class="brand-name" id="site-title">GAME OF THRONES MAP</span>
+      <span class="site-caret">&#9662;</span>
+    </button>
+    <div class="site-dropdown" id="site-dropdown">
+      <button class="site-option" data-site="home">
+        <span class="site-option-title">&#8962; The Known Realm &mdash; Home</span>
+        <span class="site-option-sub">The front gate of the realm</span>
+      </button>
+      <button class="site-option active" data-site="map">
+        <span class="site-option-title">Game of Thrones Map</span>
+        <span class="site-option-sub">The Known Realm</span>
+      </button>
+      <button class="site-option" data-site="hotd">
+        <span class="site-option-title">House of the Dragon Map</span>
+        <span class="site-option-sub">The Dance of the Dragons</span>
+      </button>
+      <button class="site-option" data-site="trees">
+        <span class="site-option-title">House Family Trees</span>
+        <span class="site-option-sub">The lineages of the great houses</span>
+      </button>
+      <button class="site-option" data-site="knight">
+        <span class="site-option-title">A Knight of the Seven Kingdoms Map</span>
+        <span class="site-option-sub">Dunk and Egg</span>
+      </button>
+      <button class="site-option" data-site="wordle">
+        <span class="site-option-title">Wordle of the Realm</span>
+        <span class="site-option-sub">Five letters, five guesses</span>
+      </button>
+      <button class="site-option" data-site="quiz">
+        <span class="site-option-title">Who Are You in the Realm?</span>
+        <span class="site-option-sub">Four quizzes: your house, your character</span>
+      </button>
+    </div>
+  </div>
+
+  <nav class="modes" id="mode-nav">
+    <div class="mode-item" data-menu="map">
+      <button class="mode-btn active" data-mode="map">The Map</button>
+      <div class="dropdown" id="menu-map"></div>
+    </div>
+    <div class="mode-item" data-menu="houses">
+      <button class="mode-btn" data-mode="houses">People &amp; Houses</button>
+      <div class="dropdown" id="menu-houses"></div>
+    </div>
+    <div class="mode-item" data-menu="regions">
+      <button class="mode-btn" data-mode="regions">Regions</button>
+      <div class="dropdown" id="menu-regions"></div>
+    </div>
+  </nav>
+
+  <div class="topbar-right">
+    <div class="search-wrap">
+      <span class="search-icon">&#128269;</span>
+      <input id="search-input" type="text" placeholder="Seek a place, a house, or a soul&hellip;" autocomplete="off" />
+      <div class="search-results hidden" id="search-results"></div>
+    </div>
+    <div class="season-item" id="season-item">
+      <button class="season-badge" id="season-badge" title="Follow the story season by season, episode by episode">
+        <span class="season-dot"></span>
+        <span class="season-badge-book">&#128214;</span>
+        <span id="season-badge-label">The Story</span> <span class="season-caret">&#9662;</span>
+      </button>
+      <div class="season-dropdown" id="season-dropdown"></div>
+    </div>
+  </div>
+</header>
+
+<div class="body-layout">
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <main class="map-stage" id="map-stage">
+    <svg id="map-svg" viewBox="0 0 5652 3682" preserveAspectRatio="xMidYMid meet">
+      <g id="map-viewport">
+        <image id="basemap" href="assets/ASOIAF_map_redrawn_v6.jpg" x="0" y="0" width="5652" height="3682" />
+        <g id="territory-layer" class="hidden-layer"></g>
+        <g id="route-layer"></g>
+        <g id="banner-layer"></g>
+        <g id="marker-layer"></g>
+        <g id="death-layer"></g>
+        <g id="people-layer"></g>
+      </g>
+    </svg>
+
+    <div class="map-vignette"></div>
+    <div class="frame-overlay"></div>
+
+    <aside class="char-card hidden" id="char-card"></aside>
+
+    <div class="map-controls">
+      <button id="zoom-in" title="Zoom in">+</button>
+      <button id="zoom-out" title="Zoom out">&minus;</button>
+      <button id="map-layers-btn" class="map-layers-btn" title="Base map" aria-haspopup="true" aria-expanded="false" aria-controls="map-layers-panel">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M11.99 18.54l-7.37-5.73L3 14.07l9 7 9-7-1.63-1.27-7.38 5.74zM12 16l7.36-5.73L21 9l-9-7-9 7 1.63 1.27L12 16z"/></svg>
+      </button>
+      <div class="map-layers-panel hidden" id="map-layers-panel" role="menu" aria-label="Base map"></div>
+    </div>
+  </main>
+</div>
+
+<section class="wordle-screen hidden" id="wordle-screen" aria-labelledby="wordle-title">
+  <div class="wordle-shell">
+    <main class="wordle-play">
+      <div class="wordle-kicker">The Maester's Word Game</div>
+      <h1 id="wordle-title">Wordle of the Realm</h1>
+      <div class="wordle-meta">
+        <span id="wordle-category-label">All Words</span>
+        <span>5 Letters</span>
+        <span>5 Guesses</span>
+      </div>
+
+      <div class="wordle-categories" id="wordle-categories" aria-label="Word category">
+        <button class="active" data-wordle-category="all">All</button>
+        <button data-wordle-category="names">Names</button>
+        <button data-wordle-category="places">Places</button>
+        <button data-wordle-category="houses">Houses</button>
+        <button data-wordle-category="lore">Lore</button>
+      </div>
+
+      <div class="wordle-board" id="wordle-board" aria-live="polite"></div>
+
+      <form class="wordle-form" id="wordle-form" autocomplete="off">
+        <input id="wordle-input" name="guess" type="text" maxlength="5" spellcheck="false" autocomplete="off" aria-label="Wordle guess" />
+        <button type="submit">Guess</button>
+      </form>
+
+      <div class="wordle-message" id="wordle-message" aria-live="polite"></div>
+
+      <div class="wordle-actions">
+        <button class="side-btn" id="wordle-new" type="button">New Game</button>
+        <button class="side-btn side-btn-ghost" id="wordle-list-toggle" type="button">Show Word Hoard</button>
+      </div>
+    </main>
+
+    <aside class="wordle-side">
+      <div class="wordle-side-title">Word Hoard</div>
+      <div class="wordle-stat"><span>Current Pool</span><b id="wordle-pool-count">0</b></div>
+      <div class="wordle-stat"><span>Guesses Left</span><b id="wordle-guesses-left">5</b></div>
+      <div class="wordle-stat"><span>Last Answer</span><b id="wordle-last-answer">&mdash;</b></div>
+      <div class="sidebar-divider"></div>
+      <div class="wordle-key" id="wordle-keyboard"></div>
+    </aside>
+  </div>
+
+  <aside class="wordle-list hidden" id="wordle-list">
+    <button class="wordle-list-close" id="wordle-list-close" type="button">&times;</button>
+    <div class="wordle-side-title">Possible Words</div>
+    <div class="wordle-list-body" id="wordle-list-body"></div>
+  </aside>
+</section>
+
+<div class="lore-modal" id="lore-modal">
+  <div class="lore-card">
+    <div class="lore-kicker">Before the tale begins</div>
+    <div class="lore-title">Whose telling do you follow?</div>
+    <div class="lore-options">
+      <button class="lore-option" data-lore="show">
+        <span class="lore-icon">&#128250;</span>
+        <span class="lore-name">The Show</span>
+        <span class="lore-sub">If you watch the series &mdash; the tale as HBO&rsquo;s eight seasons tell it.</span>
+      </button>
+      <button class="lore-option" data-lore="book">
+        <span class="lore-icon">&#128214;</span>
+        <span class="lore-name">The Books</span>
+        <span class="lore-sub">If you read the books &mdash; the tale as George R.R. Martin&rsquo;s novels tell it.</span>
+      </button>
+    </div>
+    <p class="lore-note">People, families and fates follow the telling you choose. This door opens again each time you enter.</p>
+  </div>
+</div>
+
+<div class="story-tip hidden" id="story-tip">
+  <button class="story-tip-close" id="story-tip-close" title="Close">&times;</button>
+  <div class="story-tip-title">&#128214; The Story</div>
+  <p>Follow the tale from up here: pick a <strong>season &amp; episode</strong> of the show, or a <strong>book &amp; chapter</strong> of the novels &mdash; and the whole map follows. People take their places, deaths appear, banners rise and fall.</p>
+</div>
+
+<footer class="journey-player hidden" id="journey-player">
+  <div class="player-switch hidden" id="player-switch"></div>
+  <button class="play-btn" id="play-btn" title="Play journey">&#9654;</button>
+  <div class="player-info">
+    <div class="player-character" id="player-character">&nbsp;</div>
+    <div class="player-journey" id="player-journey-summary">&nbsp;</div>
+  </div>
+  <div class="scrubber-wrap">
+    <input type="range" id="scrubber" min="0" max="1" step="0.01" value="0" />
+    <div class="scrubber-ticks" id="scrubber-ticks"></div>
+  </div>
+  <div class="player-stop" id="player-stop-label">&nbsp;</div>
+</footer>
+
+<script src="js/data.js"></script>
+<script src="js/seasons.js"></script>
+<script src="js/whereabouts.js"></script>
+<script src="js/deaths.js"></script>
+<script src="js/books.js"></script>
+<script src="js/people.js"></script>
+<script src="js/characters.js"></script>
+<script src="js/groups.js"></script>
+<script src="js/icons.js"></script>
+<script src="js/territories.js"></script>
+<script src="js/col/dragons.js"></script>
+<script src="js/col/steel.js"></script>
+<script src="js/col/wolves.js"></script>
+<script src="js/col/kingsguard.js"></script>
+<script src="js/col/battles.js"></script>
+<script src="js/col/prophecies.js"></script>
+<script src="js/map.js"></script>
+<script src="js/sigil-art.js"></script>
+<script src="js/app.js"></script>
+<script src="js/map-layers.js"></script>
+<script src="js/realm-nav.js" data-root=""></script>
+</body>
+</html>

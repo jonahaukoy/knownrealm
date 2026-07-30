@@ -1,0 +1,83 @@
+/* ============================================================================
+   daily-realm.css — the shared congratulations / too-bad result scene, and the
+   little "Daily" pieces the games share. Rides on the palette in style.css.
+   ========================================================================== */
+
+.dr-screen {
+  display: flex;
+  flex-direction: column;
+  max-width: 560px;
+  margin: 24px auto;
+  border: 1px solid var(--gold-dim);
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--ink-2, #1e1712);
+  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.4);
+  animation: dr-rise 0.5s cubic-bezier(0.2, 0.8, 0.25, 1);
+}
+@keyframes dr-rise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+
+.dr-figure { position: relative; margin: 0; line-height: 0; }
+.dr-figure img { width: 100%; height: auto; display: block; }
+.dr-figure::after {
+  content: "";
+  position: absolute; left: 0; right: 0; bottom: 0; height: 45%;
+  background: linear-gradient(to top, rgba(6,4,2,0.85), rgba(6,4,2,0));
+  pointer-events: none;
+}
+.dr-win .dr-figure { box-shadow: inset 0 0 0 2px rgba(201,161,90,0.5); }
+.dr-lose .dr-figure { filter: saturate(0.85); }
+.dr-credit {
+  position: absolute; right: 8px; bottom: 6px; z-index: 1;
+  font-family: var(--serif-body); font-size: 10px;
+  color: rgba(240,230,210,0.7); letter-spacing: 0.02em;
+}
+.dr-credit a { color: rgba(240,230,210,0.85); }
+
+.dr-body { padding: 20px 24px 24px; text-align: center; color: #f0e6d2; }
+.dr-kicker {
+  font-family: var(--serif-display);
+  font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 6px;
+}
+.dr-title {
+  font-family: var(--serif-display);
+  font-size: clamp(24px, 5vw, 34px);
+  color: var(--gold-bright); margin: 0 0 12px; line-height: 1.1;
+}
+.dr-win .dr-title { color: var(--gold-bright); }
+.dr-lose .dr-title { color: #e0c3a0; }
+.dr-text {
+  font-family: var(--serif-body); font-size: 16px; line-height: 1.55;
+  color: #ece0c4; opacity: 0.9; margin: 0 auto 16px; max-width: 460px;
+}
+.dr-streak {
+  font-family: var(--serif-display); font-size: 14px; color: var(--gold);
+  margin-bottom: 14px;
+}
+.dr-unlimited {
+  margin-top: 6px; padding: 13px 26px;
+  border: 1px solid var(--gold); border-radius: 11px;
+  background: var(--gold); color: var(--ink, #14100d);
+  font-family: var(--serif-display); font-size: 16px; cursor: pointer;
+  transition: background 0.14s;
+}
+.dr-unlimited:hover { background: var(--gold-bright); border-color: var(--gold-bright); }
+.dr-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 4px; }
+.dr-actions .dr-ghost {
+  padding: 12px 20px; border: 1px solid var(--gold-dim); border-radius: 11px;
+  background: none; color: var(--gold); font-family: var(--serif-display);
+  font-size: 14px; cursor: pointer;
+}
+.dr-actions .dr-ghost:hover { border-color: var(--gold); color: var(--gold-bright); }
+
+/* the "Daily" badge that can sit on a game button / card corner */
+.daily-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: var(--serif-display); font-size: 10px;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--gold-bright);
+}
+.daily-badge::before { content: "\2600"; font-size: 12px; }   /* sun */
+
+@media (prefers-reduced-motion: reduce) { .dr-screen { animation: none; } }

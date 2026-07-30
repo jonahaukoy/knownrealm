@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Games &amp; Trivia of the Realm — The Known Realm</title>
+<link rel="preload" href="../css/fonts/cinzel-400-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="../css/fonts/cinzel-600-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="../css/fonts/ebgaramond-400-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="stylesheet" href="../css/fonts.css" />
+<link rel="stylesheet" href="../css/style.css" />
+<link rel="stylesheet" href="trivia.css" />
+<script>try{var t=localStorage.getItem("kwTheme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
+</head>
+<body class="trivia-body">
+
+<header class="topbar">
+  <a class="brand home-brand" href="../index.html" style="text-decoration:none;color:var(--text-light)">
+    <span class="brand-icon">&#127922;</span>
+    <span class="brand-name">GAMES &amp; TRIVIA</span>
+  </a>
+  <div style="flex:1"></div>
+</header>
+
+<main class="tv-stage">
+
+  <!-- Every card is a link to that game's own page. Nothing opens inline any
+       more: a game should feel like somewhere you have gone, not a panel that
+       unfolded underneath the menu. -->
+  <section class="tv-hub" id="tv-hub">
+    <div class="tv-kicker">The Known Realm</div>
+    <h1 class="tv-hub-h1">Games &amp; Trivia</h1>
+    <p class="tv-sub">Pick your pastime &mdash; a daily council to seat, the Maester's Examination,
+      a game of heraldry, a game of voices, a round of Wordle, or a quiz to name the soul you truly are.</p>
+
+    <div class="tv-streak hidden" id="tv-streak"></div>
+
+    <div class="tv-games" id="tv-games">
+      <!-- the three daily games first, so they fill the top row -->
+      <a class="tv-game-card tv-game-daily" href="../smallcouncil/index.html">
+        <span class="tv-game-flag">Daily</span>
+        <span class="tv-game-emoji">&#9819;</span>
+        <b>The Small Council</b>
+        <span>Sixteen names, four hidden groups, four braziers. Fail and the winter takes you.</span>
+        <i>A new one every day &rarr;</i>
+      </a>
+      <a class="tv-game-card tv-game-daily" href="../wordle/index.html">
+        <span class="tv-game-flag">Daily</span>
+        <span class="tv-game-emoji">&#128214;</span>
+        <b>Wordle of the Realm</b>
+        <span>Six guesses for today's five-letter word &mdash; words of the realm, and never a name. A new one daily.</span>
+        <i>Play now &rarr;</i>
+      </a>
+      <a class="tv-game-card tv-game-daily" href="../higherlower/index.html">
+        <span class="tv-game-flag">Daily</span>
+        <span class="tv-game-emoji">&#9878;&#65039;</span>
+        <b>Higher or Lower</b>
+        <span>Longer reign, greater host, older, more kills? The measure changes every round &mdash; take the daily trial or play unlimited.</span>
+        <i>Play now &rarr;</i>
+      </a>
+      <a class="tv-game-card" href="play.html">
+        <span class="tv-game-emoji">&#10067;</span>
+        <b>Trivia of the Realm</b>
+        <span>Ten fresh questions, four sagas, two difficulties &mdash; with a spoiler shield.</span>
+        <i>Play now &rarr;</i>
+      </a>
+      <a class="tv-game-card" href="../whosaidit/index.html">
+        <span class="tv-game-emoji">&#128481;</span>
+        <b>Who Said It?</b>
+        <span>Match the line to the mouth that spoke it &mdash; books and screen alike.</span>
+        <i>Play now &rarr;</i>
+      </a>
+      <a class="tv-game-card" href="../sigilmatch/index.html">
+        <span class="tv-game-emoji">&#127991;</span>
+        <b>Sigil Match</b>
+        <span>Pair every house to its arms and words &mdash; great houses down to marcher lords.</span>
+        <i>Play now &rarr;</i>
+      </a>
+      <a class="tv-game-card" href="../quiz/index.html">
+        <span class="tv-game-emoji">&#128302;</span>
+        <b>Who Are You in the Realm?</b>
+        <span>Four personality quizzes &mdash; your house, your character, your fate. Answer true.</span>
+        <i>Play now &rarr;</i>
+      </a>
+      <a class="tv-game-card" href="../blur/index.html">
+        <span class="tv-game-emoji">&#128374;</span>
+        <b>Blur</b>
+        <span>A face, banner, place or beast hidden behind a wall of dark &mdash; reveal it fragment by fragment and name it.</span>
+        <i>Play now &rarr;</i>
+      </a>
+      <!-- coming soon, kept last so it sits in the bottom-right -->
+      <button class="tv-game-card tv-game-soon" id="tv-game-whereintherealm" disabled>
+        <span class="tv-game-emoji">&#128506;</span>
+        <b>Where in the Realm?</b>
+        <span>A view of somewhere in Westeros or Essos, and a map to place it on.</span>
+        <i>Coming soon</i>
+      </button>
+    </div>
+
+    <p class="tv-hub-foot">One spoiler shield serves them all &mdash; tell any game how far you have
+      travelled and the rest will remember.</p>
+  </section>
+
+</main>
+
+<script src="../js/streak.js"></script>
+<script>
+  /* show the player's daily streak on the hub, if they have one going */
+  (function () {
+    if (!window.KWStreak) return;
+    var el = document.getElementById("tv-streak");
+    if (!el) return;
+    var s = KWStreak.get();
+    if (s.count > 0) {
+      el.innerHTML = "&#128293; <b>" + s.count + "-day streak</b>" +
+        (s.playedToday ? " &mdash; today's daily is done." : " &mdash; play a daily to keep it alive.") +
+        (s.best > s.count ? " <span class=\"tv-streak-best\">Best: " + s.best + "</span>" : "");
+      el.classList.remove("hidden");
+    }
+  })();
+</script>
+<script src="../js/realm-nav.js" data-root="../"></script>
+</body>
+</html>

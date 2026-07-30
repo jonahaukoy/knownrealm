@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 116">
+  <!-- House Butterwell of Whitewalls: undy green, white and yellow -->
+  <defs>
+    <clipPath id="shield"><path d="M8 6 H92 V60 C92 92 50 112 50 112 C50 112 8 92 8 60 Z"/></clipPath>
+  </defs>
+  <g clip-path="url(#shield)">
+    <rect width="100" height="116" fill="#f2ead8"/>
+    <g fill="none" stroke-width="12">
+      <path d="M0 16 Q12 8 25 16 T50 16 T75 16 T100 16" stroke="#4a6741"/>
+      <path d="M0 40 Q12 32 25 40 T50 40 T75 40 T100 40" stroke="#e0c060"/>
+      <path d="M0 64 Q12 56 25 64 T50 64 T75 64 T100 64" stroke="#4a6741"/>
+      <path d="M0 88 Q12 80 25 88 T50 88 T75 88 T100 88" stroke="#e0c060"/>
+      <path d="M0 112 Q12 104 25 112 T50 112 T75 112 T100 112" stroke="#4a6741"/>
+    </g>
+  </g>
+  <path d="M8 6 H92 V60 C92 92 50 112 50 112 C50 112 8 92 8 60 Z" fill="none" stroke="#2b2015" stroke-width="4"/>
+</svg>

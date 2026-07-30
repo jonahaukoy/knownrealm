@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Higher or Lower — The Known Realm</title>
+<meta name="description" content="A Game of Thrones guessing game: reigns, hosts, ages, populations, kills and more — one mixed run, changing metric every round. Take the daily trial or play unlimited." />
+<link rel="preload" href="../css/fonts/cinzel-400-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="../css/fonts/cinzel-600-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="../css/fonts/ebgaramond-400-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="stylesheet" href="../css/fonts.css" />
+<link rel="stylesheet" href="../css/style.css" />
+<link rel="stylesheet" href="../css/daily-realm.css" />
+<link rel="stylesheet" href="higherlower.css" />
+<script>try{var t=localStorage.getItem("kwTheme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
+</head>
+<body class="hl-body">
+
+<header class="topbar">
+  <a class="brand home-brand" href="../trivia/index.html" style="text-decoration:none;color:var(--text-light)">
+    <span class="brand-icon">&#9878;&#65039;</span>
+    <span class="brand-name">HIGHER OR LOWER</span>
+  </a>
+  <div style="flex:1"></div>
+</header>
+
+<div class="hl-shell" id="hl-shell">
+
+  <section class="hl-sec" id="hl-home"></section>
+  <section class="hl-sec hl-hidden" id="hl-play"></section>
+  <section class="hl-sec hl-hidden" id="hl-result"></section>
+  <section class="hl-sec hl-hidden" id="hl-over"></section>
+
+  <p class="game-backlink"><a href="../trivia/index.html">&larr; All the games of the realm</a></p>
+</div>
+
+<script src="../js/streak.js"></script>
+<script src="../js/daily-realm.js"></script>
+<script src="hl-data.js"></script>
+<script src="higherlower-engine.js"></script>
+<script src="../js/realm-nav.js" data-root="../"></script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The Timeline — The Known Realm</title>
+<link rel="preload" href="css/fonts/cinzel-400-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="css/fonts/cinzel-600-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="css/fonts/ebgaramond-400-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="stylesheet" href="css/fonts.css" />
+<link rel="stylesheet" href="css/style.css" />
+<link rel="stylesheet" href="css/timeline.css" />
+<script>try{var t=localStorage.getItem("kwTheme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
+</head>
+<body class="tl-body">
+
+<header class="topbar wiki-topbar">
+  <a class="brand home-brand" href="timeline.html" style="text-decoration:none;color:var(--text-light)">
+    <span class="brand-icon">&#8987;</span>
+    <span class="brand-name">THE TIMELINE</span>
+  </a>
+  <div style="flex:1"></div>
+</header>
+
+<main class="tl-main">
+
+  <div class="tl-hero">
+    <div class="tl-hero-art" id="tl-hero-art"></div>
+    <div class="tl-hero-text">
+      <div class="tl-flourish">&#10022;</div>
+      <h1>The Timeline of the Known World</h1>
+      <p>From the Dawn Age to the breaking of the wheel &mdash; twelve thousand years in one line.
+        Choose an age, then read it moment by moment. Both tellings are marked where they differ.</p>
+    </div>
+  </div>
+
+  <div class="tl-erahead">Choose an age</div>
+  <div class="tl-eras" id="tl-eras"></div>
+
+  <section class="tl-focus" id="tl-focus"></section>
+
+  <div class="tl-player">
+    <div class="tl-bar">
+      <input type="range" id="tl-scrub" min="0" max="0" step="1" value="0" aria-label="Scrub the whole timeline" />
+      <div class="tl-bar-ends" id="tl-bar-ends"><span>&#8592; earlier</span><span>later &#8594;</span></div>
+    </div>
+    <button class="tl-btn tl-shield" id="tl-shield" title="Set how far you have come">&#128737; Spoiler shield</button>
+  </div>
+  <p class="tl-bar-hint">Drag the bar to sweep the years, or step with the <kbd>&larr;</kbd> <kbd>&rarr;</kbd> keys.</p>
+
+  <div class="tl-hidden-note" id="tl-hidden"></div>
+
+  <section class="tl-stream" id="tl-stream"></section>
+
+  <div class="tl-footart" id="tl-footart"></div>
+
+</main>
+
+<!-- ============ the spoiler shield ============ -->
+<div class="tl-gate" id="tl-gate">
+  <div class="tl-gate-panel">
+    <div class="tl-gate-kicker">Before you walk the years</div>
+    <h2>How far have you come?</h2>
+    <p class="tl-gate-sub">The timeline runs to the very end of the tale. Tell the maesters how far you have
+      travelled and everything beyond it stays sealed &mdash; in every telling, and in the games too.</p>
+    <div id="tl-gate-controls"></div>
+    <div class="tl-gate-count" id="tl-gate-count"></div>
+    <div class="tl-gate-actions">
+      <button class="tl-gate-btn" id="tl-gate-all">I fear no spoilers &mdash; open everything</button>
+      <button class="tl-gate-btn tl-gate-go" id="tl-gate-save">Raise the shield &amp; walk &rarr;</button>
+    </div>
+    <button class="tl-gate-close" id="tl-gate-close" title="Close">&times;</button>
+  </div>
+</div>
+
+<footer class="tl-footer">
+  Unofficial companion &mdash; not affiliated with, endorsed, sponsored, or approved by George R.R. Martin, HBO,
+  or Warner Bros. Discovery. All chronicle text is original to this site.
+  <a href="credits.html">Credits &amp; licenses</a>.
+</footer>
+
+<script src="js/timeline-data.js"></script>
+<script src="js/timeline-engine.js"></script>
+<script src="js/realm-nav.js" data-root=""></script>
+</body>
+</html>

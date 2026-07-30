@@ -1,0 +1,20 @@
+# The Known World — robots.txt
+#
+# Live domain: https://knownrealm.com
+# This file must sit at the site ROOT and be served as https://knownrealm.com/robots.txt
+# (Pick ONE canonical host — the apex knownrealm.com — and have the host 301-redirect
+#  www.knownrealm.com to it, so both sitemaps and canonicals agree.)
+
+User-agent: *
+Allow: /
+
+# not a real page for readers — the host serves it, search engines shouldn't index it
+Disallow: /404.html
+
+# working folders that are not part of the public site
+Disallow: /assets/_sources/
+Disallow: /_codex_backup_20260706_170741_site_wordle/
+Disallow: /_codex_backup_20260706_region_journey_defaults/
+
+Sitemap: https://knownrealm.com/sitemap.xml
+Sitemap: https://knownrealm.com/sitemap-prerender.xml

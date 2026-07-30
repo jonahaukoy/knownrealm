@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The Small Council — The Known Realm</title>
+<link rel="preload" href="../css/fonts/cinzel-400-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="../css/fonts/cinzel-600-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="../css/fonts/ebgaramond-400-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="stylesheet" href="../css/fonts.css" />
+<link rel="stylesheet" href="../css/style.css" />
+<link rel="stylesheet" href="../css/daily-realm.css" />
+<link rel="stylesheet" href="smallcouncil.css" />
+<script>try{var t=localStorage.getItem("kwTheme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
+</head>
+<body class="sc-body">
+
+<header class="topbar">
+  <a class="brand home-brand" href="../trivia/index.html" style="text-decoration:none;color:var(--text-light)">
+    <span class="brand-icon">&#9819;</span>
+    <span class="brand-name">THE SMALL COUNCIL</span>
+  </a>
+  <div style="flex:1"></div>
+</header>
+
+<div class="sc-shell" id="sc-shell" data-art="assets/">
+
+  <!-- ===== the plain stage: choosing a council ===== -->
+  <main class="sc-plain">
+
+    <section class="sc-setup" id="sc-setup">
+      <div class="sc-kicker">A Daily Seating</div>
+      <h1>The Small Council</h1>
+      <p class="sc-sub">Sixteen names come to the table. Four of them belong together, and then four more,
+        and four more again &mdash; but at least one name will look as though it belongs somewhere it does not.
+        Four braziers burn behind you. Every wrong seating puts one out, and the cold comes a little further in.</p>
+
+      <div class="sc-today" id="sc-today"></div>
+      <button class="sc-start" id="sc-start">Take your seat &rarr;</button>
+
+      <!-- the daily (all the realm) is what you meet first; everything else is
+           sealed behind this until you have sat today's council -->
+      <button class="sc-unlock" id="sc-unlock">or play more councils &rarr;</button>
+
+      <div class="sc-practice hidden" id="sc-practice">
+        <div class="sc-sagas" id="sc-sagas" role="group" aria-label="Choose a saga">
+          <button class="sc-saga" data-saga="all">All the Realm</button>
+          <button class="sc-saga" data-saga="got">Game of Thrones</button>
+          <button class="sc-saga" data-saga="hotd">House of the Dragon</button>
+          <button class="sc-saga" data-saga="knight">Dunk &amp; Egg</button>
+        </div>
+        <div class="sc-archive-h">The chamber's records</div>
+        <p class="sc-archive-note">Councils already sat, and councils yet to come. Play any of them at your leisure.</p>
+        <div class="sc-archive" id="sc-archive"></div>
+      </div>
+    </section>
+
+    <section class="sc-gate hidden" id="sc-gate">
+      <div class="sc-kicker">Before you sit</div>
+      <h2>The Spoiler Shield</h2>
+      <div id="sc-gate-body"></div>
+      <div class="sc-gate-actions">
+        <button class="sc-start" id="sc-gate-go">I fear no spoilers &mdash; open the chamber &rarr;</button>
+        <button class="sc-gate-alt" id="sc-gate-back">&larr; Give me a council I am safe to sit</button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===== the desk: the five paintings, and the sheet they are written on ===== -->
+  <div class="sc-deskframe">
+  <div class="sc-desk">
+    <div class="sc-table" id="sc-table"></div>
+
+    <div class="sc-parch">
+      <section class="sc-game hidden" id="sc-game">
+        <div class="sc-game-head">
+          <button class="sc-quit" id="sc-quit">&larr; Leave</button>
+          <div class="sc-title" id="sc-title"></div>
+          <span style="width:3em"></span>
+        </div>
+        <div class="sc-lives" id="sc-lives"></div>
+        <div class="sc-solved" id="sc-solved"></div>
+        <div class="sc-grid" id="sc-grid"></div>
+        <div class="sc-msg" id="sc-msg"></div>
+        <div class="sc-tools">
+          <button class="sc-tool" id="sc-shuffle">Shuffle</button>
+          <button class="sc-tool" id="sc-clear">Deselect</button>
+          <button class="sc-tool sc-tool-go" id="sc-submit">Seat them</button>
+        </div>
+      </section>
+
+      <section class="sc-result hidden" id="sc-result"></section>
+    </div>
+  </div>
+  </div>
+
+  <!-- reserved ad slot (inert until body.ads-enabled) -->
+  <div class="ad-slot ad-slot-rect" data-ad="council-result"><div class="ad-slot-fill"></div></div>
+
+  <p class="game-backlink"><a href="../trivia/index.html">&larr; All the games of the realm</a></p>
+</div>
+
+<script src="../js/streak.js"></script>
+<script src="../js/daily-realm.js"></script>
+<script src="councils-data.js"></script>
+<script src="smallcouncil-engine.js"></script>
+<script src="../js/realm-nav.js" data-root="../"></script>
+</body>
+</html>

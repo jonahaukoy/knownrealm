@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The White Book — The Book of the Brothers</title>
+<link rel="preload" href="css/fonts/cinzel-400-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="css/fonts/cinzel-600-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="css/fonts/ebgaramond-400-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="stylesheet" href="css/fonts.css" />
+<link rel="stylesheet" href="css/style.css" />
+<link rel="stylesheet" href="css/whitebook.css" />
+<script>try{var t=localStorage.getItem("kwTheme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
+</head>
+<body class="wb-body">
+
+<header class="topbar wiki-topbar">
+  <a class="brand home-brand" href="whitebook.html" style="text-decoration:none;color:var(--text-light)">
+    <span class="brand-icon">&#128737;</span>
+    <span class="brand-name">THE WHITE BOOK</span>
+  </a>
+  <div style="flex:1"></div>
+  <a class="wb-topbtn" href="#contents">Contents</a>
+  <a class="wb-topbtn" href="wiki.html#cat=kingsguard">The Kingsguard in the wiki</a>
+</header>
+
+<main class="wb-main">
+
+  <div class="wb-stage">
+    <button class="wb-arrow wb-arrow-prev" id="wb-prev" title="Turn back" aria-label="Turn back">&#10094;</button>
+
+    <div class="wb-bookwrap">
+      <div class="wb-book" id="wb-book"></div>
+      <div class="wb-shadow"></div>
+    </div>
+
+    <button class="wb-arrow wb-arrow-next" id="wb-next" title="Turn the leaf" aria-label="Turn the page">&#10095;</button>
+  </div>
+
+  <div class="wb-footline" id="wb-footline"></div>
+
+</main>
+
+<footer class="wb-footer">
+  The Book of the Brothers is kept in the White Sword Tower, and every word of this rendering of it is
+  original to this site. Unofficial companion &mdash; not affiliated with, endorsed, sponsored, or approved by
+  George R.R. Martin, HBO, or Warner Bros. Discovery.
+  <a href="credits.html">Credits &amp; licenses</a>.
+</footer>
+
+<script src="js/whitebook/01-conquest.js"></script>
+<script src="js/whitebook/02-dance.js"></script>
+<script src="js/whitebook/03-late.js"></script>
+<script src="js/whitebook/04-madking.js"></script>
+<script src="js/whitebook/05-modern.js"></script>
+<script src="js/whitebook-engine.js"></script>
+<script src="js/realm-nav.js" data-root=""></script>
+</body>
+</html>

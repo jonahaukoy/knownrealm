@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Who Said It? — The Known Realm</title>
+<link rel="preload" href="../css/fonts/cinzel-400-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="../css/fonts/cinzel-600-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="../css/fonts/ebgaramond-400-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="stylesheet" href="../css/fonts.css" />
+<link rel="stylesheet" href="../css/style.css" />
+<link rel="stylesheet" href="whosaidit.css" />
+<script>try{var t=localStorage.getItem("kwTheme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
+</head>
+<body class="ws-body">
+
+<header class="topbar">
+  <a class="brand home-brand" href="../trivia/index.html" style="text-decoration:none;color:var(--text-light)">
+    <span class="brand-icon">&#128481;</span>
+    <span class="brand-name">WHO SAID IT?</span>
+  </a>
+  <div style="flex:1"></div>
+</header>
+
+<div class="ws-shell" id="ws-shell" data-art="assets/" data-phase="setup">
+
+  <!-- ===== the plain stage: choosing a format ===== -->
+  <main class="ws-plain">
+
+    <section class="ws-setup" id="ws-setup">
+      <div class="ws-kicker">A Game of Voices</div>
+      <h1>Who Said It?</h1>
+      <p class="ws-sub">A line from the Known World, and four faces who might have spoken it.
+        Every voice you name correctly is hung on the wall of the hall, and another candle is lit.
+        Name them all and the chamber burns like a pyre.</p>
+
+      <div class="ws-sagas" id="ws-sagas" role="group" aria-label="Choose a saga">
+        <button class="ws-saga active" data-saga="got">Game of Thrones</button>
+        <button class="ws-saga" data-saga="hotd">House of the Dragon</button>
+        <button class="ws-saga" data-saga="knight">Dunk &amp; Egg</button>
+      </div>
+
+      <div class="ws-fmts" id="ws-fmts">
+        <button class="ws-fmt ws-fmt-show active" data-fmt="show">
+          <span class="ws-fmt-emoji">&#127909;</span>
+          <b>The Show</b>
+          <i id="ws-count-show">&mdash;</i>
+        </button>
+        <button class="ws-fmt ws-fmt-book" data-fmt="book">
+          <span class="ws-fmt-emoji">&#128214;</span>
+          <b>The Books</b>
+          <i id="ws-count-book">&mdash;</i>
+        </button>
+      </div>
+
+      <div class="ws-diffs" id="ws-diffs">
+        <button class="ws-diff ws-diff-easy active" data-d="1"><b>Easy</b><span>The famous lines</span></button>
+        <button class="ws-diff ws-diff-hard" data-d="3"><b>Hard</b><span>Only a maester's memory</span></button>
+      </div>
+
+      <button class="ws-start" id="ws-start">Begin the examination &rarr;</button>
+    </section>
+
+    <section class="ws-gate hidden" id="ws-gate">
+      <div class="ws-kicker">Before the questions</div>
+      <h2>The Spoiler Shield</h2>
+      <p class="ws-sub">How far into the saga have you traveled? Lines from beyond your
+        furthest season or book will be barred &mdash; no fates revealed before their time.</p>
+      <div id="ws-gate-controls"></div>
+      <div class="ws-gate-count" id="ws-gate-count"></div>
+      <div class="ws-gate-actions">
+        <button class="ws-gate-back" id="ws-gate-back">&larr; Back</button>
+        <button class="ws-gate-nospoil" id="ws-gate-nospoil">I fear no spoilers &mdash; unbar everything</button>
+        <button class="ws-start" id="ws-gate-go">Raise the shield &amp; begin &rarr;</button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===== the hall: five paintings, and the wall they are played on ===== -->
+  <div class="ws-hallframe">
+  <div class="ws-hall">
+    <div class="ws-hall-art" id="ws-hall"></div>
+    <div class="ws-hall-glow"></div>
+
+    <div class="ws-wall">
+      <!-- the head and the wall of faces live outside the two screens, so the
+           faces you collected are still hanging there when the verdict comes -->
+      <div class="ws-game-head hidden" id="ws-head">
+        <button class="ws-quit" id="ws-quit">&larr; Leave</button>
+        <div class="ws-streak" id="ws-streak"></div>
+      </div>
+      <div class="ws-faces" id="ws-faces"></div>
+
+      <section class="ws-game hidden" id="ws-game">
+        <div class="ws-card" id="ws-card">
+          <div class="ws-quote" id="ws-quote"></div>
+          <div class="ws-answers" id="ws-answers"></div>
+          <div class="ws-tools">
+            <button class="ws-tool" id="ws-hint-btn">&#128161; Hint <span class="ws-tool-tag">1 per round</span></button>
+            <button class="ws-tool" id="ws-fifty-btn">&#9878;&#65039; 50/50 <span class="ws-tool-tag">1 per round</span></button>
+          </div>
+          <div class="ws-hint hidden" id="ws-hint"></div>
+          <div class="ws-context hidden" id="ws-context"></div>
+          <button class="ws-next hidden" id="ws-next">Next line &rarr;</button>
+        </div>
+      </section>
+
+      <section class="ws-result hidden" id="ws-result"></section>
+    </div>
+  </div>
+  </div>
+
+  <p class="game-backlink"><a href="../trivia/index.html">&larr; All the games of the realm</a></p>
+</div>
+
+<script src="../js/people.js"></script>
+<script src="portraits.js"></script>
+<script src="quotes-got.js"></script>
+<script src="quotes-hotd.js"></script>
+<script src="quotes-knight.js"></script>
+<script src="whosaidit-engine.js"></script>
+<script src="../js/realm-nav.js" data-root="../"></script>
+</body>
+</html>

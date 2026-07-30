@@ -1,0 +1,4 @@
+# Ship every file exactly as it sits on disk.
+# The data files are BOM-less UTF-8 full of em-dashes; no line-ending or
+# encoding conversion should ever be applied to them on the way in or out.
+* -text

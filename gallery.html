@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The Gallery — Art of the Known World</title>
+<link rel="preload" href="css/fonts/cinzel-400-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="css/fonts/cinzel-600-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="css/fonts/ebgaramond-400-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="stylesheet" href="css/fonts.css" />
+<link rel="stylesheet" href="css/style.css" />
+<style>
+  html { height: auto; overflow-y: auto; }
+  .gallery-body {
+    display: flex; flex-direction: column; min-height: 100vh; height: auto; overflow: visible;
+    background:
+      radial-gradient(1200px 620px at 50% -8%, rgba(201,161,90,0.09), transparent 62%),
+      #14100d;
+    color: #e8dfcc;
+  }
+  .gallery-main { flex: 1; max-width: 1180px; width: 100%; margin: 0 auto; padding: 30px 22px 90px; box-sizing: border-box; }
+  .gal-hero { text-align: center; padding: 12px 0 6px; }
+  .gal-hero h1 { font-family: var(--serif-display); font-size: 36px; letter-spacing: 2px; color: #f0e6d2; margin: 0 0 10px; text-shadow: 0 2px 18px rgba(0,0,0,0.5); }
+  .gal-hero p { max-width: 620px; margin: 0 auto; opacity: 0.82; line-height: 1.65; }
+  .gal-flourish { display: flex; align-items: center; justify-content: center; gap: 14px; color: var(--gold); font-size: 13px; margin: 8px auto 4px; max-width: 320px; }
+  .gal-flourish::before, .gal-flourish::after { content: ""; height: 1px; flex: 1; background: linear-gradient(90deg, transparent, rgba(201,161,90,0.55)); }
+  .gal-flourish::after { transform: scaleX(-1); }
+  .gal-h2 { font-family: var(--serif-display); font-size: 15px; letter-spacing: 1.6px; text-transform: uppercase; color: var(--gold);
+    margin: 42px 0 4px; display: flex; align-items: center; gap: 12px; }
+  .gal-h2::after { content: ""; height: 1px; flex: 1; background: linear-gradient(90deg, rgba(201,161,90,0.42), transparent); }
+  .gal-h2-note { font-family: var(--serif-body); font-style: italic; font-size: 13px; letter-spacing: 0; text-transform: none; color: #b7a888; margin: 0 0 18px; }
+
+  /* ---- the justified rows ----
+     Each row is a flexbox; every picture carries flex-grow set to its own aspect
+     ratio on a zero basis, so the widths come out proportional to the shapes and
+     every picture in the row ends up exactly the same height. The row always
+     fills the line, so no picture is ever left standing on its own. */
+  .gal-row { display: flex; gap: 14px; margin: 0 0 14px; align-items: stretch; }
+  .gal-row > * { flex-basis: 0; min-width: 0; }
+
+  .gal-scene { display: flex; flex-direction: column;
+    border: 1px solid rgba(201,161,90,0.3); border-radius: 12px; overflow: hidden; background: #0c0a07;
+    transition: transform .16s ease, border-color .2s ease, box-shadow .2s ease; margin: 0; }
+  .gal-scene:hover { transform: translateY(-3px); border-color: var(--gold-bright); box-shadow: 0 14px 30px rgba(0,0,0,0.45); }
+  .gal-scene img { width: 100%; height: auto; display: block; object-fit: cover; }
+  .gal-scene figcaption { padding: 9px 12px; font-family: var(--serif-display); font-size: 13px;
+    color: #f0e6d2; line-height: 1.3; }
+
+  .gal-sigil { display: flex; flex-direction: column; align-items: center; gap: 7px; color: #e8dfcc; }
+  .gal-sigil-frame { width: 100%; border-radius: 10px; background: #f4ecda; border: 1px solid var(--gold-dim);
+    padding: 9px; box-sizing: border-box; display: flex; align-items: center; justify-content: center;
+    transition: transform .16s ease, box-shadow .2s ease; }
+  .gal-sigil:hover .gal-sigil-frame { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(0,0,0,0.4); }
+  .gal-sigil-frame img { max-width: 100%; max-height: 100%; object-fit: contain; }
+  .gal-sigil-label { font-size: 11.5px; text-align: center; opacity: 0.82; line-height: 1.35; }
+
+  /* on a phone a justified row would squeeze six banners into nothing, so the
+     rows wrap and each piece keeps a usable minimum width */
+  @media (max-width: 620px) {
+    .gal-row { flex-wrap: wrap; }
+    .gal-row-scene > * { flex-basis: 100%; }
+    .gal-row-sigil > * { flex-basis: 28%; }
+  }
+
+  .gal-count { font-size: 12px; color: var(--gold); letter-spacing: 1px; }
+  .gal-empty { font-style: italic; opacity: 0.6; }
+  .gallery-footer { margin-top: 40px; padding: 18px 24px; border-top: 1px solid #3a2f22; text-align: center; font-size: 11.5px; opacity: 0.55; line-height: 1.6; }
+  .gallery-footer a { color: var(--gold); }
+
+  /* every picture in the gallery is clickable to open the lightbox */
+  .gal-scene, .gal-sigil-frame { cursor: zoom-in; }
+
+  /* ---- lightbox ---- a full-screen viewer opened by clicking any picture.
+     The arrows are fixed to the viewport edges so they never shift as pictures
+     of different shapes pass through the frame. */
+  .lb { position: fixed; inset: 0; z-index: 400; display: none;
+    background: rgba(8, 6, 4, 0.92); backdrop-filter: blur(3px);
+    opacity: 0; transition: opacity .18s ease; }
+  .lb.open { display: block; opacity: 1; }
+  .lb-stage { position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; padding: 64px 84px; box-sizing: border-box; }
+  .lb-figure { max-width: 100%; max-height: 100%; display: flex; flex-direction: column;
+    align-items: center; gap: 14px; pointer-events: none; }
+  .lb-figure img { max-width: 100%; max-height: 78vh; object-fit: contain; display: block;
+    border-radius: 8px; box-shadow: 0 24px 70px rgba(0,0,0,0.7); background: #0c0a07;
+    pointer-events: auto; }
+  .lb-figure.is-sigil img { background: #f4ecda; padding: 22px; box-sizing: border-box; }
+  .lb-cap { font-family: var(--serif-display); font-size: 15px; letter-spacing: 0.04em;
+    color: #f0e6d2; text-align: center; text-shadow: 0 2px 12px rgba(0,0,0,0.6); pointer-events: auto; }
+  .lb-cap .lb-count { display: block; margin-top: 5px; font-size: 11.5px; letter-spacing: 1.4px;
+    color: var(--gold); opacity: 0.85; }
+  .lb-btn { position: fixed; z-index: 401; border: 1px solid rgba(201,161,90,0.4);
+    background: rgba(20,16,11,0.72); color: var(--gold-bright); cursor: pointer;
+    display: flex; align-items: center; justify-content: center; transition: background .15s, border-color .15s, transform .15s; }
+  .lb-btn:hover { background: rgba(201,161,90,0.2); border-color: var(--gold); }
+  .lb-close { top: 18px; right: 20px; width: 44px; height: 44px; border-radius: 8px; font-size: 26px; line-height: 1; }
+  .lb-nav { top: 50%; transform: translateY(-50%); width: 52px; height: 74px; border-radius: 10px; font-size: 30px; }
+  .lb-nav:hover { transform: translateY(-50%) scale(1.06); }
+  .lb-prev { left: 18px; }
+  .lb-next { right: 18px; }
+  .lb-nav[hidden] { display: none; }
+  @media (max-width: 620px) {
+    .lb-stage { padding: 58px 12px; }
+    .lb-nav { width: 42px; height: 60px; font-size: 24px; }
+    .lb-prev { left: 6px; } .lb-next { right: 6px; }
+  }
+</style>
+<script>try{var t=localStorage.getItem("kwTheme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
+</head>
+<body class="gallery-body">
+
+<header class="topbar wiki-topbar">
+  <a class="brand home-brand" href="gallery.html" style="text-decoration:none;color:var(--text-light)">
+    <span class="brand-icon">&#127912;</span>
+    <span class="brand-name">THE GALLERY</span>
+  </a>
+  <div style="flex:1"></div>
+</header>
+
+<main class="gallery-main" id="gallery-main">
+  <div class="gal-hero">
+    <div class="gal-flourish">&#10022;</div>
+    <h1>The Gallery</h1>
+    <p>Every banner, sigil and painted scene of the Known World, gathered in one hall.
+      New works join here as they are made.</p>
+  </div>
+  <div id="gallery-body"></div>
+</main>
+
+<footer class="gallery-footer">
+  The painted scenes and maps here are the original work of Jon-Anders Hauk&oslash;y &mdash;
+  &copy; Jon-Anders Hauk&oslash;y, all rights reserved. A few house sigils are community-made under
+  CC&nbsp;BY-SA and are being replaced with original heraldry. &nbsp;<a href="credits.html">Credits &amp; licenses</a>.
+</footer>
+
+<div class="lb" id="lightbox" aria-hidden="true">
+  <button type="button" class="lb-btn lb-close" id="lb-close" aria-label="Close (Esc)">&times;</button>
+  <button type="button" class="lb-btn lb-nav lb-prev" id="lb-prev" aria-label="Previous (&larr;)">&#8249;</button>
+  <button type="button" class="lb-btn lb-nav lb-next" id="lb-next" aria-label="Next (&rarr;)">&#8250;</button>
+  <div class="lb-stage" id="lb-stage">
+    <figure class="lb-figure" id="lb-figure">
+      <img id="lb-img" src="" alt="" />
+      <figcaption class="lb-cap"><span id="lb-label"></span><span class="lb-count" id="lb-count"></span></figcaption>
+    </figure>
+  </div>
+</div>
+
+<script src="js/sigil-art.js"></script>
+<script src="js/art-manifest.js"></script>
+<script>
+(function () {
+  const M = window.ART_MANIFEST || { scenes: [], swords: [], houseSigils: [], minorBanners: [] };
+  const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+  /* ------------------------------------------------------------------------
+     A JUSTIFIED GALLERY.
+
+     Every row is packed to the full width and every picture in a row shares one
+     height, so nothing is ever left standing alone and nothing is stretched or
+     cropped. A tall picture is narrow at a shared height, so several sit side by
+     side; a wide one is broad, so two fill a row. Like shapes fall together
+     naturally because the packer walks them in order.
+
+     It is done in pure CSS: a row is a flexbox, each picture gets
+     `flex-grow: <its aspect ratio>` on a zero basis, so widths come out
+     proportional to the ratios and the heights all match. No measuring, no
+     resize handler — it re-justifies itself at any width.
+     ------------------------------------------------------------------------ */
+
+  const ratio = (a) => (a && a.w && a.h) ? a.w / a.h : 1;
+
+  /* how much total width, in units of row-height, a row should hold. Bigger =
+     smaller pictures, more per row. */
+  const TARGET = { scene: 3.6, sigil: 6.4 };
+  const MIN_PER_ROW = 2;
+
+  function pack(list, kind) {
+    const target = TARGET[kind];
+    const rows = [];
+    let row = [], sum = 0;
+    (list || []).forEach((a) => {
+      const r = ratio(a);
+      row.push(a);
+      sum += r;
+      if (sum >= target && row.length >= MIN_PER_ROW) { rows.push(row); row = []; sum = 0; }
+    });
+    if (row.length) {
+      /* a leftover of one would stand alone — give it the previous row instead */
+      if (row.length < MIN_PER_ROW && rows.length) rows[rows.length - 1] = rows[rows.length - 1].concat(row);
+      else rows.push(row);
+    }
+    return rows;
+  }
+
+  const sceneFig = (a) => `
+    <figure class="gal-scene" style="flex-grow:${ratio(a).toFixed(4)}">
+      <img src="${esc(a.src)}" alt="${esc(a.label)}" loading="lazy"
+           style="aspect-ratio:${a.w || 4} / ${a.h || 3}"/>
+      <figcaption>${esc(a.label)}</figcaption>
+    </figure>`;
+
+  const sigilFig = (a) => `
+    <div class="gal-sigil" style="flex-grow:${ratio(a).toFixed(4)}">
+      <span class="gal-sigil-frame" style="aspect-ratio:${a.w || 1} / ${a.h || 1}">
+        <img src="${esc(a.src)}" alt="${esc(a.label)}" loading="lazy"/>
+      </span>
+      <span class="gal-sigil-label">${esc(a.label)}</span>
+    </div>`;
+
+  function render(list, kind) {
+    const rows = pack(list, kind);
+    if (!rows.length) return `<p class="gal-empty">Nothing here yet.</p>`;
+    const fig = kind === "sigil" ? sigilFig : sceneFig;
+    const cls = kind === "sigil" ? "gal-row gal-row-sigil" : "gal-row gal-row-scene";
+    return rows.map((r) => `<div class="${cls}">${r.map(fig).join("")}</div>`).join("");
+  }
+
+  const n = (x) => (x || []).length;
+  document.getElementById("gallery-body").innerHTML =
+    `<h2 class="gal-h2">Scenes of the Realm <span class="gal-count">${n(M.scenes)}</span></h2>
+     <p class="gal-h2-note">Painted moments and places &mdash; many of them hang on their own pages across the
+       wikis, the maps and the chronicle.</p>
+     ${render(M.scenes, "scene")}
+
+     <h2 class="gal-h2">Valyrian Steel <span class="gal-count">${n(M.swords)}</span></h2>
+     <p class="gal-h2-note">The named blades that cannot be replaced &mdash; every sword of dragonsteel in the
+       chronicle, drawn. Each hangs on its own page in the Valyrian Steel collection.</p>
+     ${render(M.swords, "scene")}
+
+     <h2 class="gal-h2">House Banners <span class="gal-count">${n(M.houseSigils)}</span></h2>
+     <p class="gal-h2-note">The arms of the great, landed and lesser houses, newly drawn. Every one of these has
+       had its background cut away, so the banner stands on the page rather than in a white box.</p>
+     ${render(M.houseSigils, "sigil")}
+
+     <h2 class="gal-h2">Banners of the Lesser Seats <span class="gal-count">${n(M.minorBanners)}</span></h2>
+     <p class="gal-h2-note">The heraldry of the smaller keeps and holdfasts, as flown on the maps.</p>
+     ${render(M.minorBanners, "sigil")}`;
+})();
+</script>
+<script>
+/* ---------------------------------------------------------------------------
+   The lightbox. Every picture in the gallery — scene, sword or sigil — becomes
+   one entry in a flat, ordered list; clicking any of them opens the viewer at
+   that spot. The arrows step through the whole gallery in the order it is laid
+   out, wrapping around at the ends, and stay pinned to the screen edges so they
+   never jump as the picture in the frame changes shape. Esc / arrow keys work,
+   the close button and any click outside the picture dismiss it.
+   --------------------------------------------------------------------------- */
+(function () {
+  const body = document.getElementById("gallery-body");
+  const lb = document.getElementById("lightbox");
+  const img = document.getElementById("lb-img");
+  const label = document.getElementById("lb-label");
+  const count = document.getElementById("lb-count");
+  const figure = document.getElementById("lb-figure");
+  const prevBtn = document.getElementById("lb-prev");
+  const nextBtn = document.getElementById("lb-next");
+  if (!body || !lb) return;
+
+  /* build the ordered list straight from the rendered DOM, so it always matches
+     what is on the page (scenes, then swords, then the two banner sections) */
+  const items = Array.prototype.map.call(body.querySelectorAll("img"), (el) => ({
+    src: el.getAttribute("src"),
+    label: el.getAttribute("alt") || "",
+    sigil: !!el.closest(".gal-sigil"),
+  }));
+  if (!items.length) return;
+
+  let i = 0;
+  const single = items.length < 2;
+  prevBtn.hidden = nextBtn.hidden = single;
+
+  function show(n) {
+    i = (n + items.length) % items.length;
+    const it = items[i];
+    img.src = it.src;
+    img.alt = it.label;
+    label.textContent = it.label;
+    count.textContent = single ? "" : (i + 1) + " / " + items.length;
+    figure.classList.toggle("is-sigil", it.sigil);
+  }
+  function open(n) {
+    show(n);
+    lb.classList.add("open");
+    lb.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+  }
+  function close() {
+    lb.classList.remove("open");
+    lb.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+  }
+  const next = () => show(i + 1);
+  const prev = () => show(i - 1);
+
+  /* open by clicking any picture */
+  body.addEventListener("click", (e) => {
+    const el = e.target.closest && e.target.closest(".gal-scene, .gal-sigil");
+    if (!el) return;
+    const im = el.querySelector("img");
+    if (!im) return;
+    const idx = items.findIndex((x) => x.src === im.getAttribute("src") && x.label === (im.getAttribute("alt") || ""));
+    open(idx < 0 ? 0 : idx);
+  });
+
+  nextBtn.addEventListener("click", (e) => { e.stopPropagation(); next(); });
+  prevBtn.addEventListener("click", (e) => { e.stopPropagation(); prev(); });
+  document.getElementById("lb-close").addEventListener("click", (e) => { e.stopPropagation(); close(); });
+
+  /* a click anywhere that is not the picture itself closes the viewer */
+  lb.addEventListener("click", (e) => { if (e.target !== img) close(); });
+
+  document.addEventListener("keydown", (e) => {
+    if (!lb.classList.contains("open")) return;
+    if (e.key === "Escape") { close(); }
+    else if (e.key === "ArrowRight" && !single) { next(); }
+    else if (e.key === "ArrowLeft" && !single) { prev(); }
+  });
+})();
+</script>
+<script src="js/realm-nav.js" data-root=""></script>
+</body>
+</html>

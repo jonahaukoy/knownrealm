@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sigil Match — The Known Realm</title>
+<link rel="preload" href="../css/fonts/cinzel-400-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="../css/fonts/cinzel-600-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="../css/fonts/ebgaramond-400-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="stylesheet" href="../css/fonts.css" />
+<link rel="stylesheet" href="../css/style.css" />
+<link rel="stylesheet" href="sigilmatch.css" />
+<script>try{var t=localStorage.getItem("kwTheme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
+</head>
+<body class="sm-body">
+
+<header class="topbar">
+  <a class="brand home-brand" href="../trivia/index.html" style="text-decoration:none;color:var(--text-light)">
+    <span class="brand-icon">&#127991;</span>
+    <span class="brand-name">SIGIL MATCH</span>
+  </a>
+  <div style="flex:1"></div>
+</header>
+
+<div class="sm-shell" id="sm-shell" data-art="assets/" data-phase="setup">
+
+  <!-- ===== the plain stage: choosing a difficulty ===== -->
+  <main class="sm-plain">
+
+    <section class="sm-setup" id="sm-setup">
+      <div class="sm-kicker">A Game of Heraldry</div>
+      <h1>Sigil Match</h1>
+      <p class="sm-sub">Pair every house to its arms and words &mdash; great houses down to the smallest
+        marcher lords. Every banner you name correctly is hung on the wall, hook by hook, and the room
+        wakes up around you: near dark at first, and warm with candlelight by the end.</p>
+
+      <div class="sm-diffs" id="sm-diffs">
+        <button class="sm-diff sm-diff-easy active" data-d="1"><b>Easy</b><span>The Great Houses</span></button>
+        <button class="sm-diff sm-diff-hard" data-d="3"><b>Hard</b><span>Lords and bannermen</span></button>
+        <button class="sm-diff sm-diff-mixed" data-d="0"><b>Mixed</b><span>The full heraldry</span></button>
+      </div>
+
+      <button class="sm-start" id="sm-start">Enter the hall &rarr;</button>
+    </section>
+
+  </main>
+
+  <!-- ===== the board: the wall of hooks, where the banners you earn are hung ===== -->
+  <div class="sm-boardframe">
+    <div class="sm-hall">
+      <div class="sm-hall-art" id="sm-hall"></div>
+      <div class="sm-hall-glow"></div>
+      <!-- ten hooks: two planks of five, filled left-to-right, top then bottom -->
+      <div class="sm-banners" id="sm-banners"></div>
+    </div>
+  </div>
+
+  <!-- ===== the question, asked below the wall ===== -->
+  <div class="sm-floor">
+    <section class="sm-game hidden" id="sm-game">
+      <div class="sm-game-head">
+        <button class="sm-quit" id="sm-quit">&larr; Leave</button>
+        <div class="sm-streak" id="sm-streak"></div>
+      </div>
+      <div class="sm-card" id="sm-card">
+        <div id="sm-prompt-box"></div>
+        <div id="sm-answers-box"></div>
+        <div class="sm-context hidden" id="sm-context"></div>
+        <button class="sm-next hidden" id="sm-next">Next banner &rarr;</button>
+      </div>
+    </section>
+
+    <section class="sm-result hidden" id="sm-result"></section>
+  </div>
+
+  <p class="game-backlink"><a href="../trivia/index.html">&larr; All the games of the realm</a></p>
+</div>
+
+<script src="sigils-data.js"></script>
+<script src="sigilmatch-engine.js"></script>
+<script src="../js/realm-nav.js" data-root="../"></script>
+</body>
+</html>

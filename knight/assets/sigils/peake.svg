@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 116">
+  <!-- House Peake of Starpike: three black castles on orange -->
+  <defs>
+    <clipPath id="shield"><path d="M8 6 H92 V60 C92 92 50 112 50 112 C50 112 8 92 8 60 Z"/></clipPath>
+    <g id="pk-castle">
+      <path d="M-9 10 V-4 H-6 V-8 H-3 V-4 H-1.5 V-8 H1.5 V-4 H3 V-8 H6 V-4 H9 V10 Z" fill="#1b1b1b"/>
+      <rect x="-2" y="2" width="4" height="8" fill="#c9702e"/>
+    </g>
+  </defs>
+  <g clip-path="url(#shield)">
+    <rect width="100" height="116" fill="#c9702e"/>
+    <use href="#pk-castle" transform="translate(30,32) scale(1.5)"/>
+    <use href="#pk-castle" transform="translate(70,32) scale(1.5)"/>
+    <use href="#pk-castle" transform="translate(50,74) scale(1.5)"/>
+  </g>
+  <path d="M8 6 H92 V60 C92 92 50 112 50 112 C50 112 8 92 8 60 Z" fill="none" stroke="#2b2015" stroke-width="4"/>
+</svg>

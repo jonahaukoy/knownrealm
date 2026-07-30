@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Blur — The Known Realm</title>
+<link rel="preload" href="../css/fonts/cinzel-400-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="../css/fonts/cinzel-600-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="../css/fonts/ebgaramond-400-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="stylesheet" href="../css/fonts.css" />
+<link rel="stylesheet" href="../css/style.css" />
+<link rel="stylesheet" href="blur.css" />
+<script>try{var t=localStorage.getItem("kwTheme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
+</head>
+<body class="bl-body">
+
+<header class="topbar">
+  <a class="brand home-brand" href="../trivia/index.html" style="text-decoration:none;color:var(--text-light)">
+    <span class="brand-icon">&#128374;</span>
+    <span class="brand-name">BLUR</span>
+  </a>
+  <div style="flex:1"></div>
+</header>
+
+<div class="bl-shell" id="bl-shell" data-phase="setup">
+
+  <!-- ===== the plain stage: choosing what to look for ===== -->
+  <main class="bl-plain">
+
+    <section class="bl-setup" id="bl-setup">
+      <div class="bl-kicker">A Glass Candle</div>
+      <h1>Blur</h1>
+      <p class="bl-sub">The maesters of the Citadel keep candles of black Valyrian glass, and swear
+        that a man who can light one may see things happening far away. The vision comes to you a
+        fragment at a time, hidden behind a wall of dark. Reveal more of it to be sure &mdash; but the
+        sooner you can name what you are looking at, the more it is worth. And name wrongly, and the
+        vision is lost.</p>
+
+      <div class="bl-cats" id="bl-cats">
+        <button class="bl-cat active" data-cat="all"><span>&#128302;</span><b>Everything</b><i id="bl-n-all">&mdash;</i></button>
+        <button class="bl-cat" data-cat="faces"><span>&#128100;</span><b>Faces</b><i id="bl-n-faces">&mdash;</i></button>
+        <button class="bl-cat" data-cat="banners"><span>&#127988;</span><b>Banners</b><i id="bl-n-banners">&mdash;</i></button>
+        <button class="bl-cat" data-cat="places"><span>&#127984;</span><b>Places</b><i id="bl-n-places">&mdash;</i></button>
+        <button class="bl-cat" data-cat="beasts"><span>&#128058;</span><b>Beasts</b><i id="bl-n-beasts">&mdash;</i></button>
+      </div>
+
+      <button class="bl-start" id="bl-start">Light the candle &rarr;</button>
+
+      <p class="bl-scoring">Named at first sight <b>5</b>, then <b>4</b> &middot; <b>3</b> &middot;
+        <b>2</b> &middot; <b>1</b> as you reveal more. A wrong guess ends the vision at <b>nothing</b> &mdash;
+        so reveal until you are sure.</p>
+    </section>
+
+  </main>
+
+  <!-- ===== the chamber ===== -->
+  <div class="bl-chamber" id="bl-chamber">
+    <div class="bl-dark"></div>
+
+    <section class="bl-game hidden" id="bl-game">
+      <div class="bl-head">
+        <button class="bl-quit" id="bl-quit">&larr; Snuff it</button>
+        <div class="bl-progress" id="bl-progress"></div>
+        <div class="bl-score" id="bl-score"></div>
+      </div>
+
+      <div class="bl-vision-wrap">
+        <div class="bl-vision" id="bl-vision"><img id="bl-img" alt="" /><div class="bl-tiles" id="bl-tiles"></div></div>
+        <div class="bl-candle" aria-hidden="true">
+          <div class="bl-flame"></div>
+          <div class="bl-glass"></div>
+          <div class="bl-pool"></div>
+        </div>
+      </div>
+
+      <div class="bl-steps" id="bl-steps"></div>
+      <div class="bl-answers" id="bl-answers"></div>
+
+      <div class="bl-tools">
+        <button class="bl-tool" id="bl-sharpen">&#128064; Reveal more <span class="bl-tool-tag">&minus;1 point</span></button>
+        <button class="bl-tool" id="bl-narrow">&#9878;&#65039; Narrow the field <span class="bl-tool-tag">removes two &middot; &minus;1</span></button>
+      </div>
+
+      <div class="bl-verdict hidden" id="bl-verdict"></div>
+      <button class="bl-next hidden" id="bl-next">The next vision &rarr;</button>
+    </section>
+
+    <section class="bl-result hidden" id="bl-result"></section>
+  </div>
+
+  <p class="game-backlink"><a href="../trivia/index.html">&larr; All the games of the realm</a></p>
+</div>
+
+<script src="../js/people.js"></script>
+<script src="../js/art-manifest.js"></script>
+<script src="../sigilmatch/sigils-data.js"></script>
+<script src="blur-engine.js"></script>
+<script src="../js/realm-nav.js" data-root="../"></script>
+</body>
+</html>

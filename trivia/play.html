@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Trivia of the Realm — The Known Realm</title>
+<link rel="preload" href="../css/fonts/cinzel-400-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="../css/fonts/cinzel-600-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="../css/fonts/ebgaramond-400-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="stylesheet" href="../css/fonts.css" />
+<link rel="stylesheet" href="../css/style.css" />
+<link rel="stylesheet" href="trivia.css" />
+<script>try{var t=localStorage.getItem("kwTheme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
+</head>
+<body class="trivia-body">
+
+<header class="topbar">
+  <a class="brand home-brand" href="index.html" style="text-decoration:none;color:var(--text-light)">
+    <span class="brand-icon">&#10067;</span>
+    <span class="brand-name">TRIVIA OF THE REALM</span>
+  </a>
+  <div style="flex:1"></div>
+</header>
+
+<main class="tv-stage">
+
+  <!-- ============ setup ============ -->
+  <section class="tv-setup" id="tv-setup">
+    <div class="tv-kicker">The Maester's Examination</div>
+    <h1>Trivia of the Realm</h1>
+    <p class="tv-sub">Ten questions drawn fresh from a deep pool every time — no two examinations alike.
+      Choose your saga and how much pain you can bear.</p>
+
+    <div class="tv-cats" id="tv-cats">
+      <button class="tv-cat tv-cat-got active" data-cat="got">
+        <span class="tv-cat-glow"></span>
+        <img src="../assets/sigils/stark.svg" alt="" />
+        <b>Game of Thrones</b>
+        <i id="tv-count-got">&mdash;</i>
+      </button>
+      <button class="tv-cat tv-cat-hotd" data-cat="hotd">
+        <span class="tv-cat-glow"></span>
+        <img src="../assets/sigils/targaryen.svg" alt="" />
+        <b>House of the Dragon</b>
+        <i id="tv-count-hotd">&mdash;</i>
+      </button>
+      <button class="tv-cat tv-cat-knight" data-cat="knight">
+        <span class="tv-cat-glow"></span>
+        <img src="../knight/assets/sigils/ashford.svg" alt="" />
+        <b>A Knight of the Seven Kingdoms</b>
+        <i id="tv-count-knight">&mdash;</i>
+      </button>
+      <button class="tv-cat tv-cat-all" data-cat="all">
+        <span class="tv-cat-glow"></span>
+        <span class="tv-cat-emoji">&#128009;</span>
+        <b>All the Realm</b>
+        <i id="tv-count-all">&mdash;</i>
+      </button>
+    </div>
+
+    <div class="tv-diffs" id="tv-diffs">
+      <button class="tv-diff tv-diff-easy active" data-d="1"><b>Easy</b><span>A summer child's questions</span></button>
+      <button class="tv-diff tv-diff-hard" data-d="3"><b>Hard</b><span>Maester's chain required</span></button>
+      <button class="tv-diff tv-diff-mixed" data-d="0"><b>Mixed</b><span>The full gauntlet</span></button>
+    </div>
+
+    <button class="tv-start" id="tv-start">Begin the examination &rarr;</button>
+  </section>
+
+  <!-- ============ spoiler shield ============ -->
+  <section class="tv-gate hidden" id="tv-gate">
+    <div class="tv-kicker">Before the questions</div>
+    <h2>The Spoiler Shield</h2>
+    <p class="tv-sub">How deep into the saga have you traveled? Questions from beyond your
+      furthest season or book will be barred from the examination &mdash; no fates revealed before their time.</p>
+    <div id="tv-gate-controls"></div>
+    <div class="tv-gate-count" id="tv-gate-count"></div>
+    <div class="tv-gate-actions">
+      <button class="tv-gate-back" id="tv-gate-back">&larr; Back</button>
+      <button class="tv-gate-nospoil" id="tv-gate-nospoil">I fear no spoilers &mdash; unbar everything</button>
+      <button class="tv-start" id="tv-gate-go">Raise the shield &amp; begin &rarr;</button>
+    </div>
+  </section>
+
+  <!-- ============ game ============ -->
+  <section class="tv-game hidden" id="tv-game">
+    <div class="tv-game-head">
+      <button class="tv-quit" id="tv-quit">&larr; Give up</button>
+      <div class="tv-dots" id="tv-dots"></div>
+      <div class="tv-streak" id="tv-streak"></div>
+    </div>
+    <div class="tv-card" id="tv-card">
+      <div class="tv-qimg hidden" id="tv-qimg"><img alt="" /><span class="tv-qimg-credit" id="tv-qimg-credit"></span></div>
+      <div class="tv-q" id="tv-q"></div>
+      <div class="tv-answers" id="tv-answers"></div>
+      <div class="tv-explain hidden" id="tv-explain"></div>
+      <button class="tv-next hidden" id="tv-next">Next question &rarr;</button>
+    </div>
+  </section>
+
+  <!-- ============ results ============ -->
+  <section class="tv-result hidden" id="tv-result"></section>
+
+  <p class="game-backlink"><a href="index.html">&larr; All the games of the realm</a></p>
+</main>
+
+<script src="questions-got.js"></script>
+<script src="questions-hotd.js"></script>
+<script src="questions-knight.js"></script>
+<script src="trivia-engine.js"></script>
+<script src="../js/realm-nav.js" data-root="../"></script>
+</body>
+</html>

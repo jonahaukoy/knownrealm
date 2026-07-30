@@ -1,0 +1,420 @@
+/* THE KNOWN WORLD — home page, on top of css/style.css */
+
+/* the base stylesheet pins html/body to a fixed, non-scrolling app viewport
+   (right for the map, wrong for a long page) — undo that here */
+html { height: auto; overflow-y: auto; }
+.home-body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  height: auto;
+  overflow: visible;
+  background: #14100d;
+  color: #e8dfcc;
+}
+
+/* the base sheet only styles the map's #search-input — style ours to match,
+   so the browser's default white input never shows through */
+#home-search {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-light);
+  font-family: var(--serif-body);
+  font-style: italic;
+  font-size: 14px;
+  width: 100%;
+}
+#home-search::placeholder { color: var(--text-muted); }
+
+/* ---------------- top bar ---------------- */
+.home-topbar { position: sticky; top: 0; }
+.home-brand { text-decoration: none; color: var(--text-light); }
+.home-brand .brand-name { font-size: 16px; }
+.home-brand:hover .brand-name { color: var(--gold-bright); }
+
+.home-nav {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-left: 18px;
+  flex: 1;
+}
+.home-nav a {
+  font-family: var(--serif-display);
+  font-size: 12.5px;
+  letter-spacing: 1px;
+  color: #cbbfa5;
+  text-decoration: none;
+  padding: 7px 11px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+.home-nav a:hover {
+  color: var(--gold-bright);
+  background: rgba(201, 161, 90, 0.1);
+  border-color: rgba(201, 161, 90, 0.4);
+}
+.home-search-wrap { min-width: 230px; }
+
+/* ---------------- hero ---------------- */
+.home-hero {
+  position: relative;
+  padding: 96px 24px 90px;
+  background:
+    linear-gradient(180deg, rgba(20, 16, 13, 0.82), rgba(20, 16, 13, 0.66) 55%, #14100d 100%),
+    url("assets/ASOIAF_map.jpg") center 30% / cover no-repeat;
+  border-bottom: 1px solid #3a2f22;
+  text-align: center;
+}
+.home-hero-inner { max-width: 780px; margin: 0 auto; }
+.home-hero-kicker {
+  font-family: var(--serif-display);
+  font-size: 12px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.home-hero h1 {
+  font-family: var(--serif-display);
+  font-size: 54px;
+  font-weight: 600;
+  letter-spacing: 4px;
+  margin: 14px 0 16px;
+  color: #f0e6d2;
+  text-shadow: 0 3px 18px rgba(0, 0, 0, 0.8);
+}
+.home-hero-sub {
+  font-size: 16.5px;
+  line-height: 1.65;
+  color: #d9cdb4;
+  margin: 0 auto 30px;
+  max-width: 640px;
+}
+.home-hero-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+.home-cta {
+  font-family: var(--serif-display);
+  font-size: 14px;
+  letter-spacing: 1.5px;
+  text-decoration: none;
+  padding: 13px 30px;
+  border-radius: 8px;
+  background: var(--gold);
+  color: #241c12;
+  border: 1px solid var(--gold);
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+.home-cta:hover { background: var(--gold-bright); box-shadow: 0 0 22px rgba(201, 161, 90, 0.4); }
+.home-cta-ghost { background: transparent; color: var(--gold); }
+.home-cta-ghost:hover { background: rgba(201, 161, 90, 0.15); color: var(--gold-bright); }
+
+/* ---------------- sections ---------------- */
+.home-section { max-width: 1080px; margin: 0 auto; padding: 54px 24px 10px; width: 100%; box-sizing: border-box; }
+.home-section-title {
+  font-family: var(--serif-display);
+  font-size: 22px;
+  letter-spacing: 2px;
+  color: #f0e6d2;
+  margin: 0 0 26px;
+  text-align: center;
+}
+.home-section-title::after {
+  content: "";
+  display: block;
+  width: 70px;
+  height: 2px;
+  margin: 12px auto 0;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+
+/* ---------------- portal cards ---------------- */
+.home-portals { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; }
+.home-portal {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 26px 22px 20px;
+  border-radius: 12px;
+  text-decoration: none;
+  color: #e8dfcc;
+  background: linear-gradient(180deg, rgba(240, 230, 210, 0.055), rgba(240, 230, 210, 0.02));
+  border: 1px solid rgba(201, 161, 90, 0.32);
+  transition: transform 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.home-portal:hover { transform: translateY(-4px); border-color: var(--gold-bright); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); }
+.home-portal-medal {
+  width: 62px; height: 62px;
+  border-radius: 50%;
+  background: #f4ecda;
+  border: 2px solid var(--gold);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.45);
+}
+.home-portal-medal img { width: 74%; height: 74%; object-fit: contain; }
+.home-portal-emoji { font-size: 30px; background: #2a2118; border-color: var(--gold-dim); }
+.home-portal-title { font-family: var(--serif-display); font-size: 17px; color: #f0e6d2; letter-spacing: 0.5px; }
+.home-portal-sub { font-size: 13.5px; line-height: 1.55; opacity: 0.78; flex: 1; }
+.home-portal-go { font-family: var(--serif-display); font-size: 11.5px; letter-spacing: 1.5px; color: var(--gold); text-transform: uppercase; }
+.home-portal:hover .home-portal-go { color: var(--gold-bright); }
+.home-portal { cursor: pointer; }
+.home-portal-links { display: flex; flex-wrap: wrap; gap: 6px; }
+.home-portal-links a {
+  font-family: var(--serif-display);
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--gold);
+  padding: 5px 12px;
+  border: 1px solid rgba(201, 161, 90, 0.45);
+  border-radius: 999px;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.home-portal-links a:hover { background: var(--gold); color: #241c12; }
+
+/* ---------------- stats ---------------- */
+.home-stats-section { padding-bottom: 26px; }
+.home-stats {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 14px;
+}
+.home-stat {
+  min-width: 150px;
+  padding: 18px 22px;
+  text-align: center;
+  border-radius: 10px;
+  background: rgba(240, 230, 210, 0.04);
+  border: 1px solid rgba(201, 161, 90, 0.25);
+}
+.home-stat b { display: block; font-family: var(--serif-display); font-size: 30px; color: var(--gold-bright); }
+.home-stat span { font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; opacity: 0.7; }
+
+/* ---------------- featured ---------------- */
+.home-featured { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.home-feature-card {
+  padding: 24px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(240, 230, 210, 0.05), rgba(240, 230, 210, 0.02));
+  border: 1px solid rgba(201, 161, 90, 0.3);
+}
+.home-feature-kicker {
+  font-family: var(--serif-display);
+  font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 16px;
+}
+.home-feature-char { display: flex; gap: 18px; align-items: flex-start; }
+.home-feature-face {
+  width: 84px; height: 84px; flex-shrink: 0;
+  border-radius: 50%; overflow: hidden;
+  border: 2px solid var(--gold);
+  background: #2a2118;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--serif-display); font-size: 26px; color: #f0e6d2;
+}
+.home-feature-face img { width: 100%; height: 100%; object-fit: cover; }
+.home-feature-name { font-family: var(--serif-display); font-size: 18px; color: #f0e6d2; margin-bottom: 6px; }
+.home-feature-blurb { font-size: 13.5px; line-height: 1.6; opacity: 0.85; }
+.home-feature-link {
+  display: inline-block; margin-top: 10px;
+  font-family: var(--serif-display); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--gold); text-decoration: none;
+}
+.home-feature-link:hover { color: var(--gold-bright); }
+.home-quote {
+  margin: 0; font-family: var(--serif-body); font-style: italic;
+  font-size: 18px; line-height: 1.6; color: #e8dfcc;
+}
+.home-quote::before { content: "\201C"; color: var(--gold); font-size: 26px; }
+.home-quote::after { content: "\201D"; color: var(--gold); font-size: 26px; }
+.home-quote-by { margin-top: 12px; font-size: 13px; color: var(--gold-dim); text-align: right; }
+/* the speaker's name links to their wiki page — keep it the site's gold, not the
+   browser's default blue */
+.home-quote-by a { color: var(--gold); text-decoration: none; border-bottom: 1px solid rgba(201, 161, 90, 0.35); transition: color 0.16s, border-color 0.16s; }
+.home-quote-by a:hover { color: var(--gold-bright); border-color: var(--gold-bright); }
+
+/* ---------------- about & contact ---------------- */
+.home-about { padding-bottom: 60px; }
+.home-about-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 24px; }
+.home-about-text p { font-size: 14.5px; line-height: 1.7; opacity: 0.88; margin: 0 0 14px; }
+.home-roadmap-btn {
+  display: inline-flex; align-items: center; gap: 8px; margin-top: 4px;
+  padding: 11px 20px; border: 1px solid var(--gold); border-radius: 10px;
+  background: rgba(201,161,90,0.08); color: var(--gold-bright);
+  font-family: var(--serif-display); font-size: 14px; letter-spacing: 0.4px;
+  text-decoration: none; transition: background 0.15s, border-color 0.15s;
+}
+.home-roadmap-btn:hover { background: rgba(201,161,90,0.18); border-color: var(--gold-bright); }
+.home-about-thanks {
+  margin: 26px 0 0; text-align: center; font-family: var(--serif-body);
+  font-size: 14px; font-style: italic; color: var(--text-muted);
+}
+.home-about-thanks b { font-style: normal; color: var(--gold); }
+.home-contact {
+  padding: 22px 24px;
+  border-radius: 12px;
+  background: rgba(240, 230, 210, 0.04);
+  border: 1px solid rgba(201, 161, 90, 0.3);
+  height: fit-content;
+}
+.home-contact-head {
+  font-family: var(--serif-display); font-size: 13px; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--gold); margin-bottom: 14px;
+}
+.home-contact-row {
+  display: flex; justify-content: space-between; gap: 12px;
+  padding: 8px 0; border-bottom: 1px solid rgba(201, 161, 90, 0.15);
+  font-size: 13.5px;
+}
+.home-contact-row span { opacity: 0.65; }
+.home-contact-row b { font-weight: 500; color: #e8dfcc; text-align: right; }
+.home-contact-row a { color: var(--gold); text-decoration: none; }
+.home-contact-row a:hover { color: var(--gold-bright); text-decoration: underline; }
+.home-contact-note { margin-top: 12px; font-size: 11.5px; font-style: italic; opacity: 0.55; }
+
+/* ---------------- footer ---------------- */
+.home-footer {
+  margin-top: 40px;
+  padding: 22px 24px 26px;
+  border-top: 1px solid #3a2f22;
+  background: #100d0a;
+  text-align: center;
+}
+.home-footer p { margin: 0 auto; max-width: 720px; font-size: 12px; line-height: 1.6; opacity: 0.55; }
+
+/* ---------------- search results (home flavor) ---------------- */
+.home-search-wrap .search-results { max-height: 420px; overflow-y: auto; }
+.home-sr-group {
+  font-family: var(--serif-display); font-size: 10.5px; letter-spacing: 2px;
+  text-transform: uppercase; opacity: 0.6; padding: 8px 12px 4px;
+}
+
+@media (max-width: 880px) {
+  .home-nav { display: none; } /* the portal cards carry navigation on small screens */
+  .home-hero h1 { font-size: 36px; }
+  .home-featured, .home-about-grid { grid-template-columns: 1fr; }
+  .home-search-wrap { min-width: 150px; }
+}
+
+/* ================= the hero's three sagas =================
+   The old hero offered "Enter the map" as though there were only one. There are
+   three, each with its own map and its own wiki, so the hero now lets you pick a
+   story instead of guessing which one it meant. */
+.home-sagas {
+  display: grid; gap: 12px; margin: 26px auto 0; max-width: 860px;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+}
+.home-saga {
+  display: flex; flex-direction: column; align-items: center; gap: 7px;
+  padding: 20px 16px 16px; text-align: center;
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(20, 16, 11, 0.82), rgba(12, 10, 7, 0.9));
+  border: 1px solid rgba(201, 161, 90, 0.32);
+  transition: transform 0.18s, border-color 0.18s, box-shadow 0.18s;
+}
+.home-saga:hover {
+  transform: translateY(-3px); border-color: var(--gold-bright);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+}
+.home-saga-medal {
+  width: 62px; height: 62px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: #241c12; border: 1px solid var(--gold-dim);
+}
+.home-saga-medal img { width: 76%; height: 76%; object-fit: contain; }
+.home-saga-name {
+  font-family: var(--serif-display); font-size: 15px; color: #f0e6d2;
+  letter-spacing: 0.5px; line-height: 1.3;
+}
+.home-saga-sub { font-size: 12px; color: var(--text-muted); }
+.home-saga-links {
+  display: flex; gap: 8px; align-items: center; margin-top: 4px;
+  font-family: var(--serif-display); font-size: 10.5px; letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+.home-saga-face {
+  display: flex; flex-direction: column; align-items: center; gap: 7px;
+  text-decoration: none;
+}
+.home-saga-go, .home-saga-alt { text-decoration: none; }
+.home-saga-go { color: var(--gold-bright); }
+.home-saga-go:hover { color: #f3dfae; text-decoration: underline; }
+.home-saga-alt {
+  color: var(--text-muted);
+  border-left: 1px solid rgba(201, 161, 90, 0.3); padding-left: 8px;
+}
+.home-saga-alt:hover { color: var(--gold); }
+
+.home-hero-foot {
+  margin-top: 20px; font-size: 13px; color: #cdbf9f;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8);
+}
+.home-hero-search {
+  background: none; border: none; cursor: pointer; padding: 0;
+  color: var(--gold-bright); font-family: var(--serif-body); font-size: 13px;
+  border-bottom: 1px dotted rgba(224, 189, 124, 0.6);
+}
+.home-hero-search:hover { border-bottom-style: solid; }
+.home-hero-foot kbd {
+  font-family: var(--serif-display); font-size: 11px; padding: 1px 6px;
+  border: 1px solid rgba(201, 161, 90, 0.4); border-radius: 3px; color: var(--gold);
+}
+
+.home-road-note {
+  margin: -6px 0 20px; font-size: 13.5px; color: var(--text-muted);
+  font-style: italic; line-height: 1.6;
+}
+
+/* ---- the daily pair ---- */
+.home-feature-seat {
+  font-size: 12px; color: var(--text-muted); font-style: italic; margin: -3px 0 7px;
+}
+.home-feature-links { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 10px; }
+.home-quote-context {
+  display: block; margin-top: 10px; font-size: 12.5px; line-height: 1.6;
+  color: var(--text-muted); font-style: normal;
+}
+.home-quote-note {
+  margin-top: 14px; padding-top: 10px; font-size: 12px; color: var(--text-muted);
+  border-top: 1px solid rgba(201, 161, 90, 0.18);
+}
+.home-quote-note a { color: var(--gold-dim); }
+
+@media (max-width: 720px) {
+  .home-sagas { grid-template-columns: 1fr; }
+  .home-featured { grid-template-columns: 1fr; }
+}
+
+/* ---- day theme ---- */
+:root[data-theme="light"] .home-saga {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(255, 255, 255, 0.6));
+  border-color: rgba(138, 106, 44, 0.34);
+}
+:root[data-theme="light"] .home-saga-name { color: #33281a; }
+
+/* ---- portal cards: the stretched-link pattern ----
+   The card used to be a <div data-href> driven by JavaScript, which meant no
+   keyboard focus, no ctrl-click into a new tab, and nothing for a screen reader
+   or a crawler to follow. The title is now the real link and its ::after covers
+   the whole card, so the card is clickable but the sub-links still win. */
+.home-portal { position: relative; }
+.home-portal-link { color: inherit; text-decoration: none; }
+.home-portal-link::after { content: ""; position: absolute; inset: 0; z-index: 1; }
+.home-portal:focus-within { border-color: var(--gold-bright); }
+.home-portal-link:focus-visible { outline: 2px solid var(--gold-bright); outline-offset: 3px; }
+.home-portal-links { position: relative; z-index: 2; }
+.home-portal-go { position: relative; z-index: 0; }
+
+/* legal links line in the home footer — deliberately prominent so they are easy
+   to find (privacy / terms / credits / cookie choices) */
+.home-footer-legal {
+  margin-top: 18px; display: flex; flex-wrap: wrap; justify-content: center;
+  align-items: center; gap: 10px 18px; font-size: 15px;
+}
+.home-footer-legal a {
+  color: var(--gold); text-decoration: none;
+  font-family: var(--serif-display); letter-spacing: 0.4px;
+  border-bottom: 1px solid rgba(201,161,90,0.4); padding-bottom: 1px;
+}
+.home-footer-legal a:hover { color: var(--gold-bright); border-bottom-color: var(--gold-bright); }

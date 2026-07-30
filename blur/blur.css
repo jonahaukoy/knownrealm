@@ -1,0 +1,240 @@
+/* BLUR — the glass candle.
+ *
+ * One custom property runs the whole game: --sharp, 0 to 1, raised a step every
+ * time you steady the flame, spend a hint, or guess wrong. Everything reads off
+ * it — how blurred the vision is, how solid it is, how tall and how bright the
+ * flame burns, and how far the light reaches into the chamber. Nothing here is
+ * animated by script; the engine sets one number.
+ *
+ * The candle and the chamber are drawn in CSS on purpose, so the game works
+ * today without new art. If painted states are made later they drop in behind
+ * .bl-dark the same way the other three halls do.
+ */
+
+html { height: auto; overflow-y: auto; }
+
+.bl-body {
+  display: flex; flex-direction: column; min-height: 100vh; height: auto; overflow: visible;
+  color: #ede4d0;
+  background:
+    radial-gradient(900px 500px at 50% 0%, rgba(90, 150, 140, 0.10), transparent 70%),
+    radial-gradient(700px 500px at 50% 100%, rgba(201, 161, 90, 0.08), transparent),
+    linear-gradient(180deg, #0d1210, #07090a);
+}
+
+.bl-shell {
+  --sharp: 0;
+  position: relative; display: flex; flex-direction: column; flex: 1; padding-bottom: 40px;
+}
+
+/* ---------------- the plain stage ---------------- */
+.bl-plain { flex: 1; max-width: 760px; width: 100%; margin: 0 auto; padding: 40px 20px 20px; box-sizing: border-box; }
+.bl-setup.hidden, .bl-game.hidden, .bl-result.hidden, .bl-shell .hidden { display: none; }
+.bl-shell:not([data-phase="setup"]) .bl-plain { display: none; }
+.bl-shell[data-phase="setup"] .bl-chamber { display: none; }
+
+.bl-kicker { font-family: var(--serif-display); font-size: 12px; letter-spacing: 4px; text-transform: uppercase; color: #7fd4c0; text-align: center; }
+.bl-setup h1 {
+  font-family: var(--serif-display); font-size: 42px; letter-spacing: 4px; margin: 12px 0; text-align: center;
+  background: linear-gradient(180deg, #dff5ee, #6fb9a6);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.bl-sub { max-width: 540px; margin: 0 auto 30px; opacity: 0.82; line-height: 1.65; text-align: center; }
+
+.bl-cats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 28px; }
+.bl-cat {
+  display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer;
+  padding: 15px 8px; border-radius: 12px; color: #ede4d0;
+  background: rgba(240, 230, 210, 0.05); border: 2px solid rgba(127, 212, 192, 0.2);
+  transition: border-color .2s ease, background .2s ease, transform .15s ease;
+}
+.bl-cat:hover { transform: translateY(-2px); border-color: rgba(127, 212, 192, 0.55); }
+.bl-cat.active { border-color: #7fd4c0; background: rgba(127, 212, 192, 0.12); }
+.bl-cat span { font-size: 24px; line-height: 1; }
+.bl-cat b { font-family: var(--serif-display); font-size: 14px; letter-spacing: .5px; }
+.bl-cat i { font-size: 10.5px; opacity: 0.6; font-style: normal; }
+
+.bl-start {
+  display: block; width: 100%; padding: 15px 22px; border-radius: 12px; cursor: pointer;
+  font-family: var(--serif-display); font-size: 15px; letter-spacing: 2px; text-transform: uppercase;
+  color: #08211c; border: none;
+  background: linear-gradient(180deg, #9fe6d4, #4fa591);
+  box-shadow: 0 8px 26px rgba(79, 165, 145, 0.28);
+  transition: transform .15s ease, box-shadow .2s ease;
+}
+.bl-start:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(79, 165, 145, 0.4); }
+.bl-scoring { text-align: center; font-size: 12px; color: var(--text-muted); margin-top: 20px; line-height: 1.6; }
+.bl-scoring b { color: #9fe6d4; }
+
+/* ================= the chamber ================= */
+.bl-chamber {
+  position: relative; flex: 1; width: 100%; max-width: 760px; margin: 0 auto;
+  padding: 20px 20px 40px; box-sizing: border-box;
+}
+/* the dark pulls back as the flame steadies */
+.bl-dark {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background: radial-gradient(circle at 50% 46%,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, calc(0.55 - var(--sharp) * 0.35)) 34%,
+    rgba(0, 0, 0, calc(0.9 - var(--sharp) * 0.3)) 72%);
+  transition: background 0.9s ease;
+}
+.bl-game, .bl-result { position: relative; z-index: 1; }
+
+.bl-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.bl-quit { background: none; border: none; padding: 0; cursor: pointer; color: var(--text-muted); font-family: var(--serif-body); font-size: 12.5px; }
+.bl-quit:hover { color: #9fe6d4; text-decoration: underline; }
+.bl-progress { flex: 1; text-align: center; font-family: var(--serif-display); font-size: 12px; letter-spacing: 2px; color: var(--text-muted); }
+.bl-score { font-family: var(--serif-display); font-size: 13px; color: #9fe6d4; min-width: 70px; text-align: right; }
+
+/* ---------------- the vision and the candle ---------------- */
+.bl-vision-wrap {
+  position: relative; display: flex; flex-direction: column; align-items: center;
+  margin-bottom: 8px;
+}
+.bl-vision {
+  position: relative;
+  width: min(340px, 74vw); aspect-ratio: 1 / 1;
+  overflow: hidden;
+  /* the vision has no edges — it fades out into the smoke rather than sitting
+     in a frame, which is what stops it reading as a photograph on a wall */
+  -webkit-mask-image: radial-gradient(circle at 50% 46%, #000 56%, rgba(0,0,0,0.6) 74%, transparent 88%);
+  mask-image: radial-gradient(circle at 50% 46%, #000 56%, rgba(0,0,0,0.6) 74%, transparent 88%);
+}
+/* the picture is shown CRISPLY — it is the tiles over it that hide it, not blur.
+   A gentle warm-up in saturation/brightness as the vision resolves keeps the
+   candle-glass feeling without ever softening the image. */
+.bl-vision img {
+  position: absolute; inset: 0; margin: auto;
+  max-width: 100%; max-height: 100%; object-fit: contain; display: block;
+  filter: saturate(calc(0.78 + var(--sharp) * 0.32)) brightness(calc(0.86 + var(--sharp) * 0.2));
+  transition: filter 0.6s ease;
+}
+
+/* ---------------- the tiles: the vision resolves box by box ----------------
+   A grid of dark boxes lies over the picture. Each is opaque until it is
+   revealed, when it fades away to show the picture beneath — so at first you see
+   only a few fragments, and more resolve every time you steady the flame. */
+.bl-tiles {
+  position: absolute; inset: 0; display: grid;
+  grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(5, 1fr);
+}
+.bl-tile {
+  background: #0a0f0e;
+  box-shadow: inset 0 0 0 1px rgba(150, 200, 190, 0.06);
+  transition: opacity 0.55s ease, transform 0.55s ease;
+}
+.bl-tile.shown { opacity: 0; transform: scale(1.04); }
+/* on a fresh vision the cover snaps into place with no fade, so the next
+   picture never flashes into view before the boxes close over it */
+.bl-tiles.bl-notrans .bl-tile { transition: none; }
+
+/* the obsidian candle, drawn rather than painted */
+.bl-candle { position: relative; width: 78px; height: 116px; margin-top: -14px; }
+.bl-glass {
+  position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 34px; height: 84px;
+  clip-path: polygon(28% 0, 72% 0, 88% 100%, 12% 100%);
+  background: linear-gradient(180deg, #1d2b2f, #070b0d 60%, #05080a);
+  box-shadow: inset 0 0 10px rgba(150, 240, 220, calc(0.15 + var(--sharp) * 0.45));
+  transition: box-shadow 0.9s ease;
+}
+/* a sheen down one face so the glass reads as glass */
+.bl-glass::after {
+  content: ""; position: absolute; left: 30%; top: 6%; width: 16%; height: 88%;
+  background: linear-gradient(180deg, rgba(180, 250, 235, calc(0.10 + var(--sharp) * 0.35)), transparent);
+}
+.bl-flame {
+  position: absolute; left: 50%; bottom: 78px; transform: translateX(-50%);
+  width: calc(13px + var(--sharp) * 13px);
+  height: calc(20px + var(--sharp) * 34px);
+  border-radius: 50% 50% 46% 46% / 62% 62% 38% 38%;
+  background: radial-gradient(ellipse at 50% 72%,
+    #f2fffb 0%, #a9f4e2 26%, #5fd8bd 52%, rgba(46, 160, 136, 0.55) 74%, transparent 100%);
+  box-shadow: 0 0 calc(18px + var(--sharp) * 60px) calc(2px + var(--sharp) * 12px) rgba(110, 226, 200, calc(0.28 + var(--sharp) * 0.5));
+  transition: width 0.9s ease, height 0.9s ease, box-shadow 0.9s ease;
+}
+/* the light it throws on the table */
+.bl-pool {
+  position: absolute; left: 50%; bottom: -6px; transform: translateX(-50%);
+  width: calc(90px + var(--sharp) * 150px); height: 20px; border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(110, 226, 200, calc(0.22 + var(--sharp) * 0.3)), transparent 70%);
+  transition: width 0.9s ease, background 0.9s ease;
+}
+
+/* how far the vision has been steadied */
+.bl-steps { display: flex; justify-content: center; gap: 7px; margin: 6px 0 14px; }
+.bl-step {
+  width: 34px; height: 4px; border-radius: 2px;
+  background: rgba(240, 230, 210, 0.14); border: 1px solid rgba(127, 212, 192, 0.22);
+  transition: background .5s ease, box-shadow .5s ease;
+}
+.bl-step.lit { background: #6fe0c6; box-shadow: 0 0 9px rgba(110, 226, 200, 0.8); border-color: #6fe0c6; }
+
+/* ---------------- answers ---------------- */
+.bl-answers { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+.bl-a {
+  padding: 13px 12px; border-radius: 10px; cursor: pointer;
+  font-family: var(--serif-body); font-size: 14.5px; line-height: 1.25; color: #ede4d0;
+  background: rgba(240, 230, 210, 0.055); border: 1px solid rgba(127, 212, 192, 0.26);
+  transition: border-color .18s ease, background .18s ease, transform .12s ease;
+}
+.bl-a:hover:not(:disabled) { border-color: #7fd4c0; background: rgba(127, 212, 192, 0.12); transform: translateY(-2px); }
+.bl-a:disabled { cursor: default; }
+.bl-a.right { border-color: #7fce8c; background: rgba(60, 130, 80, 0.35); }
+.bl-a.wrong { border-color: #e06a6a; background: rgba(120, 40, 40, 0.35); }
+.bl-a.gone { opacity: 0.22; }
+
+.bl-tools { display: flex; gap: 9px; justify-content: center; margin-top: 14px; flex-wrap: wrap; }
+.bl-tool {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 10px 16px; border-radius: 999px; cursor: pointer; font-size: 12.5px;
+  font-family: var(--serif-body); color: #ede4d0;
+  background: transparent; border: 1px solid rgba(127, 212, 192, 0.3);
+  transition: border-color .18s ease, background .18s ease;
+}
+.bl-tool:hover:not(:disabled) { border-color: #7fd4c0; background: rgba(127, 212, 192, 0.1); }
+.bl-tool:disabled { opacity: 0.32; cursor: default; }
+.bl-tool-tag { font-size: 10px; opacity: 0.65; text-transform: uppercase; letter-spacing: .6px; }
+
+.bl-verdict {
+  margin-top: 16px; text-align: center; font-size: 13.5px; line-height: 1.6;
+  color: #efe0c4; background: rgba(240, 230, 210, 0.045);
+  border: 1px solid rgba(127, 212, 192, 0.22); border-radius: 12px; padding: 14px 16px;
+}
+.bl-verdict b { color: #9fe6d4; font-family: var(--serif-display); letter-spacing: .5px; }
+.bl-verdict i { display: block; margin-top: 5px; font-size: 12.5px; opacity: 0.75; }
+.bl-next {
+  display: block; margin: 14px auto 0; padding: 12px 26px; border-radius: 999px; cursor: pointer;
+  font-family: var(--serif-display); font-size: 13px; letter-spacing: 1.5px;
+  color: #08211c; border: none; background: linear-gradient(180deg, #9fe6d4, #4fa591);
+}
+.bl-next:hover { background: linear-gradient(180deg, #b9f4e4, #5cb9a3); }
+
+/* ---------------- the verdict at the end ---------------- */
+.bl-result { text-align: center; }
+.bl-ring {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  width: 132px; height: 132px; margin: 10px auto 18px; border-radius: 50%;
+  background: radial-gradient(circle at 50% 40%, rgba(110, 226, 200, 0.22), rgba(6, 14, 12, 0.6));
+  border: 1px solid rgba(127, 212, 192, 0.55);
+  box-shadow: 0 0 46px rgba(110, 226, 200, 0.3);
+}
+.bl-ring b { font-family: var(--serif-display); font-size: 44px; color: #dff5ee; line-height: 1; }
+.bl-ring span { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; opacity: 0.7; margin-top: 5px; }
+.bl-rank { font-family: var(--serif-display); font-size: 26px; color: #9fe6d4; margin-bottom: 8px; }
+.bl-rank-sub { max-width: 460px; margin: 0 auto 24px; opacity: 0.85; line-height: 1.6; font-size: 14px; }
+.bl-result-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.bl-result-actions button {
+  padding: 11px 20px; border-radius: 999px; cursor: pointer; font-size: 13px;
+  font-family: var(--serif-body); color: #ede4d0;
+  background: transparent; border: 1px solid rgba(127, 212, 192, 0.4);
+}
+.bl-result-actions button:hover { border-color: #7fd4c0; background: rgba(127, 212, 192, 0.1); }
+
+@media (max-width: 560px) {
+  .bl-setup h1 { font-size: 32px; }
+  .bl-answers { grid-template-columns: 1fr; }
+  .bl-vision { width: min(280px, 80vw); }
+}

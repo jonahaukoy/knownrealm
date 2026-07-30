@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>House Family Trees — The Lineages of the Great Houses</title>
+<link rel="preload" href="../css/fonts/cinzel-400-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="../css/fonts/cinzel-600-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="../css/fonts/ebgaramond-400-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="stylesheet" href="../css/fonts.css" />
+<link rel="stylesheet" href="../css/style.css" />
+<link rel="stylesheet" href="trees.css" />
+<script>try{var t=localStorage.getItem("kwTheme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
+</head>
+<body class="trees-body">
+
+<header class="topbar">
+  <a class="brand home-brand" href="../index.html" style="text-decoration:none;color:var(--text-light)">
+    <span class="brand-icon">&#10022;</span>
+    <span class="brand-name">HOUSE FAMILY TREES</span>
+  </a>
+  <div style="flex:1"></div>
+  <button class="trees-topbtn" id="tree-rail-toggle" aria-label="The houses">&#9776; The houses</button>
+  <button class="trees-topbtn" id="tree-progress-open"><span class="progress-eye">&#128065;</span> <span id="tree-progress-label">Everything</span></button>
+</header>
+
+<!-- the whole page: a house rail on the left, the parchment on the right -->
+<div class="trees-layout" id="trees-layout">
+
+  <!-- the houses, listed down the left as a table of lineages -->
+  <aside class="tree-rail" id="tree-rail">
+    <div class="tree-rail-head">The Book of Lineages</div>
+    <nav class="tree-rail-list" id="tree-rail-list"></nav>
+    <p class="tree-rail-note">Cross-checked against <i>The World of Ice &amp; Fire</i> and
+      <i>Fire &amp; Blood</i>. Where the show and books diverge, the show is followed.</p>
+  </aside>
+
+  <!-- the parchment sheet: crest, words and blood all printed on one surface -->
+  <section class="tree-parchment" id="tree-parchment">
+    <div class="tree-sheet trees-stage" id="trees-stage">
+      <!-- everything inside the surface scales together, as ink on one page -->
+      <div class="tree-surface" id="tree-surface">
+        <div class="tree-intro" id="tree-header"></div>
+        <div class="trees-canvas" id="trees-canvas"></div>
+      </div>
+    </div>
+
+    <!-- zoom controls, so the reader is never forced to scroll-zoom to fit -->
+    <div class="tree-zoombar" id="tree-zoombar">
+      <button class="tree-zoombtn" id="tree-zoom-out" title="Smaller" aria-label="Zoom out">&minus;</button>
+      <button class="tree-zoombtn" id="tree-zoom-fit" title="Fit the page" aria-label="Fit">&#9635;</button>
+      <button class="tree-zoombtn" id="tree-zoom-in" title="Larger" aria-label="Zoom in">&#43;</button>
+    </div>
+
+    <div class="tree-hint" id="tree-hint">Scroll to zoom &middot; drag to move &middot; click a face for their card</div>
+  </section>
+</div>
+
+<aside class="char-card tree-card hidden" id="tree-card"></aside>
+
+<script src="trees-data.js"></script>
+<script src="trees-combined.js"></script>
+<script src="trees-bios.js"></script>
+<script src="trees.js"></script>
+<script src="../js/realm-nav.js" data-root="../"></script>
+</body>
+</html>

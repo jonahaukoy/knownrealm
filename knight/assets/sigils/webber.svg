@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 116">
+  <!-- House Webber of Coldmoat: a spotted spider on a silver web -->
+  <defs>
+    <clipPath id="shield"><path d="M8 6 H92 V60 C92 92 50 112 50 112 C50 112 8 92 8 60 Z"/></clipPath>
+  </defs>
+  <g clip-path="url(#shield)">
+    <rect width="100" height="116" fill="#f2f2ee"/>
+    <!-- web -->
+    <g stroke="#b8bcc4" stroke-width="1.6" fill="none">
+      <line x1="50" y1="0" x2="50" y2="116"/>
+      <line x1="0" y1="52" x2="100" y2="52"/>
+      <line x1="10" y1="8" x2="90" y2="100"/>
+      <line x1="90" y1="8" x2="10" y2="100"/>
+      <circle cx="50" cy="52" r="16"/>
+      <circle cx="50" cy="52" r="30"/>
+      <circle cx="50" cy="52" r="44"/>
+    </g>
+    <!-- spider -->
+    <g stroke="#1b1b1b" stroke-width="3.4" fill="none" stroke-linecap="round">
+      <path d="M38 38 L24 26 M40 46 L20 42 M40 58 L22 66 M44 66 L32 84"/>
+      <path d="M62 38 L76 26 M60 46 L80 42 M60 58 L78 66 M56 66 L68 84"/>
+    </g>
+    <circle cx="50" cy="42" r="7" fill="#1b1b1b"/>
+    <ellipse cx="50" cy="58" rx="11" ry="13" fill="#1b1b1b"/>
+    <circle cx="46" cy="54" r="2.4" fill="#c93a2e"/>
+    <circle cx="55" cy="58" r="2.4" fill="#c93a2e"/>
+    <circle cx="49" cy="64" r="2.4" fill="#c93a2e"/>
+  </g>
+  <path d="M8 6 H92 V60 C92 92 50 112 50 112 C50 112 8 92 8 60 Z" fill="none" stroke="#2b2015" stroke-width="4"/>
+</svg>

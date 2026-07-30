@@ -1,0 +1,118 @@
+<#
+  build.ps1 -- the prerender generator for The Known World.
+
+  A RE-RUNNABLE static-site generator, not a one-time export. Every run:
+    1. loads each wiki headless with ?prerender=1,
+    2. lets js/prerender-driver.js render every current route to a static document,
+    3. writes those documents under  p/<site>/...  at the deploy root,
+    4. regenerates  sitemap-prerender.xml  listing them all.
+
+  Because the route list is derived live from the data files (js/*.js), adding
+  characters, episodes, chapters, houses, etc. later needs NO change here -- just
+  add the content and re-run this script. Adding a whole new wiki = one more row
+  in $Sites below (and its KW_PRERENDER_CFG + driver in that wiki.html).
+
+  Requires: Microsoft Edge (headless). No Node, no build tools.
+  Usage:    from the repo root, run:   & ".\prerender\build.ps1"
+  Optional: -Origin https://yourdomain.com   (defaults to the placeholder that
+            also lives in each wiki.html's KW_PRERENDER_CFG and in sitemap.xml)
+#>
+param(
+  [string]$Origin = "https://knownrealm.com"
+)
+
+# Continue (not Stop): Edge writes progress to stderr, and under Stop PowerShell
+# turns that into a terminating NativeCommandError. We check results explicitly instead.
+$ErrorActionPreference = "Continue"
+$root = Split-Path -Parent $PSScriptRoot            # repo root (parent of prerender\)
+$Origin = $Origin.TrimEnd("/")
+
+# ---- locate Edge ----
+$edge = $null
+foreach ($p in @(
+  "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
+  "C:\Program Files\Microsoft\Edge\Application\msedge.exe")) {
+  if (Test-Path $p) { $edge = $p; break }
+}
+if (-not $edge) { throw "Microsoft Edge not found. Install Edge or edit the edge path in build.ps1." }
+
+# ---- the wikis to prerender. Add a row to extend to a new site. ----
+# url is relative to the repo root; outRoot must match KW_PRERENDER_CFG.outRoot in that page.
+$Sites = @(
+  @{ name = "got";    url = "wiki.html";        outRoot = "p/got" },
+  @{ name = "hotd";   url = "hotd/wiki.html";   outRoot = "p/hotd" },
+  @{ name = "knight"; url = "knight/wiki.html"; outRoot = "p/knight" }
+)
+
+function Encode-FileUrl([string]$absPath) {
+  $u = $absPath -replace "\\", "/"
+  $parts = $u -split "/"
+  (($parts | ForEach-Object { [Uri]::EscapeDataString($_) }) -join "/") -replace "%3A", ":"
+}
+function Write-Utf8NoBom([string]$path, [string]$text) {
+  $dir = Split-Path -Parent $path
+  if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Force -Path $dir | Out-Null }
+  [System.IO.File]::WriteAllText($path, $text, (New-Object System.Text.UTF8Encoding($false)))
+}
+
+$allLocs = New-Object System.Collections.Generic.List[string]
+$tmp = Join-Path $env:TEMP "kw_prerender"
+New-Item -ItemType Directory -Force -Path $tmp | Out-Null
+
+foreach ($site in $Sites) {
+  $pagePath = Join-Path $root $site.url
+  if (-not (Test-Path $pagePath)) { Write-Host ("  skip " + $site.name + ": page not found"); continue }
+
+  # only prerender a site whose page actually opts in (driver wired in)
+  $pageSrc = Get-Content $pagePath -Raw
+  if ($pageSrc -notmatch "prerender-driver") { Write-Host ("  skip " + $site.name + ": no prerender driver wired in"); continue }
+
+  Write-Host ("== prerendering " + $site.name + " ==")
+  $fileUrl = "file:///" + (Encode-FileUrl ($pagePath -replace "\\", "/")) + "?prerender=1"
+  $dump = Join-Path $tmp ("dump-" + $site.name + ".html")
+  $profile = Join-Path $env:TEMP ("kw_edge_" + $site.name)
+
+  & $edge --headless=new --disable-gpu --no-sandbox --user-data-dir="$profile" `
+      --virtual-time-budget=45000 --dump-dom $fileUrl 2>$null | Out-File -Encoding utf8 $dump
+
+  $rawText = Get-Content $dump -Raw
+  if ($rawText -match "KW_PRERENDER_ERROR:(\S+)") { Write-Host ("  driver error: " + $Matches[1]); continue }
+  if ($rawText -notmatch "KW_PRERENDER_DONE:(\d+)") { Write-Host "  no completion marker - skipped"; continue }
+
+  # pull the NDJSON out of the manifest block and reverse HTML-entity escaping
+  $m = [regex]::Match($rawText, '(?s)id="kw-prerender-out">(.*?)</pre>')
+  if (-not $m.Success) { Write-Host "  manifest block missing - skipped"; continue }
+  $nd = $m.Groups[1].Value.Replace("&lt;", "<").Replace("&gt;", ">").Replace("&amp;", "&")
+
+  # clean this site's output dir so pages you deleted do not linger
+  $outDir = Join-Path $root $site.outRoot
+  if (Test-Path $outDir) { Remove-Item -Recurse -Force $outDir }
+
+  $count = 0
+  foreach ($line in ($nd -split "`n")) {
+    $t = $line.Trim()
+    if ($t.Length -lt 2) { continue }
+    try { $obj = $t | ConvertFrom-Json } catch { continue }
+    Write-Utf8NoBom (Join-Path $root $obj.path) $obj.html
+    $allLocs.Add($obj.loc)
+    $count++
+  }
+  Write-Host ("  wrote " + $count + " pages -> " + $site.outRoot + "/")
+}
+
+# ---- one sitemap for everything prerendered ----
+$sb = New-Object System.Text.StringBuilder
+[void]$sb.AppendLine('<?xml version="1.0" encoding="UTF-8"?>')
+[void]$sb.AppendLine('<!-- Generated by prerender/build.ps1 - do not edit by hand; re-run the script. -->')
+[void]$sb.AppendLine('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">')
+$today = (Get-Date).ToString("yyyy-MM-dd")
+foreach ($loc in $allLocs) {
+  $safe = $loc.Replace("&", "&amp;")
+  [void]$sb.AppendLine(("  <url><loc>" + $safe + "</loc><lastmod>" + $today + "</lastmod></url>"))
+}
+[void]$sb.AppendLine('</urlset>')
+Write-Utf8NoBom (Join-Path $root "sitemap-prerender.xml") $sb.ToString()
+
+Write-Host ""
+Write-Host ("DONE. " + $allLocs.Count + " pages; sitemap-prerender.xml written.")
+Write-Host "Deploy the p/ folder and sitemap-prerender.xml, and list both sitemaps in robots.txt."

@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Game of Thrones Wiki — The Known Realm</title>
+<link rel="preload" href="css/fonts/cinzel-400-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="css/fonts/cinzel-600-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="css/fonts/ebgaramond-400-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="stylesheet" href="css/fonts.css" />
+<link rel="stylesheet" href="css/style.css" />
+<link rel="stylesheet" href="css/wiki.css" />
+<script>try{var t=localStorage.getItem("kwTheme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
+</head>
+<body class="wiki-body">
+
+<header class="topbar wiki-topbar">
+  <a class="brand home-brand" href="wiki.html" style="text-decoration:none;color:var(--text-light)">
+    <span class="brand-icon">&#10022;</span>
+    <span class="brand-name">GAME OF THRONES WIKI</span>
+  </a>
+  <div style="flex:1"></div>
+  <div class="topbar-right">
+    <div class="search-wrap">
+      <span class="search-icon">&#128269;</span>
+      <input id="wiki-search" type="text" placeholder="Seek a page&hellip;" autocomplete="off" />
+      <div class="search-results hidden" id="wiki-search-results"></div>
+    </div>
+  </div>
+</header>
+
+<main class="wiki-main" id="wiki-content"></main>
+
+<!-- reserved ad slot (inert until body.ads-enabled) -->
+<div class="ad-slot ad-slot-leaderboard" data-ad="wiki-foot"><div class="ad-slot-fill"></div></div>
+
+<footer class="wiki-footer">
+  Unofficial companion — not affiliated with, endorsed, sponsored, or approved by George R.R. Martin, HBO,
+  or Warner Bros. Discovery. All chronicle text is original to this site.
+  <a href="credits.html">Credits &amp; licenses</a>.
+</footer>
+
+<script>
+window.WIKI_CONFIG = {
+  title: "Game of Thrones Wiki",
+  sub: "Every soul, banner, castle, episode and chapter of the Known World — written in this chronicle's own words, and linked into the living map.",
+  mapHref: "map.html",
+  peopleDir: "assets/people/",
+  sigilDir: "assets/sigils/",
+  creditsHref: "credits.html",
+};
+/* real pictures for wiki page slots — keyed by page ("home", "loc:<id>",
+   "house:<id>", "char:<name>", "episode:<s>-<e>"). Missing keys fall back to an
+   elegant empty frame. Art lives in assets/scenes/ (the user's own images). */
+window.WIKI_IMAGES = {
+  "home": "assets/scenes/throne-room-betrayal.webp",
+  // places
+  "loc:winterfell": "assets/scenes/winterfell.webp",
+  "loc:castle-black": "assets/scenes/castle-black.webp",
+  "loc:the-wall": "assets/scenes/battle-for-the-wall.webp",
+  "loc:kings-landing": "assets/scenes/red-keep.webp",
+  "loc:harrenhal": "assets/scenes/harrenhall-burning.webp",
+  "loc:hardhome": "assets/scenes/hardhome.webp",
+  "loc:valyria": "assets/scenes/the-doom-of-valyria.webp",
+  "loc:dragonstone": "assets/scenes/dragon-study.webp",
+  "loc:oldtown": "assets/scenes/library.webp",
+  "loc:greywater-watch": "assets/scenes/reed-keep.webp",
+  "loc:qarth": "assets/scenes/house-of-the-undying.webp",
+  "loc:pyke": "assets/scenes/pyke.webp",
+  "house:greyjoy": "assets/scenes/pyke.webp",
+  "battle:red-wedding-battle": "assets/scenes/red-wedding.webp",
+  // houses
+  "house:stark": "assets/scenes/winterfell-with-people.webp",
+  "house:targaryen": "assets/scenes/aegon-burning-armies.webp",
+  "house:baratheon": "assets/scenes/battle-of-the-trident.webp",
+  "house:lannister": "assets/scenes/blackwater3.webp",
+  // episodes (a scene may serve more than one page — better reused than left blank)
+  // Season 1 — each hour drawn from its matching A Game of Thrones chapter art (user's picks).
+  "episode:1-1": "assets/scenes/prologue-beyond-the-wall.webp",   // Prologue · Will
+  "episode:1-2": "assets/scenes/hound-rides-down-mycah.webp",     // Eddard III
+  "episode:1-3": "assets/scenes/the-small-council.webp",          // Eddard IV
+  "episode:1-4": "assets/scenes/tyrion-arrested-crossroads.webp", // Catelyn V
+  "episode:1-5": "assets/scenes/jaime-street-ambush.webp",        // Eddard IX
+  "episode:1-6": "assets/scenes/daenerys-stallion-prophecy.webp", // Daenerys IV
+  "episode:1-7": ["assets/scenes/seed-is-strong-godswood.webp",   // Eddard XII
+                  "assets/scenes/throne-room-betrayal.webp"],     // Eddard XIV
+  "episode:1-8": "assets/scenes/syrio-holds-the-door.webp",       // Arya IV
+  "episode:1-9": "assets/scenes/baelors-steps.webp",              // Arya V
+  "episode:1-10": "assets/scenes/king-in-the-north.webp",         // Catelyn XI
+  "episode:2-9": "assets/scenes/blackwater2.webp",       // Blackwater
+  "episode:4-9": "assets/scenes/battle-for-the-wall.webp", // The Watchers on the Wall
+  "episode:4-10": "assets/scenes/stannis-against-the-wildlings.webp", // The Children
+  "episode:5-8": "assets/scenes/hardhome.webp",           // Hardhome
+  "episode:7-6": "assets/scenes/surrounded-beyond-the-wall.webp", // Beyond the Wall
+  // the collections — index banners and the battles that have art
+  "col:battles": "assets/scenes/battle-of-the-trident.webp",
+  "col:dragons": "assets/scenes/aegon-burning-armies.webp",
+  "col:prophecies": "assets/scenes/three-eyed-raven.webp",
+  "col:kingsguard": "assets/scenes/the-iron-throne1.webp",
+  // the direwolves — a wide group portrait to open on, and one of each wolf,
+  // which also become the thumbnails on the index cards
+  "col:direwolves": "assets/direwolves/all-horizontal.webp",
+  "wolf:grey-wind": "assets/direwolves/grey-wind.webp",
+  "wolf:lady": "assets/direwolves/lady.webp",
+  "wolf:nymeria": "assets/direwolves/nymeria.webp",
+  "wolf:summer": "assets/direwolves/summer.webp",
+  "wolf:shaggydog": "assets/direwolves/shaggydog.webp",
+  "wolf:ghost": "assets/direwolves/ghost.webp",
+  "battle:field-of-fire": "assets/scenes/aegon-burning-armies.webp",
+  "battle:trident": "assets/scenes/battle-of-the-trident2.webp",
+  "battle:blackwater": "assets/scenes/blackwater1.webp",
+  "battle:sack-of-kings-landing": "assets/scenes/the-iron-throne1.webp",
+  "battle:castle-black": "assets/scenes/battle-for-the-wall.webp",
+  "battle:hardhome-battle": "assets/scenes/hardhome.webp",
+  "battle:long-night-battle": "assets/scenes/winterfell-hanging.webp",
+  "prophecy:long-night-return": "assets/scenes/surrounded-beyond-the-wall.webp",
+  "prophecy:azor-ahai": "assets/scenes/azor-ahai.webp",
+  "prophecy:maggy-the-frog": "assets/scenes/maggy-the-frog.webp",
+  "prophecy:house-of-the-undying": "assets/scenes/house-of-the-undying-inside.webp",
+  "prophecy:bran-visions": "assets/scenes/three-eyed-raven.webp",
+  // the ages of the realm — era history pages (reuse existing scene art)
+  "era:dawn": "assets/scenes/surrounded-beyond-the-wall.webp",
+  "era:kingdoms": "assets/scenes/the-doom-of-valyria.webp",
+  "era:conquest": "assets/scenes/aegon-burning-armies.webp",
+  "era:dance": "assets/scenes/the-iron-throne1.webp",
+  "era:hedge": "assets/scenes/ser-hughs-tilt.webp",
+  "era:rebellion": "assets/scenes/battle-of-the-trident.webp",
+  "era:saga": "assets/scenes/red-keep.webp",
+  // Book 1 (A Game of Thrones) chapter illustrations, chapter 1 = Prologue
+  "chapter:1-1": "assets/scenes/prologue-beyond-the-wall.webp",
+  "chapter:1-2": "assets/scenes/bran-pups-in-the-snow.webp",
+  "chapter:1-3": "assets/scenes/ned-in-the-godswood.webp",
+  "chapter:1-4": "assets/scenes/daenerys-and-drogo.webp",
+  "chapter:1-5": "assets/scenes/the-crypts-of-winterfell.webp",
+  "chapter:1-6": "assets/scenes/the-winterfell-feast.webp",
+  "chapter:1-7": "assets/scenes/lysas-letter.webp",
+  "chapter:1-8": "assets/scenes/arya-watches-sparring.webp",
+  "chapter:1-9": "assets/scenes/bran-climbs.webp",
+  "chapter:1-10": "assets/scenes/tyrion-breakfast.webp",         // Tyrion I
+  "chapter:1-11": "assets/scenes/jon-gives-needle.webp",         // Jon II
+  "chapter:1-12": "assets/scenes/daenerys-wedding.webp",         // Daenerys II
+  "chapter:1-13": "assets/scenes/eddard-on-the-kingsroad.webp",  // Eddard II
+  "chapter:1-14": "assets/scenes/tyrion-rides-north.webp",       // Tyrion II
+  "chapter:1-15": "assets/scenes/catspaw-in-the-sickroom.webp",  // Catelyn III
+  "chapter:1-16": "assets/scenes/the-fight-by-the-trident.webp", // Sansa I
+  "chapter:1-17": "assets/scenes/hound-rides-down-mycah.webp",   // Eddard III
+  "chapter:1-18": "assets/scenes/bran-flies-and-wakes.webp",     // Bran III
+  "chapter:1-19": "assets/scenes/catelyn-and-littlefinger.webp", // Catelyn IV
+  "chapter:1-20": "assets/scenes/benjen-rides-ranging.webp",     // Jon III
+  "chapter:1-21": "assets/scenes/the-small-council.webp",        // Eddard IV
+  "chapter:1-22": "assets/scenes/tyrion-pissing-off-the-wall.webp", // Tyrion III
+  "chapter:1-23": "assets/scenes/syrio-first-lesson.webp",       // Arya II
+  "chapter:1-24": "assets/scenes/viserys-in-the-grass.webp",     // Daenerys III
+  "chapter:1-25": "assets/scenes/brans-saddle.webp",             // Bran IV
+  "chapter:1-26": "assets/scenes/jon-arryns-lineages.webp",      // Eddard V
+  "chapter:1-27": "assets/scenes/samwell-arrives.webp",          // Jon IV
+  "chapter:1-28": "assets/scenes/tobho-motts-forge.webp",        // Eddard VI
+  "chapter:1-29": "assets/scenes/tyrion-arrested-crossroads.webp", // Catelyn V
+  "chapter:1-30": "assets/scenes/ser-hughs-tilt.webp",           // Sansa II
+  "chapter:1-31": "assets/scenes/varys-in-the-hand-chambers.webp", // Eddard VII
+  "chapter:1-32": "assets/scenes/high-road-ambush.webp",         // Tyrion IV
+  "chapter:1-33": "assets/scenes/arya-dragon-skulls.webp",       // Arya III
+  "chapter:1-34": "assets/scenes/neds-badge-refusal.webp",       // Eddard VIII
+  "chapter:1-35": "assets/scenes/eyrie-welcome.webp",            // Catelyn VI
+  "chapter:1-36": "assets/scenes/jaime-street-ambush.webp",      // Eddard IX
+  "chapter:1-37": "assets/scenes/daenerys-stallion-prophecy.webp", // Daenerys IV
+  "chapter:1-38": "assets/scenes/bran-wolfswood-ambush.webp",    // Bran V
+  "chapter:1-39": "assets/scenes/tyrion-sky-cell.webp",          // Tyrion V
+  "chapter:1-40": "assets/scenes/ned-milk-of-the-poppy.webp",    // Eddard X
+  "chapter:1-41": "assets/scenes/bronn-vardis-moon-door.webp",   // Catelyn VII
+  "chapter:1-42": "assets/scenes/jon-named-steward.webp",        // Jon V
+  "chapter:1-43": "assets/scenes/tyrion-clan-fire.webp",         // Tyrion VI
+  "chapter:1-44": "assets/scenes/ned-iron-throne-beric.webp",    // Eddard XI
+  "chapter:1-45": "assets/scenes/sansa-to-queen-cersei.webp",    // Sansa III
+  "chapter:1-46": "assets/scenes/seed-is-strong-godswood.webp",  // Eddard XII
+  "chapter:1-47": "assets/scenes/poisoned-wine-vaes-dothrak.webp", // Daenerys V
+  "chapter:1-48": "assets/scenes/roberts-will.webp",             // Eddard XIII
+  "chapter:1-49": "assets/scenes/jon-weirwood-vows.webp",        // Jon VI
+  "chapter:1-50": "assets/scenes/throne-room-betrayal.webp",     // Eddard XIV
+  "chapter:1-51": "assets/scenes/syrio-holds-the-door.webp",     // Arya IV
+  "chapter:1-52": "assets/scenes/sansa-pleads-for-ned.webp",     // Sansa IV
+  "chapter:1-53": "assets/scenes/wight-in-mormonts-chambers.webp", // Jon VII
+  "chapter:1-54": "assets/scenes/ravens-call-the-banners.webp",  // Bran VI
+  "chapter:1-55": "assets/scenes/daenerys-claims-lhazareen.webp", // Daenerys VI
+  "chapter:1-56": "assets/scenes/moat-cailin-counsel.webp",      // Catelyn VIII
+  "chapter:1-57": "assets/scenes/tywins-war-tent.webp",          // Tyrion VII
+  "chapter:1-58": "assets/scenes/barristan-dismissed.webp",      // Sansa V
+  "chapter:1-59": "assets/scenes/black-cells-varys.webp",        // Eddard XV
+  "chapter:1-60": "assets/scenes/entering-the-twins.webp",       // Catelyn IX
+  "chapter:1-61": "assets/scenes/jon-baratheon-letter.webp",     // Jon VIII
+  "chapter:1-62": "assets/scenes/drogos-festered-wound.webp",    // Daenerys VII
+  "chapter:1-63": "assets/scenes/green-fork-vanguard.webp",      // Tyrion VIII
+  "chapter:1-64": "assets/scenes/whispering-wood-jaime.webp",    // Catelyn X
+  "chapter:1-65": "assets/scenes/bloodmagic-tent.webp",          // Daenerys VIII
+  "chapter:1-66": "assets/scenes/baelors-steps.webp",            // Arya V
+  "chapter:1-67": "assets/scenes/crypt-dream.webp",              // Bran VII
+  "chapter:1-68": "assets/scenes/heads-on-the-wall.webp",        // Sansa VI
+  "chapter:1-69": "assets/scenes/drogo-mercy.webp",              // Daenerys IX
+  "chapter:1-70": "assets/scenes/tywin-sends-tyrion.webp",       // Tyrion IX
+  "chapter:1-71": "assets/scenes/jon-rides-for-robb.webp",       // Jon IX
+  "chapter:1-72": "assets/scenes/king-in-the-north.webp",        // Catelyn XI
+  "chapter:1-73": "assets/scenes/drogos-pyre.webp",              // Daenerys X
+  // Valyrian steel — the collection index banner and each blade that has art
+  "col:swords": "assets/scenes/swords-all.webp",
+  "sword:ice": "assets/scenes/sword-ice.webp",
+  "sword:longclaw": "assets/scenes/sword-longclaw.webp",
+  "sword:blackfyre": "assets/scenes/sword-blackfyre.webp",
+  "sword:dark-sister": "assets/scenes/sword-dark-sister.webp",
+  "sword:heartsbane": "assets/scenes/sword-heartsbane.webp",
+  "sword:widows-wail": "assets/scenes/sword-widows-wail.webp",
+  "sword:oathkeeper": "assets/scenes/sword-oathkeeper.webp",
+  "sword:red-rain": "assets/scenes/sword-red-rain.webp",
+  "sword:vigilance": "assets/scenes/sword-vigilance.webp",
+  "sword:nightfall": "assets/scenes/sword-nightfall.webp",
+  "sword:orphan-maker": "assets/scenes/sword-orphan-maker.webp",
+  "sword:catspaw-dagger": "assets/scenes/catspaw-dagger.webp",
+  // Book cover plates for the Chapters page. Drop the art at these paths (or
+  // change the paths) and each tome's cover fills in — until then an elegant
+  // book emblem stands in its place.
+  // "book:1": "assets/scenes/book-covers/agot.webp",   // A Game of Thrones
+  // "book:2": "assets/scenes/book-covers/acok.webp",   // A Clash of Kings
+  // "book:3": "assets/scenes/book-covers/asos.webp",   // A Storm of Swords
+  // "book:4": "assets/scenes/book-covers/affc.webp",   // A Feast for Crows
+  // "book:5": "assets/scenes/book-covers/adwd.webp",   // A Dance with Dragons
+};
+</script>
+<script src="js/data.js"></script>
+<script src="js/seasons.js"></script>
+<script src="js/whereabouts.js"></script>
+<script src="js/deaths.js"></script>
+<script src="js/books.js"></script>
+<script src="js/people.js"></script>
+<script src="js/characters.js"></script>
+<script src="js/groups.js"></script>
+<script src="js/wiki-extra.js"></script>
+<script src="js/houses-extra.js"></script>
+<script src="js/houses-extra-2.js"></script>
+<script src="js/wiki-x/north.js"></script>
+<script src="js/wiki-x/court.js"></script>
+<script src="js/wiki-x/south.js"></script>
+<script src="js/wiki-x/essos.js"></script>
+<script src="js/wiki-x/wall.js"></script>
+<script src="js/wiki-x/rivers-isles.js"></script>
+<script src="js/wiki-x/places-north.js"></script>
+<script src="js/wiki-x/places-south.js"></script>
+<script src="js/wiki-x/places-east.js"></script>
+<script src="js/wiki-x/houses-orders.js"></script>
+<script src="js/wiki-x/episodes.js"></script>
+<script src="js/wiki-x/episodes-2.js"></script>
+<script src="js/wiki-x/chapters-1.js"></script>
+<script src="js/wiki-x/chapters-2.js"></script>
+<script src="js/wiki-x/chapters-3.js"></script>
+<script src="js/wiki-x/chapters-4.js"></script>
+<script src="js/wiki-x/chapters-5.js"></script>
+<script src="js/col/dragons.js"></script>
+<script src="js/col/steel.js"></script>
+<script src="js/col/wolves.js"></script>
+<script src="js/col/kingsguard.js"></script>
+<script src="js/col/battles.js"></script>
+<script src="js/col/prophecies.js"></script>
+<script src="js/sigil-art.js"></script>
+<script src="js/eras.js"></script>
+<script src="js/wiki-engine.js"></script>
+<script>
+/* prerender settings for the static-site generator (see js/prerender-driver.js).
+   Swap the origin for the real domain at deploy time — it also lives in sitemap.xml. */
+window.KW_PRERENDER_CFG = {
+  siteName: "Game of Thrones Wiki",
+  assetBase: "/",
+  spaHref: "/wiki.html",
+  outRoot: "p/got",
+  origin: "https://knownrealm.com",
+  css: ["/css/fonts.css", "/css/style.css", "/css/wiki.css"],
+};
+</script>
+<script src="js/prerender-driver.js"></script>
+<script src="js/realm-nav.js" data-root=""></script>
+</body>
+</html>

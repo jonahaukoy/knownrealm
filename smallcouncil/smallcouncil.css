@@ -1,0 +1,353 @@
+/* THE SMALL COUNCIL — the daily seating.
+ *
+ * The game is played on a painted desk: candle, inkpot, seal, and a sheet of
+ * parchment in the middle that the words are written on. Five paintings of that
+ * desk exist (assets/table1..5.webp), one per brazier lost — warm and candlelit
+ * at table1, frozen black with a dead hand closed over the sheet at table5 —
+ * and they are stacked and cross-faded so losing a life is a slow chill rather
+ * than a cut.
+ *
+ * Two coordinate facts hold the whole layout together:
+ *   the art is 1448 × 1086 (4:3), and
+ *   the parchment occupies 31.3%–69.7% across and 15.6%–85.1% down.
+ * .sc-desk is given the art's own aspect ratio so those percentages stay true
+ * at every size, and .sc-parch is pinned to that rect (inset a little, to keep
+ * the words off the deckled edges). Everything inside scales from --dw, the
+ * desk's width, so the board grows and shrinks with the painting.
+ *
+ * Below 820px the desk is too small to write on: the art becomes a full-bleed
+ * backdrop and the parchment becomes a plain panel over it.
+ */
+
+html { height: auto; overflow-y: auto; }
+
+.sc-body {
+  display: flex; flex-direction: column; min-height: 100vh; height: auto; overflow: visible;
+  color: #ede4d0;
+  background:
+    radial-gradient(900px 420px at 15% 0%, rgba(165, 44, 44, 0.16), transparent),
+    radial-gradient(900px 420px at 85% 0%, rgba(58, 110, 165, 0.16), transparent),
+    linear-gradient(180deg, #191411, #0c0a08);
+}
+
+.sc-shell {
+  --chill: 0;
+  /* ink on the sheet — warm sepia at first, cold as it freezes, pale on black
+     ice once the hand has closed. Driven by data-t, the current painting. */
+  --ink: #3a2b18;
+  --ink-soft: #6f5836;
+  --tile-bg: rgba(255, 252, 240, 0.28);
+  --tile-bd: rgba(58, 43, 24, 0.30);
+  --tile-hv: rgba(255, 252, 240, 0.55);
+  --tile-fg: #3a2b18;
+  --sel-bg: #3a2b18;
+  --sel-fg: #f6e7c5;
+  position: relative; display: flex; flex-direction: column; flex: 1;
+  padding-bottom: 40px;
+}
+/* table3 is still a light sheet, so the ink stays dark and only turns cold */
+.sc-shell[data-t="3"] {
+  --ink: #1d2a37; --ink-soft: #4e6272; --tile-fg: #1d2a37;
+  --tile-bg: rgba(242, 250, 255, 0.30); --tile-bd: rgba(29, 42, 55, 0.30);
+  --tile-hv: rgba(242, 250, 255, 0.55); --sel-bg: #1d2a37; --sel-fg: #e8f3fb;
+}
+/* by table4 the sheet itself has gone mid-grey: writing straight onto it must
+   go pale, while the tiles keep their own light ground and stay dark-on-light */
+.sc-shell[data-t="4"] {
+  --ink: #e8f2fb; --ink-soft: #b9cddd; --tile-fg: #16232f;
+  --tile-bg: rgba(238, 248, 255, 0.62); --tile-bd: rgba(255, 255, 255, 0.42);
+  --tile-hv: rgba(238, 248, 255, 0.85); --sel-bg: #16232f; --sel-fg: #e8f3fb;
+}
+.sc-shell[data-t="5"] {
+  --ink: #dceaf7; --ink-soft: #b8d0e6; --tile-fg: #dceaf7;
+  --tile-bg: rgba(140, 180, 215, 0.16); --tile-bd: rgba(180, 214, 240, 0.38);
+  --tile-hv: rgba(140, 180, 215, 0.30); --sel-bg: #cfe4f7; --sel-fg: #0d1720;
+}
+
+/* ================= the desk =================
+   The sheet has to stay big enough to write sixteen names on, so the desk is
+   sized from its WIDTH and allowed to be taller than the window. The frame
+   clips it, centred, so on a short screen you lose a little wood off the top
+   and bottom rather than shrinking the words to nothing. */
+.sc-deskframe {
+  display: none;
+  width: 100%; justify-content: center; align-items: center;
+  overflow: hidden; max-height: calc(100vh - 118px);
+}
+.sc-desk {
+  /* The frame clips (desk_h - frameMax)/2 off each end, and the parchment
+     starts 17.6% down, so the desk may only be tall enough that the clip stays
+     inside that margin: desk_h <= frameMax / 0.648, i.e. desk_w <= 2.05 x
+     frameMax. Below that the sheet would lose its top edge. */
+  --dw: min(1240px, 94vw, calc((100vh - 118px) * 2.05));
+  position: relative; flex: 0 0 auto;
+  width: var(--dw); aspect-ratio: 1448 / 1086;
+}
+.sc-shell:not([data-phase="setup"]) .sc-deskframe { display: flex; }
+.sc-shell:not([data-phase="setup"]) .sc-plain { display: none; }
+
+.sc-table { position: absolute; inset: 0; overflow: hidden; border-radius: 6px; }
+.sc-table-layer {
+  position: absolute; inset: 0; opacity: 0;
+  background-size: 100% 100%; background-position: center;
+  transition: opacity 1.6s ease;
+}
+.sc-table-layer.on { opacity: 1; }
+/* table1 stays lit underneath so a cross-fade never shows through to nothing */
+.sc-table-layer[data-n="1"] { opacity: 1; }
+
+.sc-parch {
+  position: absolute;
+  left: 33.1%; top: 17.6%; width: 34.8%; height: 65.5%;
+  display: flex; flex-direction: column; justify-content: center;
+  overflow-y: auto; scrollbar-width: none;
+  font-size: calc(var(--dw) * 0.0118);
+  color: var(--ink);
+}
+.sc-parch::-webkit-scrollbar { display: none; }
+
+/* ================= the cold, over everything ================= */
+.sc-frost {
+  position: fixed; inset: 0; z-index: 40; pointer-events: none;
+  opacity: calc(var(--chill) * 0.5);
+  transition: opacity 1.6s ease;
+  background:
+    radial-gradient(closest-side ellipse at 50% 50%, transparent 52%, rgba(150, 205, 255, 0.26) 90%, rgba(206, 234, 255, 0.5) 100%),
+    radial-gradient(circle at 8% 12%,  rgba(220, 242, 255, 0.26), transparent 26%),
+    radial-gradient(circle at 93% 18%, rgba(220, 242, 255, 0.22), transparent 24%),
+    radial-gradient(circle at 12% 88%, rgba(220, 242, 255, 0.20), transparent 22%),
+    radial-gradient(circle at 88% 86%, rgba(220, 242, 255, 0.24), transparent 26%);
+}
+/* the painting already carries the freeze; the overlay only tops it off */
+.sc-shell[data-phase="lost"] .sc-frost { opacity: 0.4; }
+
+/* dragonfire — the win */
+.sc-fire {
+  position: fixed; inset: 0; z-index: 41; pointer-events: none; opacity: 0;
+  background: radial-gradient(ellipse 140% 80% at 50% 118%,
+    rgba(255, 228, 150, 0.95), rgba(255, 138, 40, 0.75) 34%, rgba(190, 44, 20, 0.35) 60%, transparent 82%);
+}
+.sc-shell[data-phase="won"] .sc-fire { animation: sc-dragonfire 3.2s ease-out forwards; }
+@keyframes sc-dragonfire {
+  0%   { opacity: 0;   transform: translateY(30%) scale(1.1); }
+  16%  { opacity: 1;   transform: translateY(0) scale(1.25); }
+  42%  { opacity: 0.9; transform: translateY(-6%) scale(1.35); }
+  100% { opacity: 0;   transform: translateY(-30%) scale(1.6); }
+}
+/* the winter goes out of the painting with it */
+.sc-shell[data-phase="won"] .sc-table { animation: sc-thaw 3.2s ease-out; }
+@keyframes sc-thaw {
+  0%   { filter: brightness(1.9) saturate(1.9) hue-rotate(-12deg); }
+  100% { filter: none; }
+}
+/* the hand closes — one hard shudder as the last brazier goes */
+.sc-shell[data-phase="lost"] .sc-deskframe { animation: sc-seize 1.5s cubic-bezier(.36,.07,.19,.97) both; }
+@keyframes sc-seize {
+  0%   { transform: scale(1); }
+  14%  { transform: scale(1.035) translateX(-5px); }
+  28%  { transform: scale(1.03) translateX(5px); }
+  42%  { transform: scale(1.028) translateX(-3px); }
+  100% { transform: scale(1.02); }
+}
+
+/* ================= the plain stage: setup & gate ================= */
+.sc-plain { flex: 1; max-width: 720px; width: 100%; margin: 0 auto; padding: 36px 18px 20px; box-sizing: border-box; }
+.sc-setup.hidden, .sc-gate.hidden, .sc-game.hidden, .sc-result.hidden, .sc-shell .hidden { display: none; }
+.sc-anim-in { animation: sc-screen-in .55s cubic-bezier(.2, .7, .3, 1) both; }
+@keyframes sc-screen-in { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: none; } }
+
+.sc-kicker { font-family: var(--serif-display); font-size: 12px; letter-spacing: 4px; text-transform: uppercase; color: var(--gold); text-align: center; }
+.sc-setup h1, .sc-gate h2 {
+  font-family: var(--serif-display); font-size: 40px; letter-spacing: 3px; margin: 12px 0; text-align: center;
+  background: linear-gradient(180deg, #f6e7c5, #c9a15a);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.sc-sub { max-width: 520px; margin: 0 auto 28px; opacity: 0.8; line-height: 1.6; text-align: center; }
+
+/* choose which saga's councils to sit — All, or one of the three sagas */
+.sc-sagas { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 0 auto 22px; }
+.sc-saga {
+  font-family: var(--serif-display); font-size: 12px; letter-spacing: 1.4px; cursor: pointer;
+  padding: 8px 15px; border-radius: 999px; color: var(--gold-bright);
+  border: 1px solid rgba(201,161,90,0.34); background: rgba(240,230,210,0.04);
+  transition: border-color .15s, background .15s, color .15s, transform .12s;
+}
+.sc-saga:hover { border-color: var(--gold); transform: translateY(-1px); }
+.sc-saga.on {
+  color: #241a10; border-color: transparent;
+  background: linear-gradient(180deg, #e0bd7c, #b98f47);
+  box-shadow: 0 6px 16px rgba(201,161,90,0.24);
+}
+
+.sc-today {
+  border: 1px solid rgba(201,161,90,0.28); border-radius: 14px; padding: 20px 18px; text-align: center;
+  background: rgba(240, 230, 210, 0.045); margin-bottom: 18px;
+}
+.sc-today.sc-empty { font-style: italic; opacity: 0.75; }
+.sc-today-tag { font-family: var(--serif-display); font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--gold-bright); }
+.sc-today-name { font-family: var(--serif-display); font-size: 26px; letter-spacing: 1.5px; margin: 8px 0 4px; }
+.sc-today-date { font-size: 12px; color: var(--text-muted); }
+.sc-today-done { font-size: 13px; margin-top: 12px; color: var(--gold-bright); }
+
+.sc-start {
+  display: block; width: 100%; margin: 0 auto; padding: 15px 22px; border-radius: 12px; cursor: pointer;
+  font-family: var(--serif-display); font-size: 15px; letter-spacing: 2px; text-transform: uppercase;
+  color: #241a10; border: none;
+  background: linear-gradient(180deg, #e0bd7c, #b98f47);
+  box-shadow: 0 8px 24px rgba(201,161,90,0.24);
+  transition: transform .15s ease, box-shadow .2s ease;
+}
+.sc-start:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(201,161,90,0.34); }
+
+/* the gate that frees the rest of the councils once the daily is met */
+.sc-unlock {
+  display: block; margin: 14px auto 0; background: none; border: none; cursor: pointer;
+  font-family: var(--serif-display); font-size: 13px; color: var(--gold);
+  text-decoration: underline; text-underline-offset: 3px;
+}
+.sc-unlock:hover { color: var(--gold-bright); }
+.sc-practice { margin-top: 8px; }
+
+.sc-archive-h { font-family: var(--serif-display); font-size: 12px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--gold); margin: 34px 0 4px; text-align: center; }
+.sc-archive-note { font-size: 12px; color: var(--text-muted); text-align: center; margin: 0 0 14px; }
+.sc-archive { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+.sc-arch {
+  display: flex; align-items: center; gap: 10px; text-align: left; cursor: pointer;
+  padding: 11px 13px; border-radius: 10px; color: #ede4d0;
+  background: rgba(240, 230, 210, 0.04); border: 1px solid rgba(201,161,90,0.18);
+  transition: border-color .18s ease, background .18s ease, transform .18s ease;
+}
+.sc-arch:hover { border-color: var(--gold); background: rgba(240, 230, 210, 0.08); transform: translateY(-2px); }
+.sc-arch b { font-family: var(--serif-display); font-size: 13.5px; letter-spacing: .6px; font-weight: 500; flex: 1; }
+.sc-arch-mark { font-size: 13px; opacity: .9; }
+.sc-arch-mark.won { color: #8fd08f; }
+.sc-arch-mark.lost { color: #8cc0f0; }
+
+.sc-gate { text-align: center; }
+.sc-gate-actions { display: flex; flex-direction: column; gap: 10px; max-width: 420px; margin: 22px auto 0; }
+.sc-gate-alt {
+  padding: 12px 16px; border-radius: 10px; cursor: pointer; font-size: 13px; color: #ede4d0;
+  background: transparent; border: 1px solid rgba(201,161,90,0.3);
+}
+.sc-gate-alt:hover { border-color: var(--gold); background: rgba(240,230,210,0.05); }
+
+/* ================= the board, written on the sheet ================= */
+.sc-game-head { display: flex; align-items: center; gap: 8px; margin-bottom: 0.5em; }
+.sc-quit {
+  background: none; border: none; cursor: pointer; padding: 0;
+  color: var(--ink-soft); font-family: var(--serif-body); font-size: 0.78em;
+}
+.sc-quit:hover { color: var(--ink); text-decoration: underline; }
+.sc-title {
+  flex: 1; text-align: center; font-family: var(--serif-display);
+  font-size: 1.02em; letter-spacing: 1.5px; color: var(--ink);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+/* the braziers — one goes out for every mistake */
+.sc-lives { display: flex; align-items: center; justify-content: center; gap: 0.5em; margin-bottom: 0.85em; }
+.sc-lives-label {
+  font-family: var(--serif-display); font-size: 0.6em; letter-spacing: 2.5px;
+  text-transform: uppercase; color: var(--ink-soft); margin-right: 2px;
+}
+.sc-life {
+  width: 0.72em; height: 0.72em; border-radius: 50%;
+  background: radial-gradient(circle at 45% 35%, #ffe6a8, #e0902e 55%, #8a4a12);
+  box-shadow: 0 0 0.7em rgba(255, 170, 60, 0.85);
+  transition: background .9s ease, box-shadow .9s ease, transform .6s ease;
+}
+.sc-life.out {
+  background: radial-gradient(circle at 45% 35%, #e8f4ff, #7fb0dd 55%, #35566f);
+  box-shadow: 0 0 0.8em rgba(120, 190, 255, 0.8);
+  transform: scale(0.82);
+}
+
+.sc-solved { display: flex; flex-direction: column; gap: 0.35em; }
+.sc-solved:not(:empty) { margin-bottom: 0.45em; }
+.sc-band {
+  border-radius: 0.4em; padding: 0.55em 0.6em; text-align: center; color: #1b1409;
+  box-shadow: 0 0.15em 0.5em rgba(40, 26, 10, 0.28);
+  animation: sc-band-in .5s cubic-bezier(.2,.7,.3,1) both;
+}
+@keyframes sc-band-in { from { opacity: 0; transform: scale(.94); } to { opacity: 1; transform: none; } }
+.sc-band b { display: block; font-family: var(--serif-display); font-size: 0.8em; letter-spacing: 1px; line-height: 1.3; }
+.sc-band span { display: block; font-size: 0.76em; margin-top: 0.2em; opacity: .92; line-height: 1.35; }
+.sc-band i { display: block; font-size: 0.7em; margin-top: 0.35em; font-style: italic; opacity: .8; line-height: 1.4; }
+.sc-band-t1 { background: linear-gradient(180deg, #e6c274, #c9a15a); }
+.sc-band-t2 { background: linear-gradient(180deg, #9dbd80, #7a9c5e); }
+.sc-band-t3 { background: linear-gradient(180deg, #8fb6d6, #6b93b6); }
+.sc-band-t4 { background: linear-gradient(180deg, #b79bd0, #9375ad); }
+.sc-band-missed { outline: 2px dashed rgba(30, 20, 10, 0.4); outline-offset: -0.3em; }
+
+.sc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.32em; }
+.sc-tile {
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  min-height: 3.6em; padding: 0.3em 0.22em; border-radius: 0.35em; cursor: pointer;
+  font-family: var(--serif-body); font-size: 0.86em; line-height: 1.18;
+  color: var(--tile-fg); background: var(--tile-bg); border: 1px solid var(--tile-bd);
+  transition: background .18s ease, border-color .18s ease, transform .12s ease, color .18s ease;
+}
+.sc-tile:hover { background: var(--tile-hv); }
+.sc-tile.sel { background: var(--sel-bg); color: var(--sel-fg); border-color: var(--sel-bg); transform: translateY(-1px); }
+.sc-tile.shake { animation: sc-shake .5s; }
+@keyframes sc-shake {
+  10%, 90% { transform: translateX(-2px); } 20%, 80% { transform: translateX(4px); }
+  30%, 50%, 70% { transform: translateX(-6px); } 40%, 60% { transform: translateX(6px); }
+}
+.sc-tile.froze { animation: sc-froze 1.2s ease-out; }
+@keyframes sc-froze {
+  0%   { background: var(--tile-bg); }
+  22%  { background: #e8f6ff; color: #123049; border-color: #ffffff; box-shadow: 0 0 1.6em rgba(160,215,255,.95); }
+  100% { background: var(--tile-bg); }
+}
+
+.sc-msg { text-align: center; min-height: 1.4em; margin: 0.55em 0 0.2em; font-size: 0.76em; color: var(--ink-soft); font-style: italic; }
+
+.sc-tools { display: flex; gap: 0.4em; justify-content: center; margin-top: 0.3em; flex-wrap: wrap; }
+.sc-tool {
+  padding: 0.5em 0.95em; border-radius: 999px; cursor: pointer; font-size: 0.74em;
+  font-family: var(--serif-body); color: var(--tile-fg);
+  background: var(--tile-bg); border: 1px solid var(--tile-bd);
+  transition: border-color .18s ease, background .18s ease;
+}
+.sc-tool:hover:not(:disabled) { background: var(--tile-hv); border-color: var(--ink-soft); }
+.sc-tool:disabled { opacity: .4; cursor: default; }
+.sc-tool-go { border-color: var(--ink-soft); font-weight: 600; }
+
+/* ---------------- result, also on the sheet ---------------- */
+.sc-result { text-align: center; }
+.sc-result .sc-kicker { color: var(--ink-soft); font-size: 0.66em; }
+.sc-verdict { font-family: var(--serif-display); font-size: 1.5em; letter-spacing: 1.5px; margin: 0.3em 0 0.35em; color: var(--ink); }
+.sc-verdict-sub { margin: 0 auto 0.9em; line-height: 1.55; font-size: 0.82em; color: var(--ink-soft); }
+/* the result is written straight onto the sheet, which by the last painting is
+   almost black — every line of it needs lifting off the texture */
+.sc-result { text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45); }
+.sc-result .sc-answer, .sc-result .sc-tool { text-shadow: none; }
+.sc-answers { display: flex; flex-direction: column; gap: 0.3em; margin-bottom: 0.8em; }
+.sc-answer { border-radius: 0.35em; padding: 0.45em 0.5em; color: #1b1409; text-align: center; }
+.sc-answer b { display: block; font-family: var(--serif-display); font-size: 0.74em; letter-spacing: .8px; line-height: 1.3; }
+.sc-answer span { display: block; font-size: 0.7em; margin-top: 0.15em; opacity: .9; line-height: 1.3; }
+.sc-raven { display: inline-block; font-family: monospace; font-size: 1.1em; line-height: 1.2; letter-spacing: 2px; margin: 0 0 0.8em; }
+.sc-result-actions { display: flex; gap: 0.4em; justify-content: center; flex-wrap: wrap; }
+
+/* ================= too small to write on ================= */
+/* too narrow, or too short, to write on: the art becomes a backdrop instead */
+@media (max-width: 820px), (max-height: 640px) {
+  .sc-deskframe { display: block; max-height: none; overflow: visible; }
+  .sc-shell:not([data-phase="setup"]) .sc-deskframe { display: block; }
+  .sc-desk { --dw: 100%; width: 100%; aspect-ratio: auto; }
+  .sc-table { position: fixed; inset: 0; border-radius: 0; z-index: -1; }
+  .sc-table-layer { background-size: cover; }
+  .sc-parch {
+    position: static; width: min(560px, 94vw); margin: 18px auto 0; height: auto;
+    padding: 20px 16px 22px; box-sizing: border-box; border-radius: 4px;
+    font-size: 15px;
+    background: rgba(238, 227, 200, 0.94);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  }
+  .sc-shell[data-t="5"] .sc-parch { background: rgba(18, 30, 42, 0.92); }
+  .sc-shell[data-t="3"] .sc-parch, .sc-shell[data-t="4"] .sc-parch { background: rgba(226, 236, 244, 0.94); }
+  .sc-setup h1 { font-size: 30px; }
+  .sc-shell[data-phase="lost"] .sc-deskframe { animation: none; }
+}

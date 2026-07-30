@@ -1,0 +1,37 @@
+# ── OS / editor cruft ────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+*~
+.vscode/
+.idea/
+
+# ── old AI-tool backups (snapshots, not live code) ───────────────────
+_codex_backup_*/
+
+# ── working sources not part of the published site ──────────────────
+assets/_sources/
+.claude/
+tools/__pycache__/
+tmp/
+
+# ── heavy map source files that are NOT served ──────────────────────
+# The pages serve exactly TWO map images:
+#   assets/ASOIAF_map_redrawn_v6.jpg  — the basemap in all three maps
+#   assets/ASOIAF_map.jpg             — the CSS backdrop (home hero, style.css)
+# plus assets/ASOIAF_map_redrawn_v6_preview.jpg (the layer thumbnail).
+# Every other version and every .png master is a working file — keep it
+# on disk, out of git. This is ~280 MB.
+assets/ASOIAF_map_redrawn_v*.png
+assets/ASOIAF_map_redrawn_v*.manifest.json
+assets/ASOIAF_map.png
+assets/ASOIAF_map_original.png
+assets/ASOIAF_map_redrawn_v1*.jpg
+assets/ASOIAF_map_redrawn_v2*.jpg
+assets/ASOIAF_map_redrawn_v3*.jpg
+assets/ASOIAF_map_redrawn_v4*.jpg
+assets/ASOIAF_map_redrawn_v5*.jpg
+
+# ── scratch ──────────────────────────────────────────────────────────
+_*.html
+*.tmp

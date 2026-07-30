@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Who Are You in the Realm? — Quizzes of Ice and Fire</title>
+<link rel="preload" href="../css/fonts/cinzel-400-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="../css/fonts/cinzel-600-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="../css/fonts/ebgaramond-400-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="stylesheet" href="../css/fonts.css" />
+<link rel="stylesheet" href="../css/style.css" />
+<link rel="stylesheet" href="quiz.css" />
+<script>try{var t=localStorage.getItem("kwTheme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
+</head>
+<body class="quiz-body">
+
+<header class="topbar">
+  <a class="brand home-brand" href="../trivia/index.html" style="text-decoration:none;color:var(--text-light)">
+    <span class="brand-icon">&#10022;</span>
+    <span class="brand-name">WHO ARE YOU IN THE REALM?</span>
+  </a>
+
+  <nav class="modes">
+    <span class="trees-kicker quiz-kicker-top">The septons ask, the answers judge</span>
+  </nav>
+
+  <div class="topbar-right"></div>
+</header>
+
+<main class="quiz-stage" id="quiz-stage">
+
+  <!-- ============ the quiz picker ============ -->
+  <section class="quiz-home" id="quiz-home">
+    <div class="quiz-home-kicker">Quizzes of the Realm</div>
+    <h1>Who Are You in the Realm?</h1>
+    <p class="quiz-home-sub">Twelve questions, honestly answered, and the realm will place you.
+      No question asks you to pick a favorite animal — the maesters are subtler than that.</p>
+    <div class="quiz-cards" id="quiz-cards"></div>
+  </section>
+
+  <!-- ============ a running quiz ============ -->
+  <section class="quiz-run hidden" id="quiz-run">
+    <div class="quiz-run-head">
+      <button class="quiz-quit" id="quiz-quit">&larr; All quizzes</button>
+      <div class="quiz-run-title" id="quiz-run-title"></div>
+      <div class="quiz-progress-label" id="quiz-progress-label"></div>
+    </div>
+    <div class="quiz-progress"><div class="quiz-progress-fill" id="quiz-progress-fill"></div></div>
+    <div class="quiz-question" id="quiz-question"></div>
+    <div class="quiz-answers" id="quiz-answers"></div>
+    <button class="quiz-back hidden" id="quiz-back">&larr; Take back my last answer</button>
+  </section>
+
+  <!-- ============ the verdict ============ -->
+  <section class="quiz-result hidden" id="quiz-result"></section>
+
+  <p class="game-backlink"><a href="../trivia/index.html">&larr; All the games of the realm</a></p>
+</main>
+
+<script src="quiz-got-characters.js"></script>
+<script src="quiz-got-houses.js"></script>
+<script src="quiz-hotd-characters.js"></script>
+<script src="quiz-knight-characters.js"></script>
+<script src="quiz-engine.js"></script>
+<script src="../js/realm-nav.js" data-root="../"></script>
+</body>
+</html>

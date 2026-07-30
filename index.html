@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The Known Realm — Maps, Trees & Games of Ice and Fire</title>
+<meta name="description" content="An unofficial companion to Game of Thrones, House of the Dragon and A Knight of the Seven Kingdoms — interactive maps, an encyclopedia, family trees, a timeline and a handful of games." />
+<link rel="canonical" href="https://knownrealm.com/" />
+<link rel="icon" href="favicon.ico" />
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png" />
+<link rel="apple-touch-icon" href="assets/favicon-180.png" />
+<!-- social share preview (Open Graph + Twitter) -->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="The Known Realm" />
+<meta property="og:title" content="The Known Realm — Maps, Wiki, Trees & Games of Ice and Fire" />
+<meta property="og:description" content="Interactive maps, an encyclopedia, family trees, a timeline and games across Game of Thrones, House of the Dragon and Dunk &amp; Egg." />
+<meta property="og:url" content="https://knownrealm.com/" />
+<meta property="og:image" content="https://knownrealm.com/assets/og-image.jpg" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="The Known Realm — Ice and Fire, mapped" />
+<meta name="twitter:description" content="Interactive maps, an encyclopedia, family trees and games of Ice and Fire." />
+<meta name="twitter:image" content="https://knownrealm.com/assets/og-image.jpg" />
+<link rel="preload" href="css/fonts/cinzel-400-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="css/fonts/cinzel-600-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="css/fonts/ebgaramond-400-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="stylesheet" href="css/fonts.css" />
+<link rel="stylesheet" href="css/style.css" />
+<link rel="stylesheet" href="home.css" />
+<script>try{var t=localStorage.getItem("kwTheme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
+</head>
+<body class="home-body">
+
+<header class="topbar home-topbar">
+  <a class="brand home-brand" href="index.html">
+    <span class="brand-icon">&#10022;</span>
+    <span class="brand-name">THE KNOWN REALM</span>
+  </a>
+
+  <nav class="home-nav" id="home-nav">
+    <!-- filled by js/realm-nav.js: franchise dropdowns + standalone links -->
+    <a href="map.html">Game of Thrones</a>
+    <a href="hotd/index.html">House of the Dragon</a>
+    <a href="knight/index.html">A Knight of the Seven Kingdoms</a>
+    <a href="trees/index.html">Family Trees</a>
+    <a href="trivia/index.html">Games &amp; Trivia</a>
+    <a href="timeline.html">Timeline</a>
+    <a href="gallery.html">Gallery</a>
+    <a href="credits.html">Credits</a>
+  </nav>
+
+  <!-- the search + day/night controls are injected here by js/realm-nav.js -->
+  <div class="topbar-right"></div>
+</header>
+
+<main class="home-main">
+
+  <!-- ================= hero ================= -->
+  <section class="home-hero">
+    <div class="home-hero-inner">
+      <div class="home-hero-kicker">Maps &middot; Lineages &middot; Chronicle &middot; Games of Ice and Fire</div>
+      <h1>The Known Realm</h1>
+      <p class="home-hero-sub">Three sagas on one map table &mdash; from the tourney at Ashford Meadow to
+        the Dance of the Dragons to the long winter of the great war. Follow every soul, banner and
+        border, episode by episode and chapter by chapter.</p>
+
+      <!-- pick a story: each saga has its own map and its own wiki -->
+      <div class="home-sagas">
+        <div class="home-saga">
+          <a class="home-saga-face" href="map.html">
+            <span class="home-saga-medal"><img src="assets/sigils/new/stark.webp" alt="" /></span>
+            <span class="home-saga-name">Game of Thrones</span>
+            <span class="home-saga-sub">Eight seasons &middot; five books</span>
+          </a>
+          <span class="home-saga-links">
+            <a class="home-saga-go" href="map.html">Enter the map</a>
+            <a class="home-saga-alt" href="wiki.html">Wiki</a>
+          </span>
+        </div>
+        <div class="home-saga">
+          <a class="home-saga-face" href="hotd/index.html">
+            <span class="home-saga-medal"><img src="assets/sigils/new/targaryen.webp" alt="" /></span>
+            <span class="home-saga-name">House of the Dragon</span>
+            <span class="home-saga-sub">The Dance of the Dragons</span>
+          </a>
+          <span class="home-saga-links">
+            <a class="home-saga-go" href="hotd/index.html">Enter the map</a>
+            <a class="home-saga-alt" href="hotd/wiki.html">Wiki</a>
+          </span>
+        </div>
+        <div class="home-saga">
+          <a class="home-saga-face" href="knight/index.html">
+            <span class="home-saga-medal"><img src="knight/assets/sigils/ashford.svg" alt="" /></span>
+            <span class="home-saga-name">A Knight of the Seven Kingdoms</span>
+            <span class="home-saga-sub">Dunk &amp; Egg, ninety years before</span>
+          </a>
+          <span class="home-saga-links">
+            <a class="home-saga-go" href="knight/index.html">Enter the map</a>
+            <a class="home-saga-alt" href="knight/wiki.html">Wiki</a>
+          </span>
+        </div>
+      </div>
+
+      <div class="home-hero-foot">
+        or <button class="home-hero-search" type="button" id="home-open-search">search the whole realm</button>,
+        or <button class="home-hero-search" type="button" id="home-surprise">surprise me</button>
+        &mdash; press <kbd>/</kbd> anywhere on the site
+      </div>
+    </div>
+  </section>
+
+  <!-- reserved ad slot (inert until body.ads-enabled) -->
+  <div class="ad-slot ad-slot-leaderboard" data-ad="home-top"><div class="ad-slot-fill"></div></div>
+
+  <!-- ================= what spans all three ================= -->
+  <section class="home-section">
+    <h2 class="home-section-title">Choose your road</h2>
+    <p class="home-road-note">Each saga has its own map and its own wiki above. These run through all three.</p>
+    <div class="home-portals">
+
+      <div class="home-portal">
+        <span class="home-portal-medal home-portal-emoji">&#128214;</span>
+        <span class="home-portal-title"><a class="home-portal-link" href="wiki.html">The Wikis</a></span>
+        <span class="home-portal-sub">Every soul, castle, banner, episode and chapter, written out at
+          length &mdash; with a spoiler fold on every page so an ending is never handed to you.</span>
+        <span class="home-portal-links">
+          <a href="wiki.html">Game of Thrones</a><a href="hotd/wiki.html">House of the Dragon</a><a href="knight/wiki.html">Dunk &amp; Egg</a>
+        </span>
+      </div>
+
+      <div class="home-portal">
+        <span class="home-portal-medal home-portal-emoji">&#128009;</span>
+        <span class="home-portal-title"><a class="home-portal-link" href="wiki.html#cat=dragons">The Collections</a></span>
+        <span class="home-portal-sub">Browsable indexes of the things people actually come looking for:
+          every dragon and its riders, the Valyrian steel, the direwolves, the battles, the prophecies
+          &mdash; and the White Book, the Book of the Brothers rendered as a book you turn, every knight
+          ever sworn to the Kingsguard in the order the White Sword Tower set them down.</span>
+        <span class="home-portal-links">
+          <a href="wiki.html#cat=dragons">Dragons</a><a href="wiki.html#cat=valyrian-steel">Valyrian steel</a><a href="wiki.html#cat=battles">Battles</a><a href="wiki.html#cat=prophecies">Prophecies</a><a href="whitebook.html">The White Book &#128737;</a>
+        </span>
+      </div>
+
+      <div class="home-portal">
+        <span class="home-portal-medal home-portal-emoji">&#8987;</span>
+        <span class="home-portal-title"><a class="home-portal-link" href="timeline.html">The Timeline</a></span>
+        <span class="home-portal-sub">Twelve thousand years in one line, from the Dawn Age to the broken
+          wheel &mdash; with both tellings marked wherever the page and the screen disagree.</span>
+        <span class="home-portal-go">Walk the years &rarr;</span>
+      </div>
+
+      <div class="home-portal">
+        <span class="home-portal-medal"><img src="assets/sigils/tully.svg" alt="" /></span>
+        <span class="home-portal-title"><a class="home-portal-link" href="trees/index.html">House Family Trees</a></span>
+        <span class="home-portal-sub">Eleven great houses, root and branch &mdash; the dragon line from the
+          Old King to the Mother of Dragons, with all the marriages the septons frowned at.</span>
+        <span class="home-portal-go">Climb the trees &rarr;</span>
+      </div>
+
+      <div class="home-portal">
+        <span class="home-portal-medal home-portal-emoji">&#127922;</span>
+        <span class="home-portal-title"><a class="home-portal-link" href="trivia/index.html">Games &amp; Trivia</a></span>
+        <span class="home-portal-sub">The daily Small Council, Trivia, Sigil Match, Who Said It, the maester's
+          Wordle and the four &ldquo;which of them are you&rdquo; quizzes &mdash; all behind one spoiler shield.</span>
+        <span class="home-portal-links">
+          <a href="smallcouncil/index.html">The Small Council</a><a href="trivia/play.html">Trivia</a><a href="sigilmatch/index.html">Sigil Match</a><a href="whosaidit/index.html">Who Said It</a><a href="blur/index.html">Blur</a><a href="wordle/index.html">Wordle</a><a href="quiz/index.html">Quizzes</a>
+        </span>
+      </div>
+
+      <div class="home-portal">
+        <span class="home-portal-medal home-portal-emoji">&#127912;</span>
+        <span class="home-portal-title"><a class="home-portal-link" href="gallery.html">The Gallery</a></span>
+        <span class="home-portal-sub">Every banner, sigil and painted scene made for this site, gathered
+          in one hall. New works join it as they are drawn.</span>
+        <span class="home-portal-go">Walk the hall &rarr;</span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= the realm at a glance ================= -->
+  <section class="home-section home-stats-section">
+    <h2 class="home-section-title">The realm at a glance</h2>
+    <p class="home-road-note">Counted across all three sagas, not one &mdash; and recounted from the
+      site's own files, so these numbers cannot drift out of true.</p>
+    <div class="home-stats" id="home-stats">
+      <div class="home-stat"><b id="stat-words">&mdash;</b><span>words, every one original</span></div>
+      <div class="home-stat"><b id="stat-pages">&mdash;</b><span>pages you can search</span></div>
+      <div class="home-stat"><b id="stat-characters">&mdash;</b><span>souls of the story</span></div>
+      <div class="home-stat"><b id="stat-locations">&mdash;</b><span>places charted</span></div>
+      <div class="home-stat"><b id="stat-episodes">&mdash;</b><span>episodes &amp; chapters followed</span></div>
+      <div class="home-stat"><b id="stat-art">&mdash;</b><span>pieces of original art</span></div>
+    </div>
+  </section>
+
+  <!-- ================= featured ================= -->
+  <section class="home-section">
+    <div class="home-featured">
+      <div class="home-feature-card" id="home-feature-char">
+        <div class="home-feature-kicker">Soul of the day</div>
+        <div class="home-feature-body" id="feature-char-body"><!-- filled by home.js --></div>
+      </div>
+      <div class="home-feature-card">
+        <div class="home-feature-kicker" id="feature-quote-kicker">Words of the day</div>
+        <blockquote class="home-quote" id="feature-quote">&mdash;</blockquote>
+        <div class="home-quote-by" id="feature-quote-by"></div>
+        <div class="home-quote-note" id="feature-quote-note"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= about & contact ================= -->
+  <section class="home-section home-about" id="about">
+    <h2 class="home-section-title">About this project</h2>
+    <div class="home-about-grid">
+      <div class="home-about-text">
+        <p>The Known Realm is a companion to George R.R. Martin's world of ice and fire — three
+          interactive maps that follow the story point by point, three wikis written out at length,
+          a chronicle of twelve thousand years, the family trees of the great houses, and a handful
+          of games for the long winters. Everything runs in plain HTML, CSS and
+          JavaScript, and no account is needed to read a word of it.</p>
+        <p>Every word of the chronicle is written for this site, and every banner and painted scene
+          in the gallery is drawn for it. Nothing here is lifted from another wiki.</p>
+        <p>The realm grows tale by tale. Found a misplaced castle, a soul standing in
+          the wrong city, or a death the ledger missed? Ravens are welcome.</p>
+        <a class="home-roadmap-btn" href="roadmap.html">&#128220; The road ahead &mdash; what's still to come &rarr;</a>
+      </div>
+      <div class="home-contact">
+        <div class="home-contact-head">Contact the maester</div>
+        <div class="home-contact-row"><span>Keeper</span><b>Jon-Anders Hauk&oslash;y</b></div>
+        <div class="home-contact-row"><span>Email</span><b><a href="mailto:knownrealm@gmail.com">knownrealm@gmail.com</a></b></div>
+        <div class="home-contact-row"><span>GitHub</span><b><a href="https://github.com/jonahaukoy" target="_blank" rel="noopener">@jonahaukoy</a></b></div>
+        <div class="home-contact-row"><span>Ravens</span><b>corrections &amp; lore welcome</b></div>
+        <div class="home-contact-note">Found a misplaced castle or a death the ledger missed? Send word.</div>
+      </div>
+    </div>
+    <p class="home-about-thanks">With thanks to my brother <b>Hans-Magnus</b> &mdash; the idea was his,
+      and he helped me set the realm in motion.</p>
+  </section>
+
+</main>
+
+<footer class="home-footer">
+  <p>Unofficial companion — not affiliated with, endorsed, sponsored, or approved by George R.R. Martin,
+    HBO, or Warner Bros. Discovery. <i>Game of Thrones</i> and <i>House of the Dragon</i> are &copy; HBO;
+    <i>A Song of Ice and Fire</i> and the Dunk &amp; Egg tales are &copy; George R.R. Martin.
+    <a href="credits.html" style="color:var(--gold)">Credits &amp; licenses</a> for every image, glyph and font.</p>
+  <div class="home-footer-legal">
+    <a href="privacy.html">Privacy Policy</a>
+    <a href="terms.html">Terms of Service</a>
+    <a href="credits.html">Credits &amp; Licenses</a>
+    <a href="#" onclick="if(window.KWConsent){window.KWConsent.open();}return false;">Cookie choices</a>
+  </div>
+</footer>
+
+<!-- world data powers the search box and the featured panels -->
+<script src="js/data.js"></script>
+<script src="js/seasons.js"></script>
+<script src="js/books.js"></script>
+<script src="js/characters.js"></script>
+<script src="js/people.js"></script>
+<script src="whosaidit/quotes-got.js"></script>
+<script src="js/search-index.js"></script>
+<script src="home.js"></script>
+<script src="js/realm-nav.js" data-root=""></script>
+</body>
+</html>

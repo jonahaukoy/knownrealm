@@ -1,0 +1,178 @@
+/* WORDLE OF THE REALM — parchment-and-candlelight, like the other games. */
+
+html { height: auto; overflow-y: auto; }
+
+.wd-body {
+  display: flex; flex-direction: column; min-height: 100vh; height: auto; overflow: visible;
+  color: #ede4d0;
+  background:
+    radial-gradient(900px 460px at 50% 0%, rgba(201, 161, 90, 0.12), transparent 65%),
+    linear-gradient(180deg, #191411, #100d0b);
+}
+
+.wd-help {
+  width: 34px; height: 34px; border-radius: 50%; cursor: pointer;
+  background: rgba(201,161,90,0.08); border: 1px solid rgba(201,161,90,0.4);
+  color: var(--gold-bright); font-family: var(--serif-display); font-size: 16px;
+  transition: background 0.16s, border-color 0.16s;
+}
+.wd-help:hover { background: rgba(201,161,90,0.18); border-color: var(--gold); }
+
+.wd-stage {
+  flex: 1; width: 100%; max-width: 520px; margin: 0 auto; box-sizing: border-box;
+  padding: 24px 18px 60px; display: flex; flex-direction: column; align-items: center;
+}
+
+.wd-head { text-align: center; }
+.wd-kicker {
+  font-family: var(--serif-display); font-size: 24px; letter-spacing: 3px;
+  background: linear-gradient(180deg, #f6e7c5, #c9a15a);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.wd-sub { font-size: 12.5px; color: var(--text-muted); margin: 6px 0 0; }
+
+/* ---------------- length + mode controls ---------------- */
+.wd-controls {
+  display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap;
+  margin: 16px 0 14px;
+}
+.wd-lens, .wd-modes { display: flex; align-items: center; gap: 5px; }
+.wd-controls-label { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); margin-left: 3px; }
+.wd-len, .wd-mode {
+  cursor: pointer; color: #ddd0b4; font-family: var(--serif-display);
+  background: rgba(240, 230, 210, 0.05); border: 1px solid rgba(201, 161, 90, 0.3);
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.wd-len { width: 34px; height: 34px; border-radius: 8px; font-size: 15px; }
+.wd-mode { padding: 7px 14px; border-radius: 999px; font-size: 11.5px; letter-spacing: 1px; }
+.wd-len:hover, .wd-mode:hover { border-color: var(--gold); background: rgba(201,161,90,0.14); }
+.wd-len.active, .wd-mode.active {
+  background: rgba(201,161,90,0.2); border-color: var(--gold-bright); color: #f6e7c5;
+  box-shadow: 0 0 0 1px rgba(201,161,90,0.4);
+}
+
+.wd-msg { min-height: 22px; text-align: center; font-size: 13px; margin-bottom: 8px; }
+.wd-msg-warn { color: #e8b96a; }
+.wd-msg-win { color: #8fd08f; }
+.wd-msg-lose { color: #e08a8a; }
+
+/* ---------------- the board ---------------- */
+.wd-board { display: flex; flex-direction: column; gap: 6px; margin-bottom: 4px; }
+.wd-row { display: grid; gap: 6px; }
+.wd-cell {
+  width: 54px; height: 54px; display: flex; align-items: center; justify-content: center;
+  font-family: var(--serif-display); font-size: 26px; font-weight: 600; color: #f0e6d2;
+  border: 2px solid rgba(201, 161, 90, 0.28); border-radius: 6px; text-transform: uppercase;
+  background: rgba(240, 230, 210, 0.03);
+  transition: border-color 0.12s, background 0.3s, transform 0.1s;
+}
+.wd-cell.filled { border-color: rgba(201, 161, 90, 0.55); }
+.wd-cell.correct { background: #4f7a3a; border-color: #4f7a3a; color: #fff; }
+.wd-cell.present { background: #c9a23a; border-color: #c9a23a; color: #241c10; }
+.wd-cell.absent { background: #3a342b; border-color: #3a342b; color: #cbbfa5; }
+.wd-row.wd-shake { animation: wd-shake 0.4s; }
+@keyframes wd-shake {
+  10%, 90% { transform: translateX(-2px); } 20%, 80% { transform: translateX(4px); }
+  30%, 50%, 70% { transform: translateX(-7px); } 40%, 60% { transform: translateX(7px); }
+}
+
+/* fewer, wider tiles for 4; smaller for 6 — keep the board a steady width */
+.wd-row[style*="repeat(4"] .wd-cell { width: 60px; height: 60px; }
+.wd-row[style*="repeat(6"] .wd-cell { width: 46px; height: 46px; font-size: 22px; }
+
+/* ---------------- the keyboard ---------------- */
+.wd-keys { display: flex; flex-direction: column; gap: 6px; margin-top: 18px; width: 100%; max-width: 500px; }
+.wd-krow { display: flex; justify-content: center; gap: 5px; }
+.wd-key {
+  flex: 1; max-width: 42px; height: 52px; border-radius: 6px; cursor: pointer;
+  font-family: var(--serif-body); font-size: 15px; font-weight: 600; color: #ede4d0;
+  background: rgba(240, 230, 210, 0.09); border: 1px solid rgba(201, 161, 90, 0.24);
+  transition: background 0.12s, border-color 0.12s;
+}
+.wd-key:hover { background: rgba(201, 161, 90, 0.18); }
+.wd-key-wide { max-width: 64px; font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase; }
+.wd-key.correct { background: #4f7a3a; border-color: #4f7a3a; color: #fff; }
+.wd-key.present { background: #c9a23a; border-color: #c9a23a; color: #241c10; }
+.wd-key.absent { background: #2c2822; border-color: #2c2822; color: #8a8071; }
+
+/* ---------------- new-word button + result ---------------- */
+.wd-btn {
+  padding: 11px 20px; border-radius: 999px; cursor: pointer; font-size: 13px;
+  font-family: var(--serif-display); letter-spacing: 1px; color: #ede4d0;
+  background: transparent; border: 1px solid rgba(201, 161, 90, 0.4);
+  transition: border-color 0.16s, background 0.16s;
+}
+.wd-btn:hover { border-color: var(--gold-bright); background: rgba(201, 161, 90, 0.12); }
+.wd-btn-go { background: rgba(201,161,90,0.16); border-color: var(--gold-bright); }
+.wd-new { margin-top: 14px; }
+
+.wd-result { text-align: center; margin-top: 14px; }
+.wd-result-grid { font-size: 20px; line-height: 1.15; letter-spacing: 3px; margin-bottom: 12px; }
+.wd-result-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+.wd-giveup {
+  display: block; margin: 16px auto 0; padding: 7px 16px; cursor: pointer;
+  background: none; border: 1px solid rgba(190, 80, 70, 0.4); border-radius: 999px;
+  color: #d89a8a; font-family: var(--serif-body); font-size: 12.5px;
+  transition: border-color 0.16s, background 0.16s, color 0.16s;
+}
+.wd-giveup:hover { border-color: #c6564a; background: rgba(160, 44, 40, 0.18); color: #f0c9bd; }
+
+.hidden { display: none; }
+
+/* the "play unlimited" gate shown before the daily is met */
+.wd-unlimited-gate {
+  display: block; margin: 0 auto 10px;
+  background: none; border: none; color: var(--gold);
+  font-family: var(--serif-display); font-size: 13px; cursor: pointer;
+  text-decoration: underline; text-underline-offset: 3px;
+}
+.wd-unlimited-gate:hover { color: var(--gold-bright); }
+/* must beat this rule's own display:block (a bare .hidden loses the cascade) */
+.wd-unlimited-gate.hidden { display: none; }
+.wd-daily-result { margin-top: 6px; }
+.wd-scene-grid {
+  font-size: 18px; line-height: 1.15; letter-spacing: 3px;
+  margin: 4px 0 12px; text-align: center;
+}
+
+/* ---------------- the rules dialog ---------------- */
+.wd-rules {
+  position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
+  background: rgba(8, 6, 4, 0.72); padding: 20px;
+  animation: wd-fade 0.2s ease both;
+}
+/* must beat .wd-rules's own display:flex — same specificity, so it needs to be
+   at least as specific and come after (a bare .hidden would lose the cascade) */
+.wd-rules.hidden { display: none; }
+@keyframes wd-fade { from { opacity: 0; } to { opacity: 1; } }
+.wd-rules-card {
+  position: relative; width: min(460px, 94vw); max-height: 88vh; overflow-y: auto;
+  background: linear-gradient(180deg, #efe6cf, #e6d8b6);
+  border: 1px solid #a98a54; border-radius: 14px; box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+  padding: 28px 30px 24px; color: #2b2416;
+}
+.wd-rules-close { position: absolute; top: 12px; right: 16px; background: none; border: none; font-size: 24px; line-height: 1; color: #7a6038; cursor: pointer; }
+.wd-rules-card h2 { font-family: var(--serif-display); font-size: 26px; margin: 0 0 4px; color: #2b2416; }
+.wd-rules-lead { font-size: 16px; margin: 0 0 14px; }
+.wd-rules-list { margin: 0 0 20px; padding-left: 20px; }
+.wd-rules-list li { font-size: 14px; line-height: 1.6; margin-bottom: 4px; }
+.wd-rules-ex { border-top: 1px solid rgba(122,96,48,0.3); padding-top: 14px; }
+.wd-ex-row { display: flex; gap: 5px; margin: 12px 0 4px; }
+.wd-ex-cell {
+  width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;
+  font-family: var(--serif-display); font-weight: 700; font-size: 18px; color: #2b2416;
+  border: 2px solid #b7a678; border-radius: 4px; background: #f3ecd8;
+}
+.wd-ex-cell.correct { background: #4f7a3a; border-color: #4f7a3a; color: #fff; }
+.wd-ex-cell.present { background: #c9a23a; border-color: #c9a23a; color: #241c10; }
+.wd-ex-cell.absent { background: #7c766a; border-color: #7c766a; color: #fff; }
+.wd-rules-ex p { font-size: 13.5px; margin: 0 0 6px; color: #4a3f2a; }
+.wd-rules-foot { border-top: 1px solid rgba(122,96,48,0.3); margin-top: 14px; padding-top: 14px; font-size: 13px; color: #4a3f2a; line-height: 1.5; }
+
+@media (max-width: 480px) {
+  .wd-cell { width: 46px; height: 46px; font-size: 22px; }
+  .wd-row[style*="repeat(4"] .wd-cell { width: 52px; height: 52px; }
+  .wd-row[style*="repeat(6"] .wd-cell { width: 40px; height: 40px; font-size: 19px; }
+  .wd-key { height: 46px; }
+}

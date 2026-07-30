@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 116">
+  <!-- House Ashford: a white sun-and-chevron on orange -->
+  <defs>
+    <clipPath id="shield"><path d="M8 6 H92 V60 C92 92 50 112 50 112 C50 112 8 92 8 60 Z"/></clipPath>
+  </defs>
+  <g clip-path="url(#shield)">
+    <rect width="100" height="116" fill="#c9702e"/>
+    <!-- sun -->
+    <g fill="#f2ead8">
+      <circle cx="50" cy="34" r="11"/>
+      <g stroke="#f2ead8" stroke-width="4" stroke-linecap="round">
+        <line x1="50" y1="14" x2="50" y2="20"/>
+        <line x1="50" y1="48" x2="50" y2="54"/>
+        <line x1="30" y1="34" x2="36" y2="34"/>
+        <line x1="64" y1="34" x2="70" y2="34"/>
+        <line x1="36" y1="20" x2="40" y2="24"/>
+        <line x1="64" y1="48" x2="60" y2="44"/>
+        <line x1="64" y1="20" x2="60" y2="24"/>
+        <line x1="36" y1="48" x2="40" y2="44"/>
+      </g>
+    </g>
+    <!-- chevron -->
+    <path d="M8 92 L50 62 L92 92 L92 76 L50 46 L8 76 Z" fill="#f2ead8" transform="translate(0,8)"/>
+  </g>
+  <path d="M8 6 H92 V60 C92 92 50 112 50 112 C50 112 8 92 8 60 Z" fill="none" stroke="#2b2015" stroke-width="4"/>
+</svg>
