@@ -1,321 +1,531 @@
-/* THE TIMELINE — on top of css/style.css. Theme-aware through the shared tokens;
-   the few places that need a day-theme correction are at the foot of the file. */
+/* ============================================================================
+   THE TIMELINE — on top of css/style.css, and theme-aware through its tokens.
 
-html { height: auto; overflow-y: auto; }
+   This page is an INSTRUMENT, not a document: the bar at the top, the map, and
+   the panel beside it are all one thing, and none of them should ever be
+   scrolled off the screen. So the page itself does not scroll (style.css
+   already pins html/body for the map pages, and this file simply lets that
+   stand) and the one panel that can outgrow its box scrolls inside itself.
+   That is the opposite of the rule for a document page, and deliberate: a
+   nested scrollbar is only a nuisance when the page behind it also scrolls.
+
+   Day-theme corrections live at the foot of the file.
+   ========================================================================== */
+
 .tl-body {
-  display: flex; flex-direction: column; min-height: 100vh; height: auto; overflow: visible;
+  display: flex; flex-direction: column; height: 100vh; overflow: hidden;
   background:
-    radial-gradient(1100px 560px at 50% -8%, rgba(201, 161, 90, 0.09), transparent 62%),
-    #14100d;
+    radial-gradient(1200px 600px at 50% -10%, rgba(201, 161, 90, 0.08), transparent 62%),
+    var(--ink);
   color: #e8dfcc;
 }
-.tl-main { flex: 1; width: 100%; max-width: 980px; margin: 0 auto; padding: 26px 22px 70px; box-sizing: border-box; }
 
-/* ---- hero: a wide picture of the age you are standing in, with the title laid
-   over it. It changes as you move through the chronicle. ---- */
-.tl-hero {
-  position: relative; text-align: center; margin: 4px 0 22px;
-  border-radius: 16px; overflow: hidden;
-  border: 1px solid rgba(201, 161, 90, 0.28);
-  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.45);
-  background: #0e0b08;
-}
-.tl-hero-art { position: absolute; inset: 0; }
-.tl-hero-art img {
-  width: 100%; height: 100%; object-fit: cover; display: block;
-  opacity: 0.42; filter: saturate(0.85) contrast(1.02);
-  transition: opacity 0.5s ease;
-}
-.tl-hero::after {
-  content: ""; position: absolute; inset: 0; pointer-events: none;
-  background:
-    radial-gradient(ellipse at 50% 40%, rgba(14, 11, 8, 0.30), rgba(14, 11, 8, 0.86) 78%),
-    linear-gradient(180deg, rgba(14, 11, 8, 0.55), rgba(14, 11, 8, 0.20) 40%, rgba(14, 11, 8, 0.85));
-}
-.tl-hero-text { position: relative; z-index: 2; padding: 52px 26px 46px; }
-.tl-flourish { color: var(--gold); font-size: 13px; letter-spacing: 8px; margin-bottom: 10px; }
-.tl-hero h1 {
-  font-family: var(--serif-display); font-size: 38px; letter-spacing: 1.5px;
-  color: #f5ecd6; margin: 0 0 12px; text-shadow: 0 2px 18px rgba(0, 0, 0, 0.8);
-}
-.tl-hero p {
-  max-width: 620px; margin: 0 auto; line-height: 1.65; font-size: 15px;
-  color: #d8cbb0; text-shadow: 0 1px 10px rgba(0, 0, 0, 0.8);
+.tl-topbar { gap: 18px; }
+.tl-topnote {
+  font-family: var(--serif-body); font-style: italic; font-size: 13.5px;
+  color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
-/* ---- the ages: picture cards, so they read as something to open ---- */
-.tl-eras {
-  display: grid; gap: 10px; margin: 0 0 26px;
-  grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
-}
-.tl-era {
-  display: flex; flex-direction: column; text-align: left; cursor: pointer;
-  padding: 0; overflow: hidden; border-radius: 12px;
-  background: rgba(240, 230, 210, 0.04);
-  border: 1px solid rgba(201, 161, 90, 0.26);
-  color: #cdbf9f;
-  transition: border-color 0.18s, transform 0.18s, box-shadow 0.18s;
-}
-.tl-era:hover {
-  border-color: var(--gold); transform: translateY(-2px);
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.4);
-}
-/* the chapter you are reading is lit and raised */
-.tl-era.active {
-  border-color: var(--gold-bright); background: rgba(201, 161, 90, 0.14);
-  box-shadow: 0 0 0 1px var(--gold-bright), 0 10px 26px rgba(0, 0, 0, 0.45);
-}
-.tl-era.active .tl-era-art img { opacity: 1; }
-.tl-era-art { display: block; height: 78px; overflow: hidden; background: #0e0b08; position: relative; }
-.tl-era-art img {
-  width: 100%; height: 100%; object-fit: cover; display: block;
-  opacity: 0.72; transition: opacity 0.18s, transform 0.4s;
-}
-.tl-era:hover .tl-era-art img { opacity: 0.95; transform: scale(1.05); }
-.tl-era-art::after {
-  content: ""; position: absolute; inset: 0;
-  background: linear-gradient(180deg, transparent 40%, rgba(20, 16, 13, 0.9));
-}
-.tl-era-name {
-  font-family: var(--serif-display); font-size: 12.5px; letter-spacing: 0.6px;
-  color: #f0e6d2; padding: 10px 12px 0; line-height: 1.3;
-}
-/* the cards now carry a moment-count instead of a repeated blurb — the blurb
-   already appears on the chapter heading below, so the card stays compact */
-.tl-era-count {
-  font-family: var(--serif-body); font-size: 11px; font-style: italic;
-  color: var(--text-muted); padding: 4px 12px 11px;
-}
-.tl-era.active .tl-era-count { color: var(--gold-bright); }
+/* ==========================================================================
+   THE BAR — the age is written on the ruler, and so is BC/AC
+   ========================================================================== */
 
-/* ---- the focused moment ---- */
-.tl-focus {
-  display: grid; grid-template-columns: 300px 1fr;
-  background: linear-gradient(180deg, rgba(240, 230, 210, 0.06), rgba(240, 230, 210, 0.02));
-  border: 1px solid rgba(201, 161, 90, 0.32);
-  border-top: 3px solid var(--gold);
-  border-radius: 14px; overflow: hidden; box-shadow: var(--shadow);
-  min-height: 240px;
+/* Nothing on the bar is text to be read and copied — it is an instrument you
+   drag. Without this, sweeping the handle across the ruler paints every age's
+   name and every year in selection blue, which looks like a bug because it is
+   one. The map's own labels are covered by the same rule in .tl-terrlabel. */
+.tl-bar, .tl-bar * {
+  user-select: none; -webkit-user-select: none; -ms-user-select: none;
 }
-.tl-focus:not(:has(.tl-focus-art)) { grid-template-columns: 1fr; }
-.tl-focus-art { position: relative; background: #0e0b08; min-height: 240px; }
-.tl-focus-art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.tl-focus-art::after {
-  content: ""; position: absolute; inset: 0;
-  background: linear-gradient(90deg, rgba(20, 16, 13, 0.35), rgba(20, 16, 13, 0.10) 45%, rgba(20, 16, 13, 0.75));
+.tl-bar {
+  flex-shrink: 0;
+  display: flex; align-items: stretch; gap: 18px;
+  padding: 12px 22px 10px;
+  background: linear-gradient(180deg, #191410, #100d0a);
+  border-bottom: 1px solid #3a2f22;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.45);
+  z-index: 30;
 }
-.tl-focus-body { padding: 26px 28px 22px; min-width: 0; }
-.tl-focus-era { font-family: var(--serif-display); font-size: 11px; letter-spacing: 2.4px; text-transform: uppercase; color: var(--gold); }
-.tl-focus-when { font-style: italic; color: var(--text-muted); font-size: 13.5px; margin-top: 5px; }
-.tl-focus-title { font-family: var(--serif-display); font-size: 27px; color: #f0e6d2; margin: 8px 0 12px; line-height: 1.2; }
-.tl-badges { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
-.tl-badge { font-size: 11.5px; padding: 4px 11px; border-radius: 999px; border: 1px solid rgba(201, 161, 90, 0.4); color: var(--gold-bright); }
-.tl-badge-book { border-color: rgba(120, 150, 190, 0.45); color: #9db8d6; }
-.tl-badge-lore { border-color: rgba(203, 191, 165, 0.35); color: #cbbfa5; }
-.tl-focus-text { font-size: 15.5px; line-height: 1.75; margin: 0 0 14px; }
-.tl-focus-link { color: var(--gold-bright); text-decoration: none; font-size: 14px; border-bottom: 1px dotted rgba(224, 189, 124, 0.5); }
-.tl-focus-link:hover { border-bottom-style: solid; }
-.tl-focus-pos { margin-top: 14px; font-size: 11.5px; letter-spacing: 1px; color: var(--text-muted); text-align: right; }
-.tl-none { text-align: center; font-style: italic; opacity: 0.7; padding: 40px 10px; }
 
-/* ---- the timeline bar: sweep the whole chronicle ---- */
-.tl-player { display: flex; align-items: center; gap: 14px; margin: 18px 0 4px; }
-.tl-bar { flex: 1; min-width: 0; }
-#tl-scrub {
-  -webkit-appearance: none; appearance: none; width: 100%; height: 7px; border-radius: 999px;
-  cursor: pointer; outline: none;
-  /* the filled portion shows how far along the twelve thousand years you are */
-  background: linear-gradient(90deg, var(--gold) 0 var(--p, 0%), rgba(201, 161, 90, 0.18) var(--p, 0%) 100%);
-}
-#tl-scrub::-webkit-slider-thumb {
-  -webkit-appearance: none; appearance: none; width: 19px; height: 19px; border-radius: 50%;
-  background: radial-gradient(circle at 40% 35%, #fff6e2, var(--gold-bright));
-  border: 1px solid var(--gold); box-shadow: 0 0 9px rgba(201, 161, 90, 0.85); cursor: grab;
-}
-#tl-scrub::-webkit-slider-thumb:active { cursor: grabbing; }
-#tl-scrub::-moz-range-thumb {
-  width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--gold);
-  background: radial-gradient(circle at 40% 35%, #fff6e2, var(--gold-bright)); box-shadow: 0 0 9px rgba(201, 161, 90, 0.85);
-}
-#tl-scrub::-moz-range-progress { background: var(--gold); height: 7px; border-radius: 999px; }
-.tl-bar-ends {
-  display: flex; justify-content: space-between; margin-top: 6px;
-  font-family: var(--serif-body); font-style: italic; font-size: 11px; color: var(--text-muted);
-}
-.tl-btn {
-  background: rgba(240, 230, 210, 0.05); border: 1px solid rgba(201, 161, 90, 0.35);
-  color: var(--gold-bright); border-radius: 999px; height: 40px; padding: 0 18px;
-  font-family: var(--serif-display); font-size: 12px; letter-spacing: 1px; line-height: 1; flex-shrink: 0;
-  cursor: pointer; transition: background 0.16s, border-color 0.16s;
-}
-.tl-btn:hover { background: rgba(201, 161, 90, 0.16); border-color: var(--gold); }
-/* the one-step arrows that flank the scrubber — square, thumb-sized, and kept
-   next to the bar so they can be pressed without leaving the chronicle */
+.tl-bar-left { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+
 .tl-step {
-  width: 40px; padding: 0; font-size: 17px; letter-spacing: 0;
-  display: flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; flex-shrink: 0;
+  border-radius: 8px; background: rgba(201, 161, 90, 0.08);
+  border: 1px solid rgba(201, 161, 90, 0.38); color: var(--gold-bright);
+  font-family: var(--serif-display); font-size: 17px; line-height: 1;
+  transition: background 0.14s ease, border-color 0.14s ease;
 }
-.tl-step:active { background: rgba(201, 161, 90, 0.26); }
-.tl-shield:hover { background: rgba(160, 44, 40, 0.32); border-color: #c6564a; color: #f3d6c8; }
-.tl-shield { background: rgba(140, 32, 32, 0.20); border-color: rgba(190, 80, 70, 0.5); color: #e8b9a8; align-self: flex-start; }
-.tl-bar-hint { text-align: center; font-size: 11.5px; color: var(--text-muted); font-style: italic; margin: 0 0 4px; }
-.tl-bar-hint kbd {
-  font-family: var(--serif-body); font-style: normal; background: rgba(201,161,90,0.14);
-  border: 1px solid rgba(201,161,90,0.3); border-radius: 4px; padding: 0 5px; font-size: 11px;
-}
-.tl-hidden-note { text-align: center; font-size: 12.5px; color: var(--text-muted); font-style: italic; margin: 8px 0 22px; }
+.tl-step:hover { background: rgba(201, 161, 90, 0.22); border-color: var(--gold); }
+.tl-step-far { font-size: 14px; opacity: 0.85; }
 
-/* ---- the chronicle: only the chosen age's moments, so it flows with the page
-   and never needs a scrollbar of its own ---- */
-.tl-stream { display: flex; flex-direction: column; gap: 3px; }
-.tl-stream-head {
-  display: flex; flex-direction: column; gap: 2px;
-  margin: 0 0 10px; padding-bottom: 8px; border-bottom: 1px solid rgba(201, 161, 90, 0.22);
+.tl-readout { min-width: 148px; text-align: center; padding: 0 6px; }
+.tl-year {
+  font-family: var(--serif-display); font-size: 27px; letter-spacing: 1.2px;
+  line-height: 1.05; color: #f6e7c5;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.6);
 }
-.tl-stream-head b { font-family: var(--serif-display); font-size: 14px; letter-spacing: 1.6px; text-transform: uppercase; color: var(--gold); }
-.tl-stream-head i { font-size: 12.5px; color: var(--text-muted); }
-.tl-era-wiki {
-  align-self: flex-start; margin-top: 6px; font-family: var(--serif-display);
-  font-size: 11.5px; letter-spacing: 0.6px; color: var(--gold-bright); text-decoration: none;
-  border-bottom: 1px solid rgba(201, 161, 90, 0.4); padding-bottom: 1px; transition: color 0.16s, border-color 0.16s;
-}
-.tl-era-wiki:hover { color: #f5edd8; border-color: var(--gold-bright); }
-.tl-item {
-  display: flex; align-items: center; gap: 13px; text-align: left; width: 100%; cursor: pointer;
-  background: transparent; border: 1px solid transparent; border-left: 2px solid rgba(201, 161, 90, 0.22);
-  border-radius: 0 8px 8px 0; padding: 7px 12px 7px 9px; color: #ddd0b4;
-  transition: background 0.15s, border-left-color 0.15s;
-}
-.tl-item:hover { background: rgba(201, 161, 90, 0.09); border-left-color: var(--gold); }
-.tl-item.cur { background: rgba(201, 161, 90, 0.16); border-left-color: var(--gold); border-left-width: 3px; color: #f5edd8; }
-.tl-item-thumb {
-  flex-shrink: 0; width: 62px; height: 42px; border-radius: 5px; overflow: hidden;
-  background: rgba(201, 161, 90, 0.10); border: 1px solid rgba(201, 161, 90, 0.20);
-}
-.tl-item-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; opacity: 0.82; }
-.tl-item:hover .tl-item-thumb img, .tl-item.cur .tl-item-thumb img { opacity: 1; }
-.tl-item-text { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
-.tl-item-when { font-size: 11px; color: var(--text-muted); font-style: italic; }
-.tl-item-title { font-family: var(--serif-display); font-size: 14.5px; line-height: 1.3; }
-.tl-item-go { flex-shrink: 0; color: var(--gold); opacity: 0; transition: opacity 0.15s; font-size: 15px; }
-.tl-item:hover .tl-item-go, .tl-item.cur .tl-item-go { opacity: 0.85; }
-
-.tl-streamhead {
-  font-family: var(--serif-display); font-size: 11.5px; letter-spacing: 2.2px;
-  text-transform: uppercase; color: var(--gold); margin: 30px 0 10px;
-  display: flex; align-items: center; gap: 12px;
-}
-.tl-streamhead::after {
-  content: ""; flex: 1; height: 1px;
-  background: linear-gradient(90deg, rgba(201, 161, 90, 0.4), transparent);
+.tl-eraname {
+  font-family: var(--serif-body); font-style: italic; font-size: 12px;
+  color: var(--gold); margin-top: 2px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 230px;
 }
 
-/* the second picture: the foot of the chronicle */
-.tl-footart {
-  position: relative; margin: 30px 0 0; border-radius: 14px; overflow: hidden;
+/* ---- the track ---- */
+/* The track reserves an 18px strip along its top for the handle's flag, so the
+   year the reader is holding never sits on top of the age's name. */
+.tl-track {
+  position: relative; flex: 1; min-width: 0;
+  height: 96px; cursor: pointer; outline: none;
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.34), rgba(0, 0, 0, 0.16));
   border: 1px solid rgba(201, 161, 90, 0.22);
+  padding: 0;
+  touch-action: pan-y;
 }
-.tl-footart img { width: 100%; height: 220px; object-fit: cover; display: block; opacity: 0.55; }
-.tl-footart-cap {
-  position: absolute; left: 0; right: 0; bottom: 0; padding: 34px 18px 14px;
-  font-family: var(--serif-display); font-size: 11.5px; letter-spacing: 1.6px;
-  text-transform: uppercase; color: #e6dabc; text-align: center;
-  background: linear-gradient(180deg, transparent, rgba(14, 11, 8, 0.9));
+.tl-track:focus-visible { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(201, 161, 90, 0.3); }
+.tl-track.dragging { cursor: grabbing; }
+
+/* the ages, written across their own stretch of the bar */
+.tl-eraband { position: absolute; left: 0; right: 0; top: 18px; height: 27px; }
+.tl-era {
+  position: absolute; top: 0; height: 27px; padding: 0 3px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(201, 161, 90, 0.07);
+  border: 0; border-right: 1px solid rgba(201, 161, 90, 0.28);
+  color: var(--gold-dim); cursor: pointer; overflow: hidden;
+  font-family: var(--serif-display); font-size: 10.5px; letter-spacing: 0.9px;
+  text-transform: uppercase; white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.tl-era:first-child { border-radius: 4px 0 0 4px; }
+.tl-era:last-child { border-right: 0; border-radius: 0 4px 4px 0; }
+.tl-era:hover { background: rgba(201, 161, 90, 0.16); color: var(--gold-bright); }
+.tl-era.active {
+  background: linear-gradient(180deg, rgba(201, 161, 90, 0.30), rgba(201, 161, 90, 0.14));
+  color: #f6e7c5;
+}
+/* the long name where the age is wide enough for it, the short name otherwise
+   (the engine measures and adds .narrow — the widths are data, not guesswork) */
+.tl-era-short { display: none; }
+.tl-era.narrow { font-size: 9px; letter-spacing: 0.3px; }
+.tl-era.narrow .tl-era-long { display: none; }
+.tl-era.narrow .tl-era-short { display: inline; }
+
+/* the ruler: the years themselves, BC and AC written on them */
+.tl-ruler { position: absolute; left: 0; right: 0; top: 45px; height: 28px; }
+.tl-tick { position: absolute; top: 0; transform: translateX(-50%); text-align: center; pointer-events: none; }
+.tl-tick i { display: block; width: 1px; height: 8px; margin: 0 auto; background: rgba(201, 161, 90, 0.5); }
+.tl-tick b {
+  display: block; margin-top: 2px; font-family: var(--serif-body);
+  font-size: 10px; font-weight: 400; letter-spacing: 0.3px; color: var(--text-muted); white-space: nowrap;
+}
+.tl-tick-first { transform: translateX(0); text-align: left; }
+.tl-tick-first i { margin: 0; }
+.tl-tick-last { transform: translateX(-100%); text-align: right; }
+.tl-tick-last i { margin: 0 0 0 auto; }
+
+/* every moment the chronicle records, as a mark you can hit */
+.tl-moments { position: absolute; left: 0; right: 0; top: 73px; height: 22px; }
+.tl-moment {
+  position: absolute; bottom: calc(4px + var(--stack, 0) * 6px);
+  transform: translateX(-50%);
+  width: 7px; height: 7px; padding: 0; border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.5); cursor: pointer;
+  background: var(--gold-dim);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.tl-moment:hover { transform: translateX(-50%) scale(1.7); z-index: 4; }
+.tl-moment.now {
+  background: #f6e7c5; box-shadow: 0 0 0 3px rgba(224, 189, 124, 0.35);
+  transform: translateX(-50%) scale(1.5); z-index: 5;
+}
+.tl-moment-lore { background: #8a7043; }
+.tl-moment-got { background: #c9a15a; }
+.tl-moment-hotd { background: #a8452f; }
+.tl-moment-knight { background: #4f7a5e; }
+
+/* the handle */
+.tl-handle {
+  position: absolute; top: 17px; bottom: 0; width: 0;
+  border-left: 2px solid #f6e7c5;
+  box-shadow: 0 0 12px rgba(246, 231, 197, 0.55);
+  pointer-events: none; z-index: 6;
+}
+.tl-handle::after {
+  content: ""; position: absolute; left: -5px; bottom: -4px;
+  width: 10px; height: 10px; border-radius: 50%;
+  background: #f6e7c5; box-shadow: 0 0 10px rgba(246, 231, 197, 0.7);
+}
+.tl-handle-flag {
+  position: absolute; top: -18px; left: 0; transform: translateX(-50%);
+  padding: 2px 8px; border-radius: 4px; white-space: nowrap;
+  background: #f6e7c5; color: #241b12;
+  font-family: var(--serif-display); font-size: 11px; letter-spacing: 0.8px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
 }
 
-.tl-footer {
-  margin-top: 40px; padding: 18px 24px; border-top: 1px solid #3a2f22;
-  text-align: center; font-size: 11.5px; opacity: 0.55; line-height: 1.6;
-}
-.tl-footer a { color: var(--gold); }
+/* ==========================================================================
+   THE STAGE — the panel, and the world
+   ========================================================================== */
 
-/* ---- the spoiler gate ---- */
-.tl-gate {
-  display: none; position: fixed; inset: 0; z-index: 300;
-  background: rgba(8, 6, 4, 0.78); padding: 6vh 16px;
-  align-items: flex-start; justify-content: center; overflow-y: auto;
-}
-.tl-gate.open { display: flex; }
-.tl-gate-panel {
-  position: relative; width: 100%; max-width: 560px;
-  background: linear-gradient(180deg, var(--parchment), var(--parchment-2));
-  border: 1px solid var(--parchment-edge); border-top: 3px solid var(--gold);
-  border-radius: 12px; padding: 26px 28px 22px; color: var(--text-dark);
-  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.55);
-}
-.tl-gate-kicker { font-family: var(--serif-display); font-size: 11px; letter-spacing: 2.4px; text-transform: uppercase; color: #6e1f1f; }
-.tl-gate-panel h2 { font-family: var(--serif-display); font-size: 25px; margin: 8px 0 8px; }
-.tl-gate-sub { font-size: 14px; line-height: 1.6; color: var(--text-dark-soft); margin: 0 0 18px; }
-.tl-gate-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 9px 0; border-top: 1px solid rgba(43, 32, 21, 0.14); }
-.tl-gate-saga { flex: 1 1 190px; font-family: var(--serif-display); font-size: 13.5px; }
-.tl-gate-row label { font-size: 12px; color: var(--text-dark-soft); display: flex; align-items: center; gap: 6px; }
-.tl-gate-row select {
-  font-family: var(--serif-body); font-size: 13px; padding: 4px 7px;
-  border: 1px solid var(--parchment-edge); border-radius: 5px; background: rgba(255, 255, 255, 0.65); color: var(--text-dark);
-}
-.tl-gate-count { margin: 14px 0 4px; font-size: 13px; font-style: italic; color: var(--text-dark-soft); }
-.tl-gate-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
-.tl-gate-btn {
-  flex: 1 1 200px; background: transparent; border: 1px solid var(--gold-dim);
-  color: var(--text-dark); border-radius: 8px; padding: 10px 14px;
-  font-family: var(--serif-display); font-size: 12px; letter-spacing: 0.8px;
-}
-.tl-gate-btn:hover { background: rgba(201, 161, 90, 0.18); border-color: var(--gold); }
-.tl-gate-go { background: var(--red); border-color: var(--red); color: #f7ecdc; }
-.tl-gate-go:hover { background: var(--red-bright); border-color: var(--red-bright); }
-.tl-gate-close { position: absolute; top: 8px; right: 12px; background: none; border: none; font-size: 24px; line-height: 1; color: var(--text-dark-soft); }
-.tl-gate-close:hover { color: var(--red); }
+.tl-stage { flex: 1; display: flex; min-height: 0; }
 
-@media (max-width: 760px) {
-  .tl-focus { grid-template-columns: 1fr; }
-  .tl-focus-art { min-height: 190px; height: 190px; }
-  .tl-focus-art::after { background: linear-gradient(180deg, rgba(20, 16, 13, 0.15), rgba(20, 16, 13, 0.72)); }
-  .tl-focus-body { padding: 20px 18px; }
-  .tl-hero h1 { font-size: 27px; }
-  .tl-hero-text { padding: 34px 18px 30px; }
-  .tl-item-thumb { width: 48px; height: 34px; }
-  .tl-footart img { height: 150px; }
-  /* the era cards are the chapter picker — seven of them, one per row at
-     minmax(168px), made the whole chronicle start a screen and a half down */
-  .tl-eras { grid-template-columns: repeat(2, 1fr); gap: 7px; margin-bottom: 16px; }
-  .tl-era-body { padding: 8px 9px; }
-  .tl-era-name { font-size: 12px; letter-spacing: 0.4px; line-height: 1.25; }
-  .tl-era-when, .tl-era-count { font-size: 10px; }
-  .tl-era-art { height: 52px; }
-  /* the bar keeps its own row so the two step arrows stay full thumb-size
-     beside it; the shield drops underneath rather than squeezing them */
-  .tl-player { flex-wrap: wrap; gap: 10px; }
-  .tl-bar { flex: 1 1 auto; order: 1; }
-  #tl-prev { order: 0; }
-  #tl-next { order: 2; }
-  .tl-shield { order: 3; flex: 1 1 100%; align-self: stretch; }
+.tl-panel {
+  flex: 0 0 384px; width: 384px; min-width: 0;
+  overflow-y: auto; overflow-x: hidden;
+  background: linear-gradient(180deg, #171310, #110e0b);
+  border-right: 1px solid #3a2f22;
+}
+.tl-panel-inner { padding: 18px 20px 60px; }
+
+.tl-kicker {
+  font-family: var(--serif-display); font-size: 10.5px; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--gold); margin-bottom: 4px;
+}
+.tl-panel-year {
+  font-family: var(--serif-display); font-size: 30px; letter-spacing: 1.4px;
+  margin: 0 0 6px; color: #f5ecd6;
+}
+.tl-panel-note {
+  font-family: var(--serif-body); font-size: 14px; line-height: 1.6;
+  color: #b8ab8e; margin: 0 0 10px;
+}
+.tl-erawiki, .tl-mc-link, .tl-readmore {
+  display: inline-block; text-decoration: none;
+  font-family: var(--serif-display); font-size: 11.5px; letter-spacing: 0.9px;
+  color: var(--gold-bright); border-bottom: 1px solid rgba(201, 161, 90, 0.4);
+  padding-bottom: 1px;
+}
+.tl-erawiki:hover, .tl-mc-link:hover, .tl-readmore:hover { color: #f6e7c5; border-color: var(--gold); }
+.tl-readmore {
+  display: block; margin-top: 16px; padding: 11px 14px; text-align: center;
+  border: 1px solid rgba(201, 161, 90, 0.45); border-radius: 9px;
+  background: rgba(201, 161, 90, 0.1);
+}
+.tl-readmore:hover { background: rgba(201, 161, 90, 0.2); }
+
+.tl-panel-era { padding-bottom: 14px; border-bottom: 1px solid rgba(201, 161, 90, 0.16); }
+
+.tl-hintline {
+  margin: 12px 0 2px; font-family: var(--serif-body); font-style: italic;
+  font-size: 12.5px; color: #7f7462;
 }
 
-/* ---- day theme ---- */
+.tl-panel-h {
+  margin: 20px 0 8px; font-family: var(--serif-display);
+  font-size: 11px; letter-spacing: 1.8px; text-transform: uppercase;
+  color: var(--gold); border-bottom: 1px solid rgba(201, 161, 90, 0.18); padding-bottom: 5px;
+}
+
+.tl-moment-card {
+  margin-bottom: 14px; padding: 14px 15px; border-radius: 11px;
+  background: rgba(240, 230, 210, 0.035); border: 1px solid rgba(201, 161, 90, 0.18);
+}
+.tl-mc-when {
+  font-family: var(--serif-display); font-size: 10.5px; letter-spacing: 1.4px;
+  text-transform: uppercase; color: var(--gold-dim); margin-bottom: 4px;
+}
+.tl-moment-card h3 {
+  font-family: var(--serif-display); font-size: 17px; line-height: 1.3;
+  margin: 0 0 8px; color: #f2e8d2;
+}
+.tl-moment-card p {
+  font-family: var(--serif-body); font-size: 14.5px; line-height: 1.68;
+  color: #cdbf9f; margin: 0 0 10px;
+}
+.tl-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 9px; }
+.tl-badge {
+  font-family: var(--serif-body); font-size: 11.5px; padding: 3px 9px; border-radius: 999px;
+  border: 1px solid rgba(201, 161, 90, 0.28); color: #bfb094;
+}
+.tl-badge-show { border-color: rgba(201, 161, 90, 0.45); color: var(--gold-bright); }
+.tl-badge-book { border-color: rgba(120, 160, 200, 0.35); color: #9fb8d0; }
+.tl-badge-lore { border-color: rgba(150, 150, 150, 0.28); color: #9a9080; }
+
+.tl-quiet {
+  font-family: var(--serif-body); font-style: italic; font-size: 13.5px;
+  line-height: 1.6; color: #8d8271; margin: 14px 0 4px;
+}
+.tl-jump, .tl-agerow, .tl-back {
+  display: block; width: 100%; text-align: left; cursor: pointer;
+  background: rgba(240, 230, 210, 0.04); border: 1px solid rgba(201, 161, 90, 0.2);
+  color: #ded1b4; border-radius: 9px; padding: 10px 12px;
+  font-family: var(--serif-body); font-size: 13.5px; line-height: 1.4;
+  transition: background 0.13s ease, border-color 0.13s ease;
+}
+.tl-jump:hover, .tl-agerow:hover, .tl-back:hover { background: rgba(201, 161, 90, 0.14); border-color: var(--gold-dim); }
+.tl-agelist { display: flex; flex-direction: column; gap: 6px; }
+.tl-agerow { display: flex; gap: 10px; align-items: baseline; }
+.tl-agerow span {
+  flex: 0 0 68px; font-family: var(--serif-display); font-size: 10.5px;
+  letter-spacing: 0.8px; color: var(--gold-dim);
+}
+.tl-agerow b { font-weight: 400; }
+.tl-back { margin-bottom: 14px; font-family: var(--serif-display); font-size: 11.5px; letter-spacing: 1px; }
+
+/* ---- the territory card ---- */
+.tl-landcard { padding-top: 2px; }
+.tl-landname {
+  font-family: var(--serif-display); font-size: 24px; letter-spacing: 0.8px;
+  color: #f5ecd6; line-height: 1.2;
+}
+.tl-landsub {
+  font-family: var(--serif-body); font-style: italic; font-size: 13px;
+  color: #8d8271; margin: 3px 0 12px;
+}
+.tl-holder {
+  display: flex; align-items: center; gap: 11px; padding: 11px 13px;
+  border-radius: 10px; background: rgba(240, 230, 210, 0.045);
+  border: 1px solid rgba(201, 161, 90, 0.22); margin-bottom: 10px;
+}
+.tl-holder b { display: block; font-family: var(--serif-display); font-size: 14px; color: #f2e8d2; font-weight: 400; }
+.tl-holder i { display: block; font-family: var(--serif-body); font-size: 12px; color: #8d8271; }
+.tl-swatch {
+  flex: 0 0 auto; width: 20px; height: 20px; border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.45); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+.tl-swatch-none { background: repeating-linear-gradient(45deg, #40382c, #40382c 3px, #2a241c 3px, #2a241c 6px); }
+.tl-since { font-family: var(--serif-body); font-size: 12.5px; color: #9a8f79; margin-bottom: 12px; }
+.tl-souls {
+  display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px;
+}
+.tl-souls b { font-family: var(--serif-display); font-size: 21px; color: var(--gold-bright); font-weight: 400; }
+.tl-souls span { font-family: var(--serif-body); font-size: 12.5px; color: #8d8271; }
+.tl-landblurb {
+  font-family: var(--serif-body); font-size: 14.5px; line-height: 1.68;
+  color: #cdbf9f; margin: 14px 0 0;
+}
+
+/* ---- the shield notice ---- */
+.tl-sealed {
+  margin: 14px 0 4px; padding: 12px 14px; border-radius: 10px;
+  background: rgba(224, 168, 60, 0.09); border: 1px solid rgba(224, 168, 60, 0.34);
+}
+.tl-sealed b { display: block; font-family: var(--serif-display); font-size: 12.5px; color: #e8b451; font-weight: 400; margin-bottom: 4px; }
+.tl-sealed span { display: block; font-family: var(--serif-body); font-size: 13px; line-height: 1.55; color: #c2b391; }
+.tl-sealed-btn {
+  margin-top: 9px; padding: 8px 13px; border-radius: 8px; cursor: pointer;
+  background: rgba(224, 168, 60, 0.14); border: 1px solid rgba(224, 168, 60, 0.4);
+  color: #e8b451; font-family: var(--serif-display); font-size: 11px; letter-spacing: 0.8px;
+}
+.tl-sealed-btn:hover { background: rgba(224, 168, 60, 0.26); }
+
+/* ==========================================================================
+   THE MAP
+   ========================================================================== */
+
+.tl-mapwrap { position: relative; flex: 1; min-width: 0; overflow: hidden; background: #0b1620; }
+#tl-map { width: 100%; height: 100%; display: block; cursor: grab; touch-action: none; }
+#tl-map.dragging { cursor: grabbing; }
+
+.tl-terr {
+  fill-opacity: 0.5; stroke: rgba(20, 14, 8, 0.5); stroke-width: 7;
+  cursor: pointer; transition: fill-opacity 0.15s ease;
+}
+/* a land whose neighbour flies the same banner this year: no line between them,
+   because there is no border between them. Set by TLMap.paint(). */
+.tl-terr-merged { stroke: none; }
+.tl-terr:hover { fill-opacity: 0.72; }
+.tl-terr-merged:hover { stroke: rgba(20, 14, 8, 0.5); stroke-width: 7; }
+.tl-terr.sel { fill-opacity: 0.86; stroke: #f6e7c5; stroke-width: 30; }
+.tl-terr.dim { fill-opacity: 0.14; }
+
+/* sized in MAP units: the world is 5652 units wide and is shown in roughly a
+   thousand pixels, so a readable 12px label needs about seventy of them. The
+   engine counter-scales it so it stays that size at every zoom. */
+.tl-terrlabel {
+  font-family: var(--serif-display); font-size: 74px; letter-spacing: 2px;
+  fill: #241c12; paint-order: stroke; stroke: rgba(240, 231, 208, 0.85); stroke-width: 13px;
+  pointer-events: none; user-select: none;
+}
+
+/* the readout under the pointer */
+.tl-maptip {
+  position: absolute; z-index: 12; max-width: 230px; pointer-events: none;
+  padding: 9px 11px; border-radius: 9px;
+  background: rgba(16, 12, 9, 0.95); border: 1px solid rgba(201, 161, 90, 0.42);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.6);
+}
+.tl-maptip[hidden] { display: none; }
+.tl-maptip b { display: block; font-family: var(--serif-display); font-size: 13px; color: #f2e8d2; font-weight: 400; }
+.tl-maptip i { display: block; font-family: var(--serif-body); font-size: 12.5px; color: var(--gold-bright); font-style: normal; margin-top: 2px; }
+.tl-tip-swatch { float: right; width: 13px; height: 13px; border-radius: 3px; margin-left: 8px; border: 1px solid rgba(0, 0, 0, 0.5); }
+.tl-tip-pop { display: block; font-family: var(--serif-body); font-size: 11.5px; color: #8d8271; margin-top: 4px; }
+
+/* who is on the map, named — so the colours never have to carry it alone */
+/* Two columns, so a year with a dozen banners on the map does not need a
+   scrollbar of its own sitting on top of the world. */
+.tl-legend {
+  position: absolute; left: 14px; bottom: 14px; z-index: 11;
+  max-width: 330px; max-height: 52%; overflow: hidden;
+  padding: 9px 11px; border-radius: 10px;
+  background: rgba(16, 12, 9, 0.86); border: 1px solid rgba(201, 161, 90, 0.28);
+  backdrop-filter: blur(3px);
+}
+.tl-legend-head {
+  font-family: var(--serif-display); font-size: 9.5px; letter-spacing: 1.6px;
+  text-transform: uppercase; color: var(--gold); margin-bottom: 6px;
+}
+.tl-legend-rows { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px 10px; }
+.tl-legend-row {
+  display: flex; align-items: center; gap: 8px; width: 100%; text-align: left;
+  padding: 2px 4px; border: 0; border-radius: 5px; background: transparent; cursor: default;
+  font-family: var(--serif-body); font-size: 12px; color: #cdbf9f;
+}
+.tl-legend-row:hover { background: rgba(201, 161, 90, 0.14); color: #f2e8d2; }
+.tl-legend .tl-swatch { width: 13px; height: 13px; border-radius: 3px; }
+
+.tl-maphint {
+  position: absolute; right: 14px; top: 12px; z-index: 11;
+  padding: 6px 11px; border-radius: 999px;
+  background: rgba(16, 12, 9, 0.78); border: 1px solid rgba(201, 161, 90, 0.22);
+  font-family: var(--serif-body); font-style: italic; font-size: 12px; color: #a89a7c;
+  pointer-events: none;
+}
+
+.tl-mapctl {
+  position: absolute; right: 16px; bottom: 16px; z-index: 12;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.tl-mapctl button {
+  width: 38px; height: 38px; border-radius: 6px;
+  background: var(--parchment-2); border: 1px solid var(--parchment-edge);
+  color: var(--text-dark); font-family: var(--serif-display); font-size: 17px;
+  box-shadow: var(--shadow);
+}
+.tl-mapctl button:hover { background: var(--parchment); }
+
+/* only ever seen on a small screen */
+.tl-mapsize { display: none; }
+
+/* ==========================================================================
+   SMALL SCREENS — the map folds
+   ========================================================================== */
+
+@media (max-width: 900px) {
+  .tl-topnote { display: none; }
+
+  .tl-bar { flex-direction: column; gap: 10px; padding: 10px 12px 8px; }
+  .tl-bar-left { justify-content: center; }
+  .tl-readout { min-width: 120px; }
+  .tl-year { font-size: 22px; }
+  .tl-eraname { max-width: 180px; }
+  /* the bar stacks on a phone, so the track is a COLUMN flex item: `flex: 1`
+     (its desktop value) would give it a zero basis and collapse it to nothing,
+     which is exactly what happened. It gets a fixed basis instead. */
+  .tl-track { flex: 0 0 96px; height: 96px; width: 100%; }
+  .tl-tick b { font-size: 9px; }
+  .tl-era { font-size: 8.5px; letter-spacing: 0.4px; }
+  .tl-era-long { display: none; }
+  .tl-era-short { display: inline; }
+
+  .tl-stage { flex-direction: column; }
+
+  .tl-mapwrap {
+    flex: 0 0 auto; height: 40vh; order: 1;
+    border-bottom: 1px solid #3a2f22;
+    transition: height 0.28s ease;
+  }
+  .tl-map-big .tl-mapwrap { height: calc(100vh - 208px); }
+
+  .tl-panel {
+    order: 2; flex: 1 1 auto; width: 100%; min-height: 0;
+    border-right: 0;
+  }
+  .tl-panel-inner { padding: 14px 15px 70px; }
+
+  .tl-maphint { display: none; }
+  .tl-legend { max-width: 220px; max-height: 46%; left: 10px; bottom: 10px; padding: 7px 9px; }
+  .tl-legend-rows { gap: 1px 6px; }
+  .tl-legend-row { font-size: 11px; }
+  .tl-mapctl { right: 10px; bottom: 10px; }
+  .tl-mapctl button { width: 34px; height: 34px; font-size: 15px; }
+
+  .tl-mapsize {
+    display: block; position: absolute; left: 10px; top: 10px; z-index: 12;
+    padding: 7px 13px; border-radius: 999px; cursor: pointer;
+    background: rgba(16, 12, 9, 0.88); border: 1px solid rgba(201, 161, 90, 0.42);
+    color: var(--gold-bright); font-family: var(--serif-display);
+    font-size: 10.5px; letter-spacing: 1px; text-transform: uppercase;
+  }
+  .tl-mapsize:hover { background: rgba(201, 161, 90, 0.24); }
+}
+
+/* Below this the ages are too narrow to carry any writing at all, so the band
+   becomes what it really is — a set of chapters you can tap — and the age's
+   name is read from the big readout above it instead. */
+@media (max-width: 620px) {
+  .tl-era-long, .tl-era-short { display: none; }
+  .tl-era.narrow .tl-era-short { display: none; }
+  .tl-era.active { box-shadow: inset 0 -3px 0 var(--gold-bright); }
+}
+
+@media (max-width: 560px) {
+  .tl-step-far { display: none; }
+  .tl-readout { min-width: 100px; }
+  .tl-tick b { font-size: 8px; }
+  .tl-landname { font-size: 20px; }
+  .tl-panel-year { font-size: 25px; }
+}
+
+/* ==========================================================================
+   DAY THEME — the tokens flip, but these grounds are hardcoded above
+   ========================================================================== */
+
 :root[data-theme="light"] .tl-body {
   background:
-    radial-gradient(1100px 560px at 50% -8%, rgba(138, 106, 44, 0.10), transparent 62%),
-    #f1e9d7;
-  color: #33281a;
+    radial-gradient(1200px 600px at 50% -10%, rgba(138, 106, 44, 0.10), transparent 62%),
+    #efe7d4;
+  color: #2b2015;
 }
-:root[data-theme="light"] .tl-hero h1,
-:root[data-theme="light"] .tl-focus-title { color: #33281a; }
-:root[data-theme="light"] .tl-focus,
-:root[data-theme="light"] .tl-era,
-:root[data-theme="light"] .tl-btn {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.46));
-  border-color: rgba(138, 106, 44, 0.32);
+:root[data-theme="light"] .tl-bar {
+  background: linear-gradient(180deg, #e7ddc5, #ddd1b3);
+  border-bottom-color: #c8b384;
+  box-shadow: 0 8px 20px rgba(80, 62, 34, 0.16);
 }
-:root[data-theme="light"] .tl-era,
-:root[data-theme="light"] .tl-item { color: #4a3a22; }
-:root[data-theme="light"] .tl-item.cur { background: rgba(138, 106, 44, 0.16); color: #2b2115; }
-:root[data-theme="light"] .tl-badge-book { border-color: rgba(60, 95, 140, 0.45); color: #345278; }
-:root[data-theme="light"] .tl-badge-lore { border-color: rgba(90, 76, 56, 0.35); color: #5a4c38; }
-:root[data-theme="light"] .tl-footer { border-top-color: rgba(138, 106, 44, 0.3); }
+:root[data-theme="light"] .tl-year { color: #2b2015; text-shadow: none; }
+:root[data-theme="light"] .tl-eraname { color: #6f5320; }
+:root[data-theme="light"] .tl-track {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.24));
+  border-color: rgba(138, 106, 44, 0.35);
+}
+:root[data-theme="light"] .tl-era { color: #6f5320; background: rgba(138, 106, 44, 0.08); }
+:root[data-theme="light"] .tl-era.active {
+  background: linear-gradient(180deg, rgba(138, 106, 44, 0.3), rgba(138, 106, 44, 0.14)); color: #2b2015;
+}
+:root[data-theme="light"] .tl-tick b { color: #6a5c46; }
+:root[data-theme="light"] .tl-tick i { background: rgba(138, 106, 44, 0.55); }
+:root[data-theme="light"] .tl-handle { border-left-color: #4a3410; box-shadow: 0 0 10px rgba(74, 52, 16, 0.4); }
+:root[data-theme="light"] .tl-handle::after { background: #4a3410; box-shadow: none; }
+:root[data-theme="light"] .tl-handle-flag { background: #4a3410; color: #f5ecd6; }
 
-/* ---- day theme: the new picture surfaces ---- */
-:root[data-theme="light"] .tl-era-name { color: #33281a; }
-:root[data-theme="light"] .tl-hero { background: #2a2118; }
-:root[data-theme="light"] .tl-focus-art { background: #2a2118; }
-:root[data-theme="light"] .tl-item-thumb { border-color: rgba(138, 106, 44, 0.3); }
-:root[data-theme="light"] .tl-streamhead { color: #7a5c1e; }
+:root[data-theme="light"] .tl-panel {
+  background: linear-gradient(180deg, #f4eddc, #ece2cb); border-right-color: #c8b384;
+}
+:root[data-theme="light"] .tl-panel-year,
+:root[data-theme="light"] .tl-landname,
+:root[data-theme="light"] .tl-moment-card h3 { color: #2b2015; }
+:root[data-theme="light"] .tl-panel-note,
+:root[data-theme="light"] .tl-moment-card p,
+:root[data-theme="light"] .tl-landblurb { color: #4c4132; }
+:root[data-theme="light"] .tl-moment-card,
+:root[data-theme="light"] .tl-holder { background: rgba(255, 255, 255, 0.5); border-color: rgba(138, 106, 44, 0.3); }
+:root[data-theme="light"] .tl-jump,
+:root[data-theme="light"] .tl-agerow,
+:root[data-theme="light"] .tl-back { background: rgba(255, 255, 255, 0.5); border-color: rgba(138, 106, 44, 0.3); color: #3b3226; }
+:root[data-theme="light"] .tl-holder b { color: #2b2015; }
+:root[data-theme="light"] .tl-souls b { color: #6f5320; }
+:root[data-theme="light"] .tl-quiet,
+:root[data-theme="light"] .tl-hintline,
+:root[data-theme="light"] .tl-landsub,
+:root[data-theme="light"] .tl-since { color: #6a5c46; }
+
+:root[data-theme="light"] .tl-maptip { background: rgba(247, 241, 226, 0.97); border-color: rgba(138, 106, 44, 0.45); }
+:root[data-theme="light"] .tl-maptip b { color: #2b2015; }
+:root[data-theme="light"] .tl-maptip i { color: #6f5320; }
+:root[data-theme="light"] .tl-legend { background: rgba(247, 241, 226, 0.92); border-color: rgba(138, 106, 44, 0.35); }
+:root[data-theme="light"] .tl-legend-row { color: #3b3226; }
+:root[data-theme="light"] .tl-maphint { background: rgba(247, 241, 226, 0.86); border-color: rgba(138, 106, 44, 0.3); color: #6a5c46; }
+:root[data-theme="light"] .tl-mapsize { background: rgba(247, 241, 226, 0.94); color: #6f5320; border-color: rgba(138, 106, 44, 0.45); }
+:root[data-theme="light"] .tl-terrlabel { fill: #1c1710; stroke: rgba(255, 252, 244, 0.86); }

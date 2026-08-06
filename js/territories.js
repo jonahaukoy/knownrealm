@@ -34,7 +34,7 @@ const RULERS = {
   "greyjoy":        { name: "House Greyjoy",                          color: "#7a3fb0" },
   "bolton":         { name: "House Bolton, Wardens of the North",     color: "#c75b7a" },
   "martell":        { name: "House Martell",                          color: "#e06414" },
-  "nights-watch":   { name: "The Night's Watch",                      color: "#3b4046" },
+  "nights-watch":   { name: "The Night's Watch",                      color: "#9fb1c4" },
   "white-walkers":  { name: "The White Walkers",                      color: "#b7cfdd" },
   "free-folk":      { name: "The Free Folk",                          color: "#77876f" },
   "brotherhood":    { name: "The Brotherhood Without Banners",        color: "#26221e" },
@@ -44,24 +44,27 @@ const RULERS = {
 
 const TERRITORIES = [
 
-  /* ---------------- beyond the Wall: the slow advance of the dead ----------------
-     Three bands. The farthest north is always theirs; the middle falls when the
-     Fist of the First Men is overrun; the near band when Hardhome empties. The
-     show's dawn (S8E4) gives it all back to the free folk. */
-  { id: "bw-far", name: "The Lands of Always Winter", base: "white-walkers",
-    own: [[8,4,"free-folk"]],
-    /* trimmed a little tighter to the mythical far-north strip the basemap
-       itself labels "The Lands of Always Winter" — the old line dipped south
-       far enough to read as a much larger claim than the story ever shows */
-    pts: [[240,40],[1660,40],[1660,120],[1200,125],[700,135],[400,140],[255,100]] },
-  { id: "bw-mid", name: "The haunted forest, deep", base: "free-folk",
-    own: [[3,1,"white-walkers"],[8,4,"free-folk"]],
+  /* ---------------- beyond the Wall ----------------
+     ONE land, not three (Aug 2026, at the owner's request). It used to be cut
+     into three horizontal bands — "The Lands of Always Winter", "the haunted
+     forest, deep" and "the haunted forest" — which fell to the dead one after
+     another. Three bands meant three seams to keep identical and, worse, a
+     permanent pale stripe across the top of the map, as though the Others were
+     standing in the far north at every hour of the story.
+
+     Now it is a single country called what everyone in the books calls it, and
+     it belongs to the free folk, who are the only people who actually live
+     there. It answers to the Others ONLY while they are abroad: from the
+     massacre at Hardhome (S5E8) — the hour the free folk abandon the lands
+     beyond the Wall altogether — to the dawn after the Long Night (S8E4). In
+     the books' telling the turn is the Fist of the First Men (ASOS ch 1).
+
+     The top edge is now the top of the chart: the basemap draws dry land right
+     up to y=0 (x 624-1296), which the old y=40 line left unpainted. */
+  { id: "beyond-the-wall", name: "Beyond the Wall", base: "free-folk",
+    own: [[5,8,"white-walkers"],[8,4,"free-folk"]],
     ownBook: [[3,1,"white-walkers"]],
-    pts: [[255,120],[400,175],[700,165],[1200,150],[1660,140],[1660,192],[1100,208],[600,232],[300,225]] },
-  { id: "bw-near", name: "The haunted forest", base: "free-folk",
-    own: [[5,9,"white-walkers"],[8,4,"free-folk"]],
-    ownBook: [[5,2,"white-walkers"]],
-    pts: [[300,225],[600,232],[1100,208],[1660,192],[1660,240],[1620,252],[1546,248],[1424,262],[1300,272],[1180,285],[1100,310],[950,340],[700,350],[400,360],[260,300]] },
+    pts: [[240,0],[1660,0],[1660,240],[1620,252],[1546,248],[1424,262],[1300,272],[1180,285],[1100,310],[950,340],[700,350],[400,360],[260,300]] },
 
   /* ---------------- the North ----------------
      The crown's while Robert lives; Robb's when the banners rise; Bolton by
@@ -79,7 +82,7 @@ const TERRITORIES = [
     /* NE corner covers the Grey Cliffs; the top edge now also hugs the Gift's
        eastern edge up to (1645,340) so there is no untenanted spit between the
        Gift and the North on the Bay of Seals. */
-    pts: [[360,380],[950,340],[1130,372],[1200,418],[1300,452],[1420,478],[1560,460],[1620,430],[1645,340],[1720,405],[1950,445],[1950,1230],[1600,1255],[1400,1240],[1250,1232],[1100,1258],[900,1285],[830,1310],[720,1352],[600,1362],[500,1345],[420,1330],[360,1335]] },
+    pts: [[360,380],[950,340],[1040,458],[1100,446],[1180,421],[1300,408],[1424,398],[1546,384],[1620,388],[1660,390],[1720,405],[1950,445],[1950,1230],[1600,1255],[1400,1240],[1250,1232],[1100,1258],[900,1285],[830,1310],[720,1352],[600,1362],[500,1345],[420,1330],[360,1335]] },
   /* Skagos, Skane and the small northern isles — trimmed so the polygon stays
      over the islands (north of the North's mainland top edge) instead of
      dipping south to y≈480 onto the Grey Cliffs, where its fill used to overlap
@@ -90,16 +93,38 @@ const TERRITORIES = [
     ownBook: [[1,72,"stark"],[3,52,"bolton"]],
     pts: [[1670,150],[1950,140],[1950,415],[1760,420],[1690,315]] },
 
-  /* The Gift & the New Gift: the Watch's band immediately SOUTH of the Wall,
-     spanning its full length from the Shadow Tower (west) to Eastwatch (east)
-     — but NOT out to Bear Island or the Grey Cliffs, which are the North's own
-     coasts bulging south of the Wall's ends. Its southern edge is shared with
-     the North's northern edge (the central dip around Castle Black), and it is
-     painted AFTER the North so the Watch's grey isn't buried under the North's
-     fill; overrun when the Wall falls, restored at the dawn. */
-  { id: "the-gift", name: "The Gift & the New Gift", base: "nights-watch",
+  /* THE GIFT AND THE NEW GIFT — the Watch's two bands south of the Wall.
+     Redrawn twice in Aug 2026, and the second time is the one that matters.
+     They were briefly two flat rectangles, which the owner rightly called
+     awful: a grey slab floating in the middle of the North with sea on either
+     side of it, painted ON TOP of the North rather than beside it, and dark
+     enough to bury the chart's own printed "Castle Black".
+
+     They are now three bands that TILE, sharing their edges point for point so
+     there is neither a seam nor a doubled multiply:
+
+         beyond the Wall     …its southern edge is
+         the Gift            …whose southern edge, 68px on, is
+         the New Gift        …whose southern edge, 68px on, is
+         the North           …top edge
+
+     Change one of those edges and you must change the two that touch it.
+
+     The depth is not arbitrary: the Wall is 100 leagues long and spans
+     x1272-x1547 on this chart, so it runs at 2.75 pixels to the league, and
+     each grant is 25 leagues — about 68px. East and west the bands are drawn
+     well out past both coasts (x 1040 and x 1660) and the land mask cuts them
+     at the shoreline, which is how every polygon in this file is built. That
+     is what puts them on the water's edge at both ends instead of stopping in
+     open country.
+
+     Overrun when the Wall falls, restored at the dawn. */
+  { id: "the-gift", name: "The Gift", base: "nights-watch",
     own: [[7,7,"white-walkers"],[8,4,"nights-watch"]],
-    pts: [[1100,310],[1180,285],[1300,272],[1424,262],[1546,248],[1620,252],[1645,340],[1620,430],[1560,460],[1420,478],[1300,452],[1200,418],[1130,372]] },
+    pts: [[1040,322],[1100,310],[1180,285],[1300,272],[1424,262],[1546,248],[1620,252],[1660,254],[1660,322],[1620,320],[1546,316],[1424,330],[1300,340],[1180,353],[1100,378],[1040,390]] },
+  { id: "the-new-gift", name: "The New Gift", base: "nights-watch",
+    own: [[7,7,"white-walkers"],[8,4,"nights-watch"]],
+    pts: [[1040,390],[1100,378],[1180,353],[1300,340],[1424,330],[1546,316],[1620,320],[1660,322],[1660,390],[1620,388],[1546,384],[1424,398],[1300,408],[1180,421],[1100,446],[1040,458]] },
 
   /* Theon's prize: Winterfell and its heartland, held for one bloody season.
      BOOK seizure corrected to ACOK ch 38 (Theon III, "Theon Greyjoy takes his

@@ -26,6 +26,9 @@
 
 <div class="hl-shell" id="hl-shell">
 
+  <!-- what the shield is keeping back, if anything. Printed by the engine and
+       only ever when something really is held. -->
+  <div id="hl-held"></div>
   <section class="hl-sec" id="hl-home"></section>
   <section class="hl-sec hl-hidden" id="hl-play"></section>
   <section class="hl-sec hl-hidden" id="hl-result"></section>
@@ -34,6 +37,12 @@
   <p class="game-backlink"><a href="../trivia/index.html">&larr; All the games of the realm</a></p>
 </div>
 
+<!-- the shield up front, not lazily: the engine filters the decks the moment it
+     runs, and a reader who has already set their shield must not watch half the
+     game vanish and come back a second later -->
+<script src="../js/shield.js" data-kw-shield="1"></script>
+<script src="../js/collection-data.js"></script>
+<script src="../js/collection.js"></script>
 <script src="../js/streak.js"></script>
 <script src="../js/daily-realm.js"></script>
 <script src="hl-data.js"></script>

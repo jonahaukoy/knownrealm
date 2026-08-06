@@ -1,0 +1,386 @@
+/* ============================================================================
+   THE IRON LADDER — THE HARBOUR, THE ROAD, THE CAMP, AND THE FAR PLACES.
+
+   The last of the four scene files. Everything here belongs to somewhere that
+   is not a street and not a hall: a wharf, a war camp, a wood with somebody
+   else in it, the ice at the top of the world, the brick at the bottom of it.
+
+   The regional half of this file is gated on `realms` or on tags that only
+   certain countries carry (`wall`, `slave`, `desert`, `island`, `warcamp`), so
+   a scene about the Wall cannot fire in Dorne and a scene about a slave market
+   cannot fire in the Vale. That is the point: a player who has crossed the
+   narrow sea should be able to tell, without being told, that the deck changed
+   under them.
+   ========================================================================== */
+
+window.IL_EVENTS = (window.IL_EVENTS || []).concat([
+
+/* ============================================================ THE HARBOUR = */
+
+{ id: "r-cargo-nobody-claims", w: 4,
+  when: { wild: false, amenities: ["harbour"] },
+  dm: "There are crates on the wharf at {spot} that have been there four days. The ship that landed them has gone. Nobody has come for them and the harbourmaster has begun asking whose they are in a tone that means he would like somebody to say theirs.",
+  opts: [
+    { label: "Say they are yours",
+      check: { attr: "charm", dc: 13, perkBonus: [{ perk: "silver", n: 4 }, { perk: "sly", n: 3 }] },
+      pass: { text: "You sign a book and pay a small fee and own six crates of something. Two of them are worth nothing. One of them is worth a very great deal.", eff: { coin: 210, notoriety: 3, attr: { charm: 1 } } },
+      fail: { text: "The harbourmaster asks for the bill of lading, which is a thing you had not heard of until this moment.", eff: { standing: -4, coin: -10 } } },
+    { label: "Find out whose they really are",
+      check: { attr: "wits", dc: 12, perkBonus: [{ perk: "clever", n: 3 }, { perk: "connected", n: 3 }] },
+      pass: { text: "A house in the free cities that has stopped answering letters, which means something has happened to it, which is worth knowing before anybody else knows it.", eff: { secrets: 2, flags: ["knows-the-ships", "dangerous-knowledge"] } },
+      fail: { text: "Four answers, all confident, none the same.", eff: {} } },
+    { label: "Open one in the dark",
+      check: { attr: "cunning", dc: 12, perkBonus: [{ perk: "quiet", n: 4 }] },
+      pass: { text: "Lyseni glass, packed in straw, and you take what you can carry and leave the crate looking exactly as it did.", eff: { coin: 120, notoriety: 4 } },
+      fail: { text: "The harbourmaster keeps a dog on the wharf at night, which everybody who works here knows.", eff: { health: -14 }, goto: "arrest" } },
+    { label: "Leave it alone", res: { text: "You leave it. On the sixth day men come for it with a cart and papers, and they are not men you would have wanted to meet in a dark shed.", eff: { attr: { wits: 1 } } } },
+  ] },
+
+{ id: "r-drowning", w: 3,
+  when: { wild: false, anyAmenity: ["harbour", "shore"] },
+  dm: "Somebody goes into the water off {spot} and does not come back up in the place they should have. The wharf is crowded and every single person on it is watching and not moving.",
+  opts: [
+    { label: "Go in after them",
+      check: { attr: "grit", dc: 14, perkBonus: [{ perk: "sea-legs", n: 4 }, { perk: "strong", n: 3 }, { perk: "hardy", n: 2 }] },
+      pass: { text: "Cold enough to stop your chest, and deeper than it looks, and you get a hand in their collar on the second try. The wharf is a great deal louder afterwards than it was during.", eff: { renown: 6, standing: 6, spared: 1, health: -12, followers: 1, flags: ["kindness-remembered"] } },
+      fail: { text: "You find nothing at all down there, twice, and are pulled out yourself by two men with a boathook.", eff: { health: -22, rest: -20 } } },
+    { label: "Throw a rope", req: { anyItems: ["rope"] },
+      res: { text: "It is a better idea than going in and it works, and nobody sings about the man who threw the rope. You know what you did.", eff: { spared: 1, standing: 3, renown: 2 } } },
+    { label: "Watch, like everybody else",
+      res: { text: "It takes a surprisingly short time. Afterwards the wharf goes back to work and nobody mentions it, and that is the part that stays with you.", eff: { health: -2, attr: { grit: 1 } } } },
+  ] },
+
+{ id: "r-smuggler-offer", w: 4,
+  when: { wild: false, amenities: ["harbour"], anyPlaceTag: ["crime", "poor", "port"] },
+  dm: "A captain at {spot} wants a man who is not from here to carry something ashore that is not on his manifest. He is very clear that it is not dangerous and very unclear about what it is.",
+  opts: [
+    { label: "Carry it and do not look",
+      check: { attr: "cunning", dc: 12, perkBonus: [{ perk: "quiet", n: 3 }, { perk: "sly", n: 3 }] },
+      pass: { text: "Off the boat, through a gate, into a cart. Twenty minutes and more coin than a month of honest work, which is the entire argument for this line of business.", eff: { coin: 130, notoriety: 4, flags: ["ran-cargo"] } },
+      fail: { text: "There is an inspection at the gate that everybody had said was paid off.", eff: { coin: -20 }, goto: "arrest" } },
+    { label: "Look first",
+      check: { attr: "wits", dc: 12, perkBonus: [{ perk: "wary", n: 4 }] },
+      pass: { text: "It is not spice. Knowing what it is doubles your price and halves your sleep, and you take the doubled price.", eff: { coin: 260, secrets: 1, notoriety: 6, flags: ["ran-cargo", "dangerous-knowledge"] } },
+      fail: { text: "He sees you looking and the offer evaporates, along with any chance of the next one.", eff: { standing: -2 } } },
+    { label: "Ask for a berth instead of a fee",
+      check: { attr: "charm", dc: 12, perkBonus: [{ perk: "sea-legs", n: 3 }, { perk: "silver", n: 3 }] },
+      pass: { text: "He would rather pay in passage than coin, which tells you what he thinks of both. You have a way out of this town whenever you want one.", eff: { flags: ["ship-berth", "knows-a-captain"], coin: 20 } },
+      fail: { text: "He wants a porter, not a passenger, and says so.", eff: {} } },
+    { label: "Tell the customs men", req: { amenities: ["watch"] },
+      res: { text: "There is a reward and it is paid on the spot and it is less than he offered you. Harbours are small and this one now knows something about you.", eff: { coin: 45, standing: 3, flags: ["informer"], rel: { harbour: -4 } } } },
+  ] },
+
+/* ============================================================== THE CAMP = */
+
+{ id: "r-camp-followers", w: 4,
+  when: { anyPlaceTag: ["warcamp"] },
+  dm: "An army is camped here, which means four thousand men and about the same number of people who are not soldiers and are living off the army: cooks, carters, whores, smiths, thieves and a septon who has given up.",
+  opts: [
+    { label: "Sell something to soldiers", req: { minCoin: 15 }, cost: { coin: 15 },
+      check: { attr: "cunning", dc: 11, perkBonus: [{ perk: "sly", n: 3 }, { perk: "connected", n: 2 }] },
+      pass: { text: "Men with pay and nothing to spend it on and no other seller within four leagues. It is the best market in the world and it lasts until the army moves.", eff: { coin: 110, attr: { cunning: 1 } } },
+      fail: { text: "A serjeant decides you are gouging his men, which you are, and takes your stock as a fine.", eff: { coin: -15, health: -6 } } },
+    { label: "Take the wounded work nobody wants",
+      check: { attr: "grit", dc: 12, perkBonus: [{ perk: "healer-hands", n: 5 }, { perk: "hardy", n: 3 }], itemBonus: [{ item: "bandages", n: 3 }] },
+      pass: { text: "Four days in the tent where they put the ones they have given up on. Two of them do not die. You will remember their faces longer than they will remember yours.", eff: { renown: 3, standing: 4, health: -10, attr: { grit: 1 }, flags: ["tended-the-wounded"], coin: 25 } },
+      fail: { text: "It is worse than you imagined and you last a day and a half.", eff: { health: -14, standing: -1 } } },
+    { label: "Enlist", req: { notFlags: ["sworn", "soldier"] },
+      res: { text: "A spear, a bowl, a place in a line, and somebody else's argument to die in. They feed you tonight, which is more than this morning managed.", eff: { flags: ["soldier", "sworn", "at-war"], work: "sellsword", coin: 25, food: 70 } } },
+    { label: "Go through the tents of men who are out drilling",
+      check: { attr: "cunning", dc: 14, perkBonus: [{ perk: "quiet", n: 4 }, { perk: "sly", n: 3 }] },
+      pass: { text: "Soldiers carry their whole wealth with them and are away from it for six hours a day.", eff: { coin: 150, notoriety: 8 } },
+      fail: { text: "Armies hang thieves in front of the whole camp, because armies are held together by exactly one thing.", eff: { health: -20 }, goto: "arrest" } },
+  ] },
+
+{ id: "r-battle-aftermath", w: 3,
+  when: { anyPlaceTag: ["warcamp"], anyFlag: ["soldier", "at-war", "sellsword"] },
+  dm: "It is over. You are standing up and a great many people are not, and the field is already full of men going through what is on the ground, some of whom were on your side an hour ago.",
+  opts: [
+    { label: "Take what the dead have no use for",
+      check: { attr: "grit", dc: 10 },
+      pass: { text: "Coin, a good belt, and a sword better than the one you came with. Nobody on this field thinks less of you and you think slightly less of yourself.", eff: { coin: 90, items: ["sword"], health: -6, attr: { grit: 1 } } },
+      fail: { text: "One of the ones you are going through is not dead, and says something, and you have to decide about it very fast.", eff: { coin: 40, health: -8, flags: ["saw-a-bad-thing"] } } },
+    { label: "Get the living off the field first",
+      check: { attr: "grit", dc: 13, perkBonus: [{ perk: "strong", n: 3 }, { perk: "healer-hands", n: 4 }] },
+      pass: { text: "Eleven of them, over two days, some of them wearing the wrong colours, which you stop noticing after the third. The company hears about it and so does the company opposite.", eff: { renown: 8, standing: 6, spared: 3, health: -18, followers: 2, flags: ["merciful"] } },
+      fail: { text: "You do what you can and it is not much and the cold does most of the rest.", eff: { health: -14, spared: 1 } } },
+    { label: "Find whoever was commanding and make him remember you",
+      check: { attr: "charm", dc: 14, perkBonus: [{ perk: "silver", n: 3 }], flagBonus: [{ flag: "learned-from-a-veteran", n: 3 }] },
+      pass: { text: "He is exhausted and needs somebody to say a sensible thing to. You say two. In the morning you are on a list you were not on yesterday.", eff: { standing: 8, renown: 4, coin: 60, flags: ["noticed-by-a-captain"], followers: 2 } },
+      fail: { text: "He has forty men trying to do exactly this and you are the thirty-ninth.", eff: { rest: -15 } } },
+  ] },
+
+/* =============================================================== THE WALL = */
+
+{ id: "r-wall-ranging", w: 4,
+  when: { anyPlaceTag: ["wall"] },
+  dm: "A ranging is going out beyond the gate, and they are one man short because a man is always short. The ranger who asks does not oversell it. He says it is eight days and cold and probably nothing.",
+  opts: [
+    { label: "Go with them",
+      check: { attr: "grit", dc: 13, perkBonus: [{ perk: "hardy", n: 4 }, { perk: "cold-blood", n: 3 }], itemBonus: [{ item: "cloak-warm", n: 3 }, { item: "tent", n: 2 }] },
+      pass: { text: "Eight days, and it is nothing, and nothing beyond the Wall is a considerable achievement. You come back knowing how to walk in that country, which is a thing very few living men know.", eff: { renown: 4, attr: { grit: 1, wits: 1 }, flags: ["ranged-beyond"], health: -12, coin: 15 } },
+      fail: { text: "It is not nothing. Two of them do not come back and you are one of the ones who has to decide, at a certain point, to stop looking.", eff: { health: -26, rest: -30, flags: ["saw-a-bad-thing"], attr: { grit: 1 } } } },
+    { label: "Ask what they are really looking for",
+      check: { attr: "wits", dc: 12, perkBonus: [{ perk: "wary", n: 3 }] },
+      pass: { text: "Not wildlings. He tells you what the last three rangings found, which was villages standing empty with the doors open and the food still on the table, and then he tells you to forget he said it.", eff: { secrets: 2, flags: ["dangerous-knowledge", "knows-the-north"] } },
+      fail: { text: "He says wildlings and looks at the ice until you go away.", eff: {} } },
+    { label: "Take the black", req: { notFlags: ["nights-watch", "sworn"] },
+      res: { text: "The words are said in a grove of trees at night and are considerably shorter than you expected. It ends here — no lands, no wife, no crown, no sons — and it also, for a certain kind of man, begins here.", eff: { flags: ["nights-watch", "sworn", "sworn-celibate", "oathbound"], work: "guard", standing: 6, food: 80, rest: 60 } } },
+  ] },
+
+{ id: "r-wall-deserter", w: 3,
+  when: { anyPlaceTag: ["wall"], flags: ["nights-watch"] },
+  dm: "A man of the Watch has gone over the ice, and you know which man, and you knew before anybody else did because he told you in a way that was almost asking to be stopped.",
+  opts: [
+    { label: "Say nothing",
+      res: { text: "They find out in the morning. There is a hunt and it fails and the whole castle is worse for a month. Nobody ever knows you knew.", eff: { flags: ["kept-a-secret"], attr: { cunning: 1 }, health: -3 } } },
+    { label: "Report it",
+      res: { text: "They take him at Mole's Town before noon and the Lord Commander takes his head in front of the whole garrison, and you are made to stand at the front.", eff: { standing: 5, flags: ["informer"], health: -4, rel: { watch: 2 } } } },
+    { label: "Go after him yourself and bring him back quietly",
+      check: { attr: "swiftness", dc: 14, perkBonus: [{ perk: "quick", n: 4 }, { perk: "rider", n: 3 }] },
+      pass: { text: "You get him at a crossroads twenty leagues south and neither of you says anything the whole way back. He is put on a wall for a month rather than a block, because nobody official ever knew he had left.", eff: { spared: 1, renown: 2, rel: { watch: 3 }, health: -10, flags: ["owed-a-life"] } },
+      fail: { text: "He is a day ahead and he is not stupid, and now there are two men of the Watch missing.", eff: { flags: ["deserter", "hunted"], health: -14 } } },
+    { label: "Go with him", req: { notFlags: ["deserter"] }, hint: "Desertion from the Watch is death in every kingdom of the seven.",
+      check: { attr: "cunning", dc: 15, perkBonus: [{ perk: "quiet", n: 4 }, { perk: "sly", n: 3 }] },
+      pass: { text: "South in the dark with the ice at your back and no oath in front of you. It is the freest you have felt and the most hunted you have ever been, at the same moment.", eff: { flags: ["deserter", "hunted", "wanted", "-nights-watch", "-sworn"], move: "random", health: -10, attr: { swiftness: 1 } } },
+      fail: { text: "You get four leagues.", eff: { flags: ["deserter"], health: -16 }, goto: "arrest" } },
+  ] },
+
+/* ======================================================== BEYOND THE WALL = */
+
+{ id: "r-freefolk-camp", w: 4,
+  when: { realms: ["beyond-the-wall"] },
+  dm: "There is a camp in the trees — hide tents, dogs, and forty people who owe nothing to anybody and are looking at you as a question that has not yet been answered.",
+  opts: [
+    { label: "Walk in with your hands open",
+      check: { attr: "grit", dc: 12, perkBonus: [{ perk: "honest", n: 3 }, { perk: "hardy", n: 3 }], flagBonus: [{ flag: "freefolk", n: 6 }] },
+      pass: { text: "They feed you because you came in rather than round, which is the whole of their law on the subject. {folk} wants to know what the kneelers are doing this year and is genuinely curious.", eff: { food: 80, rest: 50, secrets: 1, rel: { freefolk: 3 }, flags: ["free-folk-friend"] } },
+      fail: { text: "A dog gets to you first and four of them get to you after the dog, and you are put out of the camp with your boots and nothing else.", eff: { health: -18, coin: -30, food: -10 } } },
+    { label: "Steal from the edge of it and go",
+      check: { attr: "cunning", dc: 14, perkBonus: [{ perk: "quiet", n: 4 }] },
+      pass: { text: "Dried meat, a good knife and a hide. They will know by morning and they will not be able to do anything about it, which they will mind a great deal.", eff: { food: 70, items: ["knife"], notoriety: 5, rel: { freefolk: -4 } } },
+      fail: { text: "Free folk sleep in shifts, because free folk have been raided by everybody including each other for eight thousand years.", eff: { health: -24 } } },
+    { label: "Ask to go south with them", req: { anyFlag: ["freefolk", "free-folk-friend"] },
+      res: { text: "They are all going south. Everybody up here is going south, and none of them will say what from, and the not-saying is the most frightening thing you have heard in your life.", eff: { secrets: 2, flags: ["knows-whats-coming", "dangerous-knowledge"], food: 40 } } },
+  ] },
+
+/* ================================================================= DESERT = */
+
+{ id: "r-desert-water", w: 4,
+  when: { anyPlaceTag: ["desert"] },
+  dm: "There is a well here and it belongs to somebody, and the somebody has two men sitting by it in the shade doing nothing at all, which in this country is a full-time occupation.",
+  opts: [
+    { label: "Pay what they ask", cost: { coin: 12 }, req: { minCoin: 12 },
+      res: { text: "Water is not free anywhere in Dorne and it is dearest exactly where you need it most, which is not cruelty but arithmetic.", eff: { water: 100, food: 10 } } },
+    { label: "Ask for it as a guest",
+      check: { attr: "charm", dc: 12, perkBonus: [{ perk: "honest", n: 3 }, { perk: "comely", n: 2 }] },
+      pass: { text: "You are given water, and then shade, and then {dish}, and then a great deal of conversation, because the rules of hospitality out here are older and stricter than any lord's law.", eff: { water: 100, food: 60, rest: 30, standing: 2, flags: ["desert-guest"] } },
+      fail: { text: "They look at you for a while and then name a price, which is their way of saying no.", eff: { water: 10 } } },
+    { label: "Take it",
+      check: { attr: "might", dc: 14, perkBonus: [{ perk: "strong", n: 3 }], itemBonus: [{ item: "sword", n: 3 }, { item: "bow", n: 3 }] },
+      pass: { text: "You drink and fill everything you have and ride out, and behind you two men are already deciding how far they are prepared to follow.", eff: { water: 100, notoriety: 10, flags: ["wanted", "desert-enemy"] } },
+      fail: { text: "There is a third man you did not see, up on the rock, and he has a bow, and in this country everybody has a bow.", eff: { health: -30, water: 20 } } },
+  ] },
+
+/* ================================================================== SLAVE = */
+
+{ id: "r-slave-block", w: 4,
+  when: { anyPlaceTag: ["slave"], notFlags: ["enslaved"] },
+  dm: "There is a block at {spot} and a line of people on it, and the crowd around it is bidding in a language you half follow with the bored fluency of men buying grain.",
+  opts: [
+    { label: "Buy one, and free them", cost: { coin: 150 }, req: { minCoin: 150 },
+      res: { text: "It costs you a great deal and changes nothing about the institution and everything about one person. They do not go. They stay with you, which was not the arrangement and is what happens.", eff: { followers: 1, renown: 3, standing: 2, spared: 1, flags: ["breaker-of-chains", "freed-a-slave"] } } },
+    { label: "Buy one, and use them", cost: { coin: 150 }, req: { minCoin: 150 },
+      res: { text: "It is legal here and nobody in the square thinks anything of it, and it will be a very long time before you stop noticing that you did it.", eff: { followers: 1, coin: -150, notoriety: 6, standing: 4, flags: ["slaver"] } } },
+    { label: "Find out who is supplying the block",
+      check: { attr: "cunning", dc: 13, perkBonus: [{ perk: "sly", n: 3 }, { perk: "connected", n: 3 }] },
+      pass: { text: "Ships out of one port, a captain who does not sail under his own name, and a Westerosi house at the end of it that would be ruined if the chain were ever drawn out in public.", eff: { secrets: 2, flags: ["dangerous-knowledge", "knows-a-debt"] } },
+      fail: { text: "You ask two questions and the second one is heard by somebody whose job is hearing second questions.", eff: { flags: ["watched", "hunted"], health: -8 } } },
+    { label: "Cut the chain", hint: "There are forty of them and a great many more of the other kind.",
+      check: { attr: "might", dc: 18, perkBonus: [{ perk: "cold-blood", n: 4 }, { perk: "strong", n: 4 }], itemBonus: [{ item: "sword", n: 4 }, { item: "armour", n: 3 }] },
+      pass: { text: "Forty people go over that square in every direction at once and the city cannot catch a tenth of them. You are a story in Slaver's Bay by nightfall and a marked man by morning.", eff: { renown: 20, notoriety: 25, spared: 8, flags: ["breaker-of-chains", "wanted", "hunted"], health: -25 } },
+      fail: { text: "The chain is iron and the men around it do this every day.", eff: { health: -30, flags: ["enslaved"], jail: 2 }, goto: "enslaved-life" } },
+    { label: "Walk past it", res: { text: "You walk past. Everybody in this square is walking past.", eff: { health: -1 } } },
+  ] },
+
+/* ====================================================== THE FREE CITIES == */
+
+{ id: "r-bank-offer", w: 3,
+  when: { realms: ["free-cities"], amenities: ["market"], minStanding: 20 },
+  dm: "A man in grey at {spot} has established, without appearing to ask, what you own and what you intend. He represents an institution that does not need to be named in this city.",
+  opts: [
+    { label: "Take the loan", cost: {},
+      res: { text: "Four hundred, at terms that are perfectly clear and perfectly reasonable and will be enforced with the same courtesy with which they were offered.", eff: { coin: 400, flags: ["indebted", "bank-debt"], standing: 3 } } },
+    { label: "Ask what the terms actually are",
+      check: { attr: "wits", dc: 13, perkBonus: [{ perk: "lettered", n: 4 }, { perk: "clever", n: 3 }] },
+      pass: { text: "He tells you, precisely, including the part about what has happened to kings. You take a smaller sum on better terms, which is the correct answer and is taken by almost nobody.", eff: { coin: 200, flags: ["indebted", "bank-debt", "read-the-terms"], attr: { wits: 1 } } },
+      fail: { text: "He explains for twenty minutes and you understand rather less at the end than you did at the start, which is not an accident.", eff: { coin: 400, flags: ["indebted", "bank-debt"] } } },
+    { label: "Ask him what he wants instead of coin",
+      check: { attr: "charm", dc: 14, perkBonus: [{ perk: "silver", n: 3 }, { perk: "connected", n: 3 }] },
+      pass: { text: "Information, occasionally, about a house you are close to. It costs nothing today. It is the most expensive arrangement you will ever enter into.", eff: { coin: 120, flags: ["bank-friend", "informer"], secrets: 1, standing: 4 } },
+      fail: { text: "He wants coin returned, with interest, and finds the question faintly amusing.", eff: {} } },
+    { label: "Decline", res: { text: "You decline. He is entirely unbothered and gives you a way to find him, and you keep it, which is what he intended.", eff: { flags: ["knows-the-bank"] } } },
+  ] },
+
+{ id: "r-sellsword-company", w: 4,
+  when: { sides: ["essos"], amenities: ["crowd"], notFlags: ["sworn", "enslaved"] },
+  dm: "A free company is taking on men at {spot} — a paymaster with a chest, a serjeant with a list, and three hundred men behind them who have all decided that somebody else's war is a trade like any other.",
+  opts: [
+    { label: "Sign, and read the contract first", req: { anyPerk: ["lettered", "clever"] },
+      check: { attr: "wits", dc: 12, perkBonus: [{ perk: "lettered", n: 4 }] },
+      pass: { text: "Contracts in the free companies are real documents and the terms differ enormously. You take one that pays less and lets you leave, and the serjeant looks at you with something like respect.", eff: { coin: 60, flags: ["sellsword", "sworn", "at-war", "read-the-terms"], work: "sellsword", attr: { wits: 1 } } },
+      fail: { text: "You read it and it is in Valyrian and you sign it anyway.", eff: { coin: 80, flags: ["sellsword", "sworn", "at-war", "bad-contract"], work: "sellsword" } } },
+    { label: "Sign",
+      res: { text: "Coin in your hand, a company at your back, and a war somewhere ahead that has nothing whatever to do with you. Half the men here will be dead in three years and every one of them knows it.", eff: { coin: 80, flags: ["sellsword", "sworn", "at-war"], work: "sellsword", standing: 3 } } },
+    { label: "Fight one of them to be taken on at rank",
+      check: { attr: "might", dc: 15, perkBonus: [{ perk: "duellist", n: 4 }, { perk: "strong", n: 3 }], itemBonus: [{ item: "sword", n: 3 }, { item: "armour", n: 3 }] },
+      pass: { text: "You put a man down in front of three hundred who make their living judging exactly this, and you are a serjeant before you have signed anything.", eff: { coin: 140, followers: 8, renown: 6, flags: ["sellsword", "sworn", "at-war", "band-leader"], work: "sellsword", health: -12 } },
+      fail: { text: "They pick the man you fight and they pick him well.", eff: { health: -24, standing: -3 } } },
+    { label: "Walk on", res: { text: "You walk on. There will be another company by the end of the month; there always is.", eff: {} } },
+  ] },
+
+/* =========================================================== THE DOTHRAKI = */
+
+{ id: "r-khalasar-crossing", w: 4,
+  when: { realms: ["dothraki-sea"] },
+  dm: "A khalasar is crossing in front of you and it takes most of a day to pass — forty thousand riders, their herds, their carts, their captives, moving over the grass like one enormous slow animal.",
+  opts: [
+    { label: "Stand where you are and let them see you",
+      check: { attr: "grit", dc: 13, perkBonus: [{ perk: "cold-blood", n: 4 }, { perk: "honest", n: 2 }] },
+      pass: { text: "A dozen of them ride round you, twice, deciding. Then one of them says something that makes the others laugh and they let you be. Running would have settled it the other way.", eff: { attr: { grit: 1 }, renown: 1, flags: ["faced-a-khalasar"] } },
+      fail: { text: "They take everything you are carrying, which takes about ninety seconds, and leave you standing in the grass entirely unharmed and entirely without anything.", eff: { coin: -9999, food: -30, items: ["-horse", "-sword"] } } },
+    { label: "Offer yourself as a gift-giver", req: { minCoin: 60 }, cost: { coin: 60 },
+      check: { attr: "charm", dc: 13, perkBonus: [{ perk: "silver", n: 3 }] },
+      pass: { text: "A khal takes gifts, never payment, and the distinction is the whole of Dothraki diplomacy. You ride with them nine days, eat what they eat, and are put down unharmed at the edge of the grass.", eff: { rest: 40, food: 80, secrets: 1, flags: ["rode-with-a-khalasar"], attr: { charm: 1 } } },
+      fail: { text: "You get the words wrong in a way that reads as payment, and they take the coin and treat you as a man who has bought nothing.", eff: { coin: -60, health: -10 } } },
+    { label: "Hide and let it go past",
+      check: { attr: "cunning", dc: 12, perkBonus: [{ perk: "quiet", n: 4 }] },
+      pass: { text: "Grass is taller than people think. Six hours face down and they are gone and you have all your possessions and no story.", eff: { rest: -20 } },
+      fail: { text: "Outriders go wide of a khalasar for exactly this reason.", eff: { health: -14, coin: -50 } } },
+  ] },
+
+/* ============================================================ THE WILD ==== */
+
+{ id: "r-wild-outlaws", w: 4,
+  when: { wild: true, anyPlaceTag: ["forest", "crime", "mountain"] },
+  dm: "There are six of them in the trees and they have been there for a while, and the one who steps out is not in a hurry because there is nowhere for you to be in a hurry to.",
+  opts: [
+    { label: "Give them everything without being asked twice",
+      res: { text: "It is the correct answer and everybody present knows it. They take what you have and one of them tells you which way the nearest village is, which is nearly kindness.", eff: { coin: -9999, food: -20, flags: ["robbed-on-the-road"] } } },
+    { label: "Offer to join them",
+      check: { attr: "charm", dc: 13, perkBonus: [{ perk: "silver", n: 3 }, { perk: "honest", n: 2 }], flagBonus: [{ flag: "wanted", n: 4 }, { flag: "outlaw", n: 4 }] },
+      pass: { text: "They are hungrier than they look and short of men, and they take you because a seventh is a seventh. This is how nearly every outlaw band in history has been recruited.", eff: { flags: ["outlaw", "in-a-band"], followers: 2, coin: 20, food: 40 } },
+      fail: { text: "They do not want a seventh. They want your boots.", eff: { coin: -9999, health: -10, food: -20 } } },
+    { label: "Fight", req: { armed: true },
+      check: { attr: "might", dc: 17, perkBonus: [{ perk: "cold-blood", n: 4 }, { perk: "duellist", n: 3 }], itemBonus: [{ item: "armour", n: 4 }, { item: "good-sword", n: 3 }, { item: "shield", n: 2 }] },
+      pass: { text: "Two of them go down in the first eight seconds and the other four discover they are not, in fact, the sort of men who die for a stranger's purse.", eff: { kills: 2, renown: 5, coin: 60, health: -22, flags: ["killer"], attr: { might: 1 } } },
+      fail: { text: "Six is six, and they do this every week, and you do not.", eff: { health: -35, coin: -9999, items: ["-sword", "-good-sword"] } } },
+    { label: "Run",
+      check: { attr: "swiftness", dc: 13, perkBonus: [{ perk: "quick", n: 4 }, { perk: "rider", n: 3 }], itemBonus: [{ item: "horse", n: 4 }, { item: "courser", n: 5 }] },
+      pass: { text: "You are gone into the trees before the sentence is finished, and they do not follow far because nobody chases a running man through a wood for nothing.", eff: { rest: -25, food: -10, attr: { swiftness: 1 } } },
+      fail: { text: "One of them is on a horse and you are not.", eff: { health: -18, coin: -9999 } } },
+  ] },
+
+{ id: "r-wild-hermit", w: 3,
+  when: { wild: true },
+  dm: "There is smoke, and the smoke is one fire, and the fire belongs to one person who has clearly been out here a very long time and does not appear surprised to see anybody.",
+  opts: [
+    { label: "Sit down and be quiet until spoken to",
+      check: { attr: "grit", dc: 10, perkBonus: [{ perk: "quiet", n: 4 }] },
+      pass: { text: "Two hours of silence and then a bowl of something, and then, slowly, a great deal about this country: where the water is, which berries, and what walks here in winter.", eff: { food: 60, water: 40, rest: 40, secrets: 1, flags: ["knows-this-country"], attr: { wits: 1 } } },
+      fail: { text: "You talk first and they stop talking entirely, and after a while you understand that you are meant to go.", eff: { rest: -10 } } },
+    { label: "Ask what they are hiding from",
+      check: { attr: "charm", dc: 13, perkBonus: [{ perk: "honest", n: 4 }] },
+      pass: { text: "They tell you, and it is a name you have heard, and by the end of it you understand exactly why somebody would choose this instead.", eff: { secrets: 2, flags: ["dangerous-knowledge"], rest: 20 } },
+      fail: { text: "They put the fire out, which is a considerable statement to make in this weather.", eff: { rest: -12, health: -4 } } },
+    { label: "Take what they have", hint: "There is one of them and they are old.",
+      check: { attr: "might", dc: 10 },
+      pass: { text: "It amounts to a pot, a hide and four days of food. They watch you do it and say nothing at all, which is the part you take away with you.", eff: { food: 55, rest: 15, notoriety: 4, standing: -4, flags: ["robbed-the-poor"] } },
+      fail: { text: "Old men out here are out here because they can be, and there is a bow behind the log.", eff: { health: -20 } } },
+  ] },
+
+{ id: "r-wild-old-road", w: 3,
+  when: { wild: true },
+  dm: "You come out of the trees onto a road that should not be here — cut stone, wheel-worn, straight, and going somewhere that no longer exists.",
+  opts: [
+    { label: "Follow it",
+      check: { attr: "grit", dc: 11, perkBonus: [{ perk: "hardy", n: 3 }] },
+      pass: { text: "Two days of walking on a surface rather than through country. It halves the work and at the end of it there is a place with a roof.", eff: { rest: -10, food: -12, flags: ["knows-the-way"], move: "random" } },
+      fail: { text: "It goes for six leagues and then stops in the middle of a wood, which is a great deal worse for the spirits than if it had never started.", eff: { rest: -25, food: -18 } } },
+    { label: "Look at what built it",
+      check: { attr: "wits", dc: 12, perkBonus: [{ perk: "bookish", n: 4 }, { perk: "clever", n: 3 }] },
+      pass: { text: "Not Andal work and not the Watch's. Older, and better, and there is a stone at the side of it with something cut into it that has almost gone.", eff: { secrets: 2, attr: { wits: 1 }, flags: ["saw-the-old-work"] } },
+      fail: { text: "Stones.", eff: { rest: -8 } } },
+    { label: "Wait beside it and see who uses it",
+      check: { attr: "cunning", dc: 12, perkBonus: [{ perk: "wary", n: 3 }, { perk: "quiet", n: 3 }] },
+      pass: { text: "Nobody, for a day and a half. And then, at dusk, a great many people at once, moving fast and quietly and not wanting to be seen, and you are not seen.", eff: { secrets: 2, flags: ["dangerous-knowledge"], rest: -20 } },
+      fail: { text: "A day and a half of nothing, and you are a day and a half hungrier.", eff: { food: -20, rest: -20 } } },
+  ] },
+
+{ id: "r-wild-injured-animal", w: 3,
+  when: { wild: true, anyPlaceTag: ["forest", "mountain", "wild"] },
+  dm: "There is a dog in a snare that is not yours, and it has been there long enough to have stopped fighting it, and it looks at you without much expectation of anything.",
+  opts: [
+    { label: "Cut it loose",
+      check: { attr: "charm", dc: 11, perkBonus: [{ perk: "beast-friend", n: 5 }] },
+      pass: { text: "It does not bite you, which is the whole gamble. It also does not go away, and three days later it is still not going away, and by the fourth you have started talking to it.", eff: { items: ["dog"], spared: 1, health: -2, attr: { charm: 1 } } },
+      fail: { text: "It bites you very badly and then goes, and you spend a week with a hand that will not close.", eff: { health: -16 } } },
+    { label: "Kill it and eat it",
+      res: { text: "It is a great deal of meat and you are a great deal hungry, and it takes you a surprisingly long time to be able to start.", eff: { food: 70, health: -2, attr: { grit: 1 } } } },
+    { label: "Take the snare and leave the dog", req: { anyItems: ["knife"] },
+      res: { text: "Wire is worth more than either of you. The dog watches you take it and does not understand and follows you for a mile.", eff: { items: ["rope"], food: -4, standing: -1 } } },
+    { label: "Leave it", res: { text: "You go round. It does not make a sound as you pass, which is worse.", eff: { health: -2 } } },
+  ] },
+
+{ id: "r-wild-lost-party", w: 3,
+  when: { wild: true },
+  dm: "Four people, well dressed for a road and badly dressed for this, with one horse between them and no idea whatsoever where they are. One of them is a good deal more important than the others and is trying not to show it.",
+  opts: [
+    { label: "Guide them out", req: { anyFlag: ["knows-the-way", "knows-this-country", "read-the-ground"] },
+      check: { attr: "wits", dc: 12, perkBonus: [{ perk: "clever", n: 3 }, { perk: "hardy", n: 2 }] },
+      pass: { text: "Three days to a road and a day more to a gate. The important one gives you a purse and then, thinking better of it, a name to use and the promise that it will work.", eff: { coin: 180, standing: 6, flags: ["known-at-court", "connected-here"], renown: 2, rest: -20 } },
+      fail: { text: "You are as lost as they are by the second day and considerably more embarrassed about it.", eff: { rest: -30, food: -25, standing: -2 } } },
+    { label: "Sell them what you have", req: { minFood: 50 },
+      check: { attr: "charm", dc: 11, perkBonus: [{ perk: "sly", n: 3 }] },
+      pass: { text: "Food, water and directions, at a price that would be robbery anywhere with a market in it. There is no market in it.", eff: { coin: 120, food: -40, water: -30 } },
+      fail: { text: "They have no coin on them at all, which is what happens to people whose servants carry things.", eff: { food: -20 } } },
+    { label: "Take the horse and go",
+      check: { attr: "cunning", dc: 12, perkBonus: [{ perk: "quiet", n: 3 }, { perk: "quick", n: 3 }] },
+      pass: { text: "It is the only thing they have that matters and it is tethered at the edge of the firelight. Four people are going to have a considerably worse week.", eff: { items: ["horse"], notoriety: 8, standing: -4 } },
+      fail: { text: "The important one is not asleep, and is armed, and is a great deal better with it than the clothes suggested.", eff: { health: -20 } } },
+    { label: "Point and keep walking", res: { text: "You point at the way out and keep going. It is more than most people out here would do.", eff: { spared: 1, rest: -6 } } },
+  ] },
+
+{ id: "r-island-storm", w: 3,
+  when: { anyPlaceTag: ["island", "sea"] },
+  dm: "The weather closes on {place} and every boat is dragged up the beach and the whole settlement goes indoors and waits, and there is nothing to do for three days but be inside with these people.",
+  opts: [
+    { label: "Help drag the boats and mend what breaks",
+      check: { attr: "might", dc: 11, perkBonus: [{ perk: "strong", n: 3 }, { perk: "sea-legs", n: 3 }] },
+      pass: { text: "Three days of it and one long night on a roof in the dark holding thatch down with your body. Afterwards you are somebody who was here for the storm, which is a category of person on an island.", eff: { standing: 6, renown: 2, health: -10, followers: 1, flags: ["weathered-it"] } },
+      fail: { text: "A boat goes over on the shingle with your hand under it.", eff: { health: -22 } } },
+    { label: "Listen to three days of stories",
+      res: { text: "Islands remember. By the end of it you have the whole history of this rock, including the parts that would embarrass {holder} and the part about what is in the cove.", eff: { secrets: 2, rest: 40, food: 40, flags: ["knows-this-country"] } } },
+    { label: "Go through the houses of the men who are down at the boats",
+      check: { attr: "cunning", dc: 13, perkBonus: [{ perk: "sly", n: 3 }] },
+      pass: { text: "There is not much on an island like this and you take most of it and are on the first boat out when the weather lifts.", eff: { coin: 80, notoriety: 8, rel: { island: -5 } } },
+      fail: { text: "On an island everybody knows whose feet those are.", eff: { health: -18, notoriety: 10 }, goto: "arrest" } },
+  ] },
+
+{ id: "r-holy-island", w: 2,
+  when: { anyPlaceTag: ["holy"], notPlaceTags: ["city"] },
+  dm: "This is a holy place and it is quiet in a way that has weight to it, and the person keeping it does not ask what you want because they have decided to wait and see whether you know.",
+  opts: [
+    { label: "Stay a while and find out",
+      res: { text: "Days of nothing. It is the most uncomfortable thing you have done in a year and you come out of it having decided something you had been carefully not deciding for a very long time.", eff: { rest: 60, health: 10, attr: { grit: 1, wits: 1 }, flags: ["resolved", "faithful"] } } },
+    { label: "Ask what is kept here",
+      check: { attr: "charm", dc: 13, perkBonus: [{ perk: "honest", n: 4 }, { perk: "bookish", n: 3 }] },
+      pass: { text: "They show you, which nobody expected including them. It is older than the Faith and older than the Andals and it is not, in any sense you had, a thing.", eff: { secrets: 2, attr: { wits: 1 }, flags: ["saw-the-old-work", "dangerous-knowledge"] } },
+      fail: { text: "They say that nothing is kept here, in the voice of somebody keeping something.", eff: {} } },
+    { label: "Take something", hint: "From a holy place.",
+      check: { attr: "cunning", dc: 14, perkBonus: [{ perk: "sly", n: 3 }, { perk: "cold-blood", n: 3 }] },
+      pass: { text: "It is silver-gilt and heavy and it will sell in three cities. You do not sleep well for a season and you tell yourself that is a coincidence.", eff: { items: ["relic"], coin: 60, notoriety: 8, flags: ["robbed-a-temple"] } },
+      fail: { text: "You are seen by the one person here, who does not shout, and does not stop you, and simply watches, and you put it down.", eff: { standing: -4, health: -2, spared: 1 } } },
+  ] },
+
+]);

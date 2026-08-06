@@ -25,6 +25,76 @@
 
   function esc(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
 
+  /* ================= the spoiler shield, on the page =================
+     One record for the whole site (js/shield.js), the same one the games, the
+     family trees and the timeline read. Two rules govern how it is used here:
+
+     1. A reader who has NEVER answered the shield is shown everything. They
+        have not asked to be protected, and an encyclopedia that opens by
+        hiding itself is no use to anybody. They are offered the shield in the
+        bar instead.
+     2. Either telling unlocks. Someone who has read A Storm of Swords already
+        knows what season three does, so season three is not withheld from
+        them — that is KWShield's own standing rule and this only applies it.
+
+     UNLOCK maps each season of this wiki's saga to the book that covers the
+     same ground. Past the point the published books reach, the season is marked
+     `b: 99` — KWShield's own way of writing "this telling has no opinion, and
+     never will". It must NOT be left out: an absent field means "no threshold
+     to meet", which reads as SATISFIED and would throw seasons six, seven and
+     eight open to everybody. */
+  const UNLOCK = CFG.unlock || {
+    1: { s: 1, b: 1 }, 2: { s: 2, b: 2 }, 3: { s: 3, b: 3 }, 4: { s: 4, b: 3 },
+    5: { s: 5, b: 5 }, 6: { s: 6, b: 99 }, 7: { s: 7, b: 99 }, 8: { s: 8, b: 99 },
+  };
+  const SHIELD_S = CFG.shieldSeasonKey || "gotS";
+  const SHIELD_B = CFG.shieldBookKey || "gotB";
+  const SHIELD_SMAX = CFG.shieldSeasonMax || 8;
+  const SHIELD_BMAX = CFG.shieldBookMax || 5;
+
+  function shieldAnswered() { return !!(window.KWShield && window.KWShield.has()); }
+  function shieldNow() { return window.KWShield ? window.KWShield.get() : null; }
+  function reachTh(th) {
+    if (!shieldAnswered()) return true;
+    return window.KWShield.reach(th, SHIELD_S, SHIELD_B);
+  }
+  /* has the reader reached season n of this saga, by either road? */
+  function seenSeason(n) { return reachTh(UNLOCK[n] || { s: n, b: 99 }); }
+  /* Has the reader read book n? Books gate on BOOKS ALONE — deliberately, and
+     not through KWShield.reach(), whose "either telling unlocks" would answer
+     yes to anyone who had watched anything, since a threshold naming only a
+     book leaves the show with no opinion to fail. This section is titled "only
+     in the books" and is for people reading them; a viewer who has finished the
+     whole show still has not read a word of A Feast for Crows, and telling them
+     what is in it is precisely the spoiler they asked us to hold back. */
+  function readBook(n) {
+    if (!shieldAnswered()) return true;
+    return shieldNow()[SHIELD_B] >= n;
+  }
+  /* have they finished either telling? — the bar for whole-arc essays, which
+     cannot be cut into seasons because they were not written that way */
+  function finishedEither() { return reachTh({ s: SHIELD_SMAX, b: SHIELD_BMAX }); }
+
+  /* where the reader says they stand, in words, for the notice below */
+  function shieldStanding() {
+    const st = shieldNow();
+    if (!st) return "";
+    const bits = [];
+    if (st[SHIELD_S] > 0) bits.push("through season " + st[SHIELD_S]);
+    if (st[SHIELD_B] > 0) bits.push("through book " + st[SHIELD_B]);
+    return bits.length ? bits.join(" and ") : "at the very beginning";
+  }
+  /* the line that admits something has been held back. It is only ever printed
+     when something ACTUALLY was, so its presence is honest and its absence is
+     not a promise that nothing was coming. */
+  function shieldNote(n, what) {
+    if (!n) return "";
+    return `<p class="wk-shielded"><span class="wk-shielded-icon">&#128737;</span>
+      <span>${n === 1 ? "One part of this is" : n + " parts of this are"} folded away &mdash; your
+      spoiler shield stands ${esc(shieldStanding())}, and ${esc(what)} lies past it.
+      <button type="button" class="wk-shieldbtn" data-open-shield>Move the shield</button></span></p>`;
+  }
+
   /* the browsable collections — dragons, Valyrian steel, direwolves, the
      Kingsguard, battles, prophecies. A wiki without them still works. */
   const COLS = (typeof COLLECTIONS !== "undefined" && COLLECTIONS) || [];
@@ -161,15 +231,36 @@
   function metaRow(k, v) { return v ? `<div class="wk-meta-row"><span>${k}</span><b>${v}</b></div>` : ""; }
 
   /* WIKI_EXTRA values are either a legacy array of paragraphs, or an object:
-       { paras: [...],  — the long-form article ("The fuller tale")
-         vs:    [...],  — how the books and the screen tell it differently
-         fate:  [...] } — detailed death prose, shown ONLY inside the spoiler fold
+       { intro:    [...],   — who they are, in a few sentences: appearance,
+                              temper, what they want. Runs under the blurb at
+                              the very top and is never gated — it is the one
+                              part of a page that has to be safe for everybody.
+         paras:    [...],   — the old whole-arc essay. No longer rendered on a
+                              character page (Aug 2026); still used by houses,
+                              orders and places as their "fuller tale".
+         sections: [{h, paras}], — a fuller tale cut into its own headings, for
+                              houses, orders and places
+         seasons:  {n: [...]},  — hand-written recap of season n; where none is
+                              written the season is composed from the
+                              chronicle's own episode notes and event lines
+         vs:       [...],   — how the books and the screen tell it differently
+         fate:     [...] }  — death prose, shown once the reader has reached it
      extraFor() normalizes both shapes so every render path reads one format. */
   function extraFor(key) {
     const raw = (typeof WIKI_EXTRA !== "undefined" && WIKI_EXTRA[key]) || null;
-    if (!raw) return { paras: null, vs: null, fate: null };
-    if (Array.isArray(raw)) return { paras: raw, vs: null, fate: null };
-    return { paras: raw.paras || null, vs: raw.vs || null, fate: raw.fate || null };
+    const empty = { intro: null, paras: null, sections: null, seasons: null, vs: null, fate: null };
+    if (!raw) return empty;
+    if (Array.isArray(raw)) return Object.assign({}, empty, { paras: raw });
+    return Object.assign({}, empty, {
+      intro: raw.intro || null, paras: raw.paras || null, sections: raw.sections || null,
+      seasons: raw.seasons || null, vs: raw.vs || null, fate: raw.fate || null,
+    });
+  }
+  /* a fuller tale that carries its own headings (houses, orders, places) */
+  function sectionBlock(sections) {
+    return (sections || []).map((s) =>
+      `<h4 class="wk-h4">${esc(s.h)}</h4>` +
+      (s.paras || []).map((p) => `<p class="wk-para">${linkify(p)}</p>`).join("")).join("");
   }
   function paraBlock(title, paras) {
     return paras && paras.length
@@ -183,9 +274,48 @@
      back a list; pictureFor hands back just the first, for single-image thumbnails
      and covers that cannot show more than one. */
   function picturesFor(key) {
-    const v = (typeof WIKI_IMAGES !== "undefined" && key && WIKI_IMAGES[key]) || null;
+    let v = (typeof WIKI_IMAGES !== "undefined" && key && WIKI_IMAGES[key]) || null;
+    /* a person with no scene of their own falls back to the portrait table
+       (js/wiki-art.js), which is chosen to be safe for a reader on their first
+       hour — a banner is shown before the shield is ever consulted */
+    if (!v && key && key.indexOf("char:") === 0 && typeof WIKI_PORTRAIT !== "undefined") {
+      v = WIKI_PORTRAIT[key.slice(5)] || null;
+    }
     if (!v) return [];
     return Array.isArray(v) ? v : [v];
+  }
+
+  /* ================= pictures inside the text =================
+     A wiki reads better with something to look at beside the prose. Two kinds
+     of figure are dropped into the running text, both small enough to sit in a
+     column rather than swallow it:
+
+       - a scene tied to a season, declared in WIKI_FIGURES, which is held back
+         by exactly the same shield that holds its season back;
+       - the art already filed against an EPISODE of that season, which needs no
+         new table at all because every one of those was painted for that hour.
+
+     Everything is `loading="lazy"`: a page can carry a dozen of these and must
+     not pay for them until they are scrolled to. */
+  function figureHTML(src, label, side) {
+    return `<figure class="wk-fig wk-fig-${side || "right"}">
+      <img src="${esc(src)}" alt="${esc(label || "")}" loading="lazy"/>
+      ${label ? `<figcaption>${esc(label)}</figcaption>` : ""}
+    </figure>`;
+  }
+  function seasonFigures(key, sN, episodes, name) {
+    const out = [];
+    const declared = (typeof WIKI_FIGURES !== "undefined" && WIKI_FIGURES[key]) || [];
+    declared.forEach((f) => { if (f.season === sN) out.push(figureHTML(f.src, f.label, out.length % 2 ? "left" : "right")); });
+    if (out.length) return out.join("");
+    /* nothing declared: borrow the art of an hour this person is actually in */
+    for (let i = 0; i < episodes.length; i++) {
+      const ep = episodes[i];
+      if (name && !(ep.people || []).some((p) => p.name === name)) continue;
+      const pics = picturesFor("episode:" + sN + "-" + ep.n);
+      if (pics.length) return figureHTML(pics[0], ep.title, "right");
+    }
+    return "";
   }
   function pictureFor(key) {
     const list = picturesFor(key);
@@ -425,6 +555,136 @@
     }
   }
 
+  /* ================= naming a person in running prose =================
+     The chronicle's own sentences call people by whatever the sentence wanted:
+     "Eddard Stark" in one line and "Ned" in the next. To find the lines that
+     are about somebody we need every name that unambiguously means them.
+
+     The full name always counts. A single given name counts ONLY if no other
+     soul in this wiki shares it — "Arya" is safe, "Jon" is not, because Jon
+     Arryn and Jon Connington would both answer to it. Anything shorter than
+     four letters is left alone; so are the honorific forms in CHARACTER_ALIASES
+     that already point here. Matching is on word boundaries, so "Bran" never
+     catches "Brandon". */
+  const FIRST_COUNT = {};
+  Object.keys(CHARACTERS).forEach((n) => {
+    const first = n.split(" ")[0];
+    FIRST_COUNT[first] = (FIRST_COUNT[first] || 0) + 1;
+  });
+  const HOOK_CACHE = {};
+  function nameHooks(name) {
+    if (HOOK_CACHE[name]) return HOOK_CACHE[name];
+    const words = [name];
+    const first = name.split(" ")[0];
+    if (first.length >= 4 && FIRST_COUNT[first] === 1 && first !== name) words.push(first);
+    const list = words.map((w) =>
+      new RegExp("\\b" + w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\b"));
+    HOOK_CACHE[name] = list;
+    return list;
+  }
+
+  /* ================= the road they walk =================
+     Two ledgers describe it: WHEREABOUTS (season, episode, place) and
+     WHEREABOUTS_BOOK (book, chapter, place). Each is reduced to the ORDER of
+     the places it visits, consecutive repeats collapsed, and then the two are
+     diffed with a longest-common-subsequence. Every place both tellings agree
+     on becomes one full-width row; each stretch where they disagree becomes a
+     split row, screen on the left and page on the right. Where only one telling
+     has any record at all, its road simply runs whole down the page. */
+  function stopsFrom(ledger, name, fmt) {
+    if (typeof ledger === "undefined" || !ledger || !ledger[name]) return [];
+    const out = [];
+    ledger[name].forEach((s) => {
+      const id = s[2];
+      if (!id || !locById[id]) return;
+      if (out.length && out[out.length - 1].id === id) return;   /* still there */
+      out.push({ id: id, when: fmt(s[0], s[1]) });
+    });
+    return out;
+  }
+  function lcs(a, b) {
+    const n = a.length, m = b.length;
+    const t = [];
+    for (let i = 0; i <= n; i++) t.push(new Array(m + 1).fill(0));
+    for (let i = n - 1; i >= 0; i--)
+      for (let j = m - 1; j >= 0; j--)
+        t[i][j] = a[i].id === b[j].id ? t[i + 1][j + 1] + 1 : Math.max(t[i + 1][j], t[i][j + 1]);
+    const pairs = [];
+    let i = 0, j = 0;
+    while (i < n && j < m) {
+      if (a[i].id === b[j].id) { pairs.push([i, j]); i++; j++; }
+      else if (t[i + 1][j] >= t[i][j + 1]) i++;
+      else j++;
+    }
+    return pairs;
+  }
+  function stopHTML(st, note) {
+    const l = locById[st.id];
+    return `<b><a class="wk-link" href="#loc=${st.id}">${esc(l.name)}</a></b>` +
+      (note ? `<i class="wk-note"> — ${esc(note)}</i>` : "");
+  }
+  function journeyHTML(name) {
+    const show = stopsFrom(typeof WHEREABOUTS !== "undefined" ? WHEREABOUTS : null, name,
+      (a, b) => `S${a}·E${b}`);
+    const book = stopsFrom(typeof WHEREABOUTS_BOOK !== "undefined" ? WHEREABOUTS_BOOK : null, name,
+      (a, b) => `${(BOOKS.find((x) => x.n === a) || {}).short || "Bk " + a} ${b}`);
+    if (!show.length && !book.length) return "";
+
+    /* hand-written notes, where a traced road exists for this person */
+    const notes = {};
+    const j = WORLD.journeys && WORLD.journeys.find((x) => x.character === name || x.character.indexOf(name) === 0);
+    if (j) j.stops.forEach((st) => { if (st.location && st.note) notes[st.location] = st.note; });
+
+    const rows = [];
+    const whole = (st, when) =>
+      `<span class="wk-row wk-row-plain wk-jrow"><span class="wk-row-num">${esc(when)}</span>
+        <span>${stopHTML(st, notes[st.id])}</span></span>`;
+    const side = (list) => list.map((st) =>
+      `<span class="wk-jside-stop"><span class="wk-row-num">${esc(st.when)}</span>
+        <span>${stopHTML(st, notes[st.id])}</span></span>`).join("");
+    const split = (a, b) =>
+      `<span class="wk-row wk-row-plain wk-jrow wk-jsplit">
+        <span class="wk-jside wk-jside-show"><span class="wk-jside-tag">On the screen</span>${side(a)}</span>
+        <span class="wk-jside wk-jside-book"><span class="wk-jside-tag">In the books</span>${side(b)}</span>
+      </span>`;
+
+    if (!book.length) show.forEach((st) => rows.push(whole(st, st.when)));
+    else if (!show.length) book.forEach((st) => rows.push(whole(st, st.when)));
+    else {
+      const pairs = lcs(show, book);
+      let i = 0, k = 0;
+      pairs.forEach(([pi, pk]) => {
+        const onlyShow = show.slice(i, pi), onlyBook = book.slice(k, pk);
+        if (onlyShow.length || onlyBook.length) rows.push(split(onlyShow, onlyBook));
+        rows.push(whole(show[pi], show[pi].when + " · " + book[pk].when));
+        i = pi + 1; k = pk + 1;
+      });
+      const tailShow = show.slice(i), tailBook = book.slice(k);
+      if (tailShow.length || tailBook.length) rows.push(split(tailShow, tailBook));
+    }
+    const both = show.length && book.length;
+    return `<h3 class="wk-h3">Their journey</h3>` +
+      (both ? `<p class="wk-jnote">Where the two tellings send them to the same place the road runs
+        whole; where they part, the screen keeps the left and the books the right.</p>` : "") +
+      `<div class="wk-rows wk-journey">${rows.join("")}</div>`;
+  }
+
+  /* the ground they cover in one season, as a closing line for a composed
+     season recap — the ledger already knows it and it grounds the rest */
+  function seasonPlaces(name, sN) {
+    if (typeof WHEREABOUTS === "undefined" || !WHEREABOUTS || !WHEREABOUTS[name]) return "";
+    const seenP = [];
+    WHEREABOUTS[name].forEach((s) => {
+      if (s[0] !== sN || !s[2] || !locById[s[2]]) return;
+      if (seenP.indexOf(s[2]) < 0) seenP.push(s[2]);
+    });
+    if (!seenP.length) return "";
+    const links = seenP.map((id) => `<a class="wk-link" href="#loc=${id}">${esc(locById[id].name)}</a>`);
+    const list = links.length === 1 ? links[0]
+      : links.slice(0, -1).join(", ") + " and " + links[links.length - 1];
+    return `<b class="wk-para-lead">Where they stand.</b> ${list}.`;
+  }
+
   /* small print under portraits & stills */
   function creditHTML() {
     const href = CFG.creditsHref || "credits.html";
@@ -458,88 +718,225 @@
     if (c.siblings && c.siblings.length) fam.push(metaRow("Siblings", c.siblings.map(charLink).join(", ")));
     if (c.children && c.children.length) fam.push(metaRow("Children", c.children.map(charLink).join(", ")));
 
-    /* ===== the archive: hand-written long-form paragraphs, where they exist ===== */
     const extra = extraFor(name);
-    const archive = paraBlock("The fuller tale", extra.paras);
-    const versus = paraBlock("The page and the screen", extra.vs);
 
-    /* ===== Biography: their story season by season, composed from the chronicle ===== */
-    const bioParas = [];
+    /* ================= WHO THEY ARE, IN A FEW SENTENCES =================
+       The blurb answers "who is this" in a line. A hand-written `intro` adds
+       what a blurb has no room for — what they look like, how they carry
+       themselves, what they are after. Where none is written, the page composes
+       a second sentence out of what the data already knows: their house, their
+       birthplace, and the banners and orders they are sworn to.
+
+       This part is NEVER gated. It is the one piece of a page that has to be
+       safe for a reader on their first episode, so nothing in it may look
+       forward — which is also why it is built from standing facts and not from
+       anything that happens. */
+    let intro = "";
+    if (extra.intro && extra.intro.length) {
+      intro = extra.intro.map((p) => `<p class="wk-para wk-intro">${linkify(p)}</p>`).join("");
+    } else {
+      const bits = [];
+      const hh = c.house && houseById[c.house];
+      if (hh) bits.push(`of <a class="wk-link" href="#house=${hh.id}">${esc(hh.name)}</a>`);
+      if (c.born) bits.push(`born at ${esc(c.born)}`);
+      const orders = groups.filter((g) => !houseById[g.id])
+        .map((g) => (groupsFlat.find((x) => x.g.id === g.id) || { g: {} }).g)
+        .filter((g) => g.name);
+      if (orders.length) {
+        const seenO = [];
+        const names = orders.filter((g) => seenO.indexOf(g.name) < 0 && seenO.push(g.name))
+          .slice(0, 3).map((g) => `<a class="wk-link" href="#group=${g.id}">${esc(g.name)}</a>`);
+        bits.push("sworn to " + names.join(", "));
+      }
+      if (bits.length) intro = `<p class="wk-para wk-intro">A soul ${bits.join(", ")}.</p>`;
+    }
+
+    /* ================= THE FULLER TALE =================
+       Rebuilt Aug 2026 at the owner's request. It used to be one whole-arc
+       essay that assumed you had finished the show, followed much further down
+       by a separate season-by-season list. It is now a recap you can read from
+       where you actually are: one segment per season, each hidden on its own if
+       the spoiler shield has not reached it, and the person's ending at the
+       foot of it. The essay is still here — it is the best writing on the page
+       — but it has moved below the seasons and waits until you have finished
+       one telling or the other, because it cannot be cut into seasons.
+
+       There is no "their fate" fold any more. The ending is simply part of the
+       recap, and the shield decides whether you see it. */
+    let hiddenTale = 0;
+    const taleBits = [];
+
     ALL_SEASONS.forEach((s) => {
-      const bits = [];
-      s.episodes.forEach((ep) => {
-        const p = (ep.people || []).find((x) => x.name === name);
-        if (p) bits.push(`In <a class="wk-link" href="#episode=${s.n}-${ep.n}"><i>${esc(ep.title)}</i></a>${p.note ? " — " + esc(p.note) : "."}`);
-      });
-      if (bits.length) bioParas.push(`<p class="wk-para"><b class="wk-para-lead">${esc(s.name)}.</b> ${bits.join(" ")}</p>`);
+      /* hand-written prose for this season if anyone has written it; otherwise
+         the chronicle's own episode notes, strung together */
+      const written = extra.seasons && extra.seasons[s.n];
+      let body = "";
+      if (written && written.length) {
+        body = written.map((p) => `<p class="wk-para">${linkify(p)}</p>`).join("");
+      } else {
+        /* Composed, and composed to READ — one sentence per hour they are in,
+           plus the chronicle's own event lines that name them, plus the places
+           they stand that season. Three sources instead of one is the
+           difference between a list of fragments and a recap you can follow.
+           Anything hand-written above beats all of it. */
+        const hooks = nameHooks(name);
+        const bits = [];
+        s.episodes.forEach((ep) => {
+          const p = (ep.people || []).find((x) => x.name === name);
+          const evs = (ep.events || []).filter((ev) => hooks.some((h) => h.test(ev)));
+          if (!p && !evs.length) return;
+          const where = `<a class="wk-link" href="#episode=${s.n}-${ep.n}"><i>${esc(ep.title)}</i></a>`;
+          if (p && p.note) bits.push(`In ${where} — ${esc(p.note)}`);
+          else if (p) bits.push(`They are there in ${where}.`);
+          evs.slice(0, 2).forEach((ev) => bits.push(linkify(ev)));
+        });
+        if (bits.length) {
+          /* broken into paragraphs of four sentences so a long season is a
+             couple of readable blocks rather than one wall */
+          const paras = [];
+          for (let k = 0; k < bits.length; k += 4) paras.push(bits.slice(k, k + 4).join(" "));
+          body = paras.map((p) => `<p class="wk-para">${p}</p>`).join("");
+          const stops = seasonPlaces(name, s.n);
+          if (stops) body += `<p class="wk-para wk-season-where">${stops}</p>`;
+        }
+      }
+      if (!body) return;
+      if (!seenSeason(s.n)) { hiddenTale++; return; }
+      const figs = seasonFigures("char:" + name, s.n, s.episodes, name);
+      taleBits.push(`<section class="wk-season"><h4 class="wk-season-name">${esc(s.name)}</h4>${figs}${body}</section>`);
     });
-    const story = bioParas.length
-      ? `<h3 class="wk-h3">In the show, season by season</h3>${bioParas.join("")}` : "";
 
-    /* ===== In the books: the movements that feature them, as prose ===== */
-    const bookParas = [];
+    /* ---- how it ends for them ----
+       Each telling's ending is gated on its own reckoning: the screen's death
+       on its season, the books' on its book. Someone who has read all five
+       books and watched nothing is told what the books did to them and not
+       what the screen did, which is exactly right. */
+    {
+      const endBits = [];
+      let endHidden = 0;
+      if (c.death && c.death.s === 0) {
+        endBits.push(`<p class="wk-para">${linkify(c.death.how)} — before this story begins.</p>`);
+      } else if (c.death && c.death.s > 0) {
+        if (seenSeason(c.death.s)) {
+          const tale = (typeof DEATH_TALES !== "undefined" && DEATH_TALES[name]) || null;
+          endBits.push(`<p class="wk-para"><b class="wk-para-lead">On the screen.</b> ${esc(c.death.how)}
+            <a class="wk-link" href="#episode=${c.death.s}-${c.death.e}">(S${c.death.s}&middot;E${c.death.e})</a></p>`);
+          if (tale) endBits.push(`<p class="wk-para">${linkify(tale)}</p>`);
+        } else endHidden++;
+      }
+      if (c.bookDeath) {
+        if (readBook(c.bookDeath.b)) {
+          const bt = (typeof DEATH_TALES_BOOK !== "undefined" && DEATH_TALES_BOOK[name]) || null;
+          const bk = (BOOKS.find((b) => b.n === c.bookDeath.b) || {}).short || ("book " + c.bookDeath.b);
+          endBits.push(`<p class="wk-para"><b class="wk-para-lead">On the page.</b> ${esc(c.bookDeath.how)}
+            <a class="wk-link" href="#chapter=${c.bookDeath.b}-${c.bookDeath.ch}">(${esc(bk)}, ch. ${c.bookDeath.ch})</a></p>`);
+          if (bt) endBits.push(`<p class="wk-para">${linkify(bt)}</p>`);
+        } else endHidden++;
+      }
+      if (extra.fate && extra.fate.length) {
+        if (finishedEither()) extra.fate.forEach((p) => endBits.push(`<p class="wk-para">${linkify(p)}</p>`));
+        else endHidden++;
+      }
+      hiddenTale += endHidden;
+      if (endBits.length) {
+        taleBits.push(`<section class="wk-season wk-season-end"><h4 class="wk-season-name">How it ends for them</h4>${endBits.join("")}</section>`);
+      } else if (!endHidden && !c.death && !c.bookDeath) {
+        taleBits.push(`<section class="wk-season wk-season-end"><h4 class="wk-season-name">How it ends for them</h4>
+          <p class="wk-para">The chronicle records no death for this soul &mdash; they are living when the
+          tale leaves them, or their ending is a page the maesters have yet to turn.</p></section>`);
+      }
+    }
+
+    /* The whole-arc essay that used to close this section is gone (Aug 2026).
+       The owner's judgement, and it is right: once the seasons above are a real
+       recap, an essay retelling the same arc a second time is just the same
+       story again. The prose is not deleted — it still sits in js/wiki-x/ and
+       js/wiki-extra.js — it simply has no slot on the page any more. If it is
+       ever wanted back, it belongs INSIDE the seasons, cut up, not after them. */
+
+    const archive = taleBits.length || hiddenTale
+      ? `<h3 class="wk-h3">The fuller tale</h3>` +
+        shieldNote(hiddenTale, "what lies beyond it") + taleBits.join("")
+      : "";
+
+    /* ================= THEIR CHAPTERS, BOOK BY BOOK =================
+       This used to be "Only in the books" — a paragraph of movement titles. It
+       is now what a reader of the novels actually wants: every chapter that
+       looks through this person's eyes, in order, under its book, carrying the
+       one-line retelling that chapter already has and linking to its own page.
+
+       A chapter belongs to somebody if its title is their point of view (the
+       stem is mapped in js/chapter-pov.js — "Reek" and "Alayne" are the two
+       that hide behind another name), or, for everyone who never held a
+       viewpoint, if the chapter's own retelling names them. Each book is gated
+       on that book alone. */
+    let hiddenBooks = 0;
+    const bookBits = [];
+    if (c.bookBlurb) {
+      if (readBook(1)) bookBits.push(`<p class="wk-para wk-lead-books">${linkify(c.bookBlurb)}</p>`);
+      else hiddenBooks++;
+    }
+    const POV = (typeof CHAPTER_POV !== "undefined" && CHAPTER_POV) || {};
+    const hooks = nameHooks(name);
     BOOKS.forEach((b) => {
-      const bits = [];
-      (b.beats || []).forEach((bt) => {
-        const p = (bt.people || []).find((x) => x.name === name);
-        if (p) bits.push(`In <a class="wk-link" href="#chapter=${b.n}-${bt.from}"><i>${esc(bt.title)}</i></a>${p.note ? " — " + esc(p.note) : "."}`);
+      const rows = [];
+      (b.chs || []).forEach((ch, i) => {
+        const title = ch[0] || "";
+        const stem = title.replace(/\s+[IVXLC]+$/, "");
+        const isPov = POV[stem] === name;
+        const named = !isPov && hooks.length && hooks.some((h) => h.test(ch[1] || ""));
+        if (!isPov && !named) return;
+        /* the painting made for this very chapter, where one exists — a small
+           plate on the row, not a banner */
+        const art = pictureFor("chapter:" + b.n + "-" + (i + 1));
+        rows.push(`<a class="wk-chapline${isPov ? " wk-chapline-pov" : ""}${art ? " wk-chapline-art" : ""}" href="#chapter=${b.n}-${i + 1}">
+          ${art ? `<span class="wk-chapline-thumb"><img src="${esc(art)}" alt="" loading="lazy"/></span>` : ""}
+          <span class="wk-chapline-name">${esc(title)}</span>
+          <span class="wk-chapline-text">${esc(ch[1] || "")}</span></a>`);
       });
-      if (bits.length) bookParas.push(`<p class="wk-para"><b class="wk-para-lead">${esc(b.name)}.</b> ${bits.join(" ")}</p>`);
+      if (!rows.length) return;
+      if (!readBook(b.n)) { hiddenBooks++; return; }
+      const povCount = rows.filter((r) => r.indexOf("wk-chapline-pov") > 0).length;
+      const count = povCount
+        ? `${povCount} chapter${povCount === 1 ? "" : "s"} of their own` +
+          (rows.length > povCount ? `, and ${rows.length - povCount} more that name them` : "")
+        : `${rows.length} chapter${rows.length === 1 ? "" : "s"} that name them`;
+      bookBits.push(`<section class="wk-season"><h4 class="wk-season-name">${esc(b.name)}
+        <em class="wk-season-count">${count}</em></h4>
+        <div class="wk-chaplines">${rows.join("")}</div></section>`);
     });
-    const inBooks = bookParas.length
-      ? `<h3 class="wk-h3">In the books</h3>${bookParas.join("")}` : "";
-
-    /* ===== Their journey (the traced road, with its tale) ===== */
-    let journey = "";
-    const j = WORLD.journeys && WORLD.journeys.find((x) => x.character === name || x.character.indexOf(name) === 0);
-    if (j) {
-      journey = `<h3 class="wk-h3">Their journey</h3><div class="wk-rows">` + j.stops.map((st) => {
-        const place = st.location && locById[st.location]
-          ? `<a class="wk-link" href="#loc=${st.location}">${esc(locById[st.location].name)}</a>` : esc(st.name || "");
-        return `<span class="wk-row wk-row-plain"><span class="wk-row-num">E${st.episode}</span>
-          <span><b>${place}</b><i class="wk-note"> — ${esc(st.note || "")}</i></span></span>`;
-      }).join("") + `</div>`;
+    if (extra.vs && extra.vs.length) {
+      if (finishedEither()) {
+        bookBits.push(`<section class="wk-season wk-season-essay"><h4 class="wk-season-name">Where the page and the screen part</h4>` +
+          extra.vs.map((p) => `<p class="wk-para">${linkify(p)}</p>`).join("") + `</section>`);
+      } else hiddenBooks++;
     }
+    const inBooks = bookBits.length || hiddenBooks
+      ? `<h3 class="wk-h3">Their chapters, book by book</h3>` +
+        shieldNote(hiddenBooks, "the books you have not opened yet") + bookBits.join("")
+      : "";
 
-    /* ===== the road (place-by-place whereabouts) ===== */
-    let road = "";
-    if (typeof WHEREABOUTS !== "undefined" && WHEREABOUTS[name]) {
-      const stops = WHEREABOUTS[name].filter((s) => s[2] && locById[s[2]]);
-      if (stops.length) road = `<h3 class="wk-h3">Where they stand, season by season</h3><div class="wk-road">` +
-        stops.map((s) => `<span class="wk-road-stop">S${s[0]}·E${s[1]} — <a class="wk-link" href="#loc=${s[2]}">${esc(locById[s[2]].name)}</a></span>`).join("") + `</div>`;
-    }
+    /* ================= THEIR JOURNEY =================
+       Every place the story takes them, in order — and where the two tellings
+       send them to different places, the row splits: the screen's road down the
+       left, the books' down the right. Rows the two agree on stay whole and run
+       the full width, so the page reads as one road that occasionally forks.
 
-    /* ===== mentioned in the chronicle (event lines & chapter texts naming them) ===== */
-    const mentions = [];
-    ALL_SEASONS.forEach((s) => s.episodes.forEach((ep) => {
-      if (mentions.length >= 8) return;
-      (ep.events || []).forEach((ev) => {
-        if (mentions.length < 8 && ev.indexOf(name.split(" ")[0]) >= 0 && ev.indexOf(name) >= 0)
-          mentions.push(`<li>${linkify(ev)} <a class="wk-link" href="#episode=${s.n}-${ep.n}">(S${s.n}·E${ep.n})</a></li>`);
-      });
-    }));
-    BOOKS.forEach((b) => (b.chs || []).forEach((ch, i) => {
-      if (mentions.length >= 12) return;
-      if ((ch[1] || "").indexOf(name) >= 0)
-        mentions.push(`<li>${linkify(ch[1])} <a class="wk-link" href="#chapter=${b.n}-${i + 1}">(${esc(b.short)} ${i + 1})</a></li>`);
-    }));
-    const mentioned = mentions.length
-      ? `<h3 class="wk-h3">Mentioned in the chronicle</h3><ul class="wk-list">${mentions.join("")}</ul>` : "";
+       The order comes from the whereabouts ledgers (which cover everybody); the
+       notes come from WORLD.journeys (which are hand-written but only exist for
+       a few), so a stop that has a note keeps it. */
+    const journey = journeyHTML(name);
 
-    /* ===== fate, folded away from innocent eyes. EVERY soul gets the fold, living or
-       dead, so its mere presence betrays nothing — what death the tale has written,
-       if any, waits inside. ===== */
-    const tale = (typeof DEATH_TALES !== "undefined" && DEATH_TALES[name]) || (typeof DEATH_TALES_BOOK !== "undefined" && DEATH_TALES_BOOK[name]);
-    const fateBits = [];
-    if (c.death && c.death.s > 0) fateBits.push(`<b>The show:</b> ${esc(c.death.how)} (S${c.death.s}·E${c.death.e})`);
-    if (c.death && c.death.s === 0) fateBits.push(`<b>Before the tale:</b> ${esc(c.death.how)}`);
-    if (c.bookDeath) fateBits.push(`<b>The books:</b> ${esc(c.bookDeath.how)} (${(BOOKS.find((b) => b.n === c.bookDeath.b) || {}).short || "book " + c.bookDeath.b}, ch. ${c.bookDeath.ch})`);
-    if (tale) fateBits.push(linkify(tale));
-    (extra.fate || []).forEach((p) => fateBits.push(linkify(p)));
-    const fateInner = fateBits.length
-      ? fateBits.map((b) => `<p>${b}</p>`).join("")
-      : `<p>The chronicle records no death for this soul — they are living when the tale leaves them, or their ending is a page the maesters have yet to turn.</p>`;
-    const fate = `<details class="wk-spoiler"><summary>Their fate — if death has found them, it is written here. Open at your peril.</summary><div>${fateInner}</div></details>`;
+    /* The "Their fate — open at your peril" fold that used to sit here is gone
+       (Aug 2026). An ending is not a curiosity to be unwrapped; it is the last
+       part of the recap, and the shield above decides whether the reader sees
+       it. What was inside this fold now closes "The fuller tale". */
+
+    /* their folio in the White Book, for anyone who ever wore the white cloak */
+    const folio = (typeof WHITEBOOK_FOLIO !== "undefined" && WHITEBOOK_FOLIO[name]) || null;
+    const whiteBook = folio
+      ? `<a class="wk-bigbtn" href="${CFG.whiteBookHref || "whitebook.html"}#kg=${encodeURIComponent(folio)}">&#128737; Their folio in the White Book &rarr;</a>`
+      : "";
 
     const hasImg = (typeof PEOPLE_IMGS !== "undefined") && PEOPLE_IMGS[name];
     out.innerHTML = crumbs([{ label: "Characters", href: "#cat=characters" }, { label: name }]) +
@@ -558,15 +955,11 @@
           <h1>${esc(name)}</h1>
           <div class="wk-badges">${badges || ""}</div>
           <p class="wk-lead">${linkify(c.blurb || "")}</p>
+          ${intro}
           ${archive}
-          ${c.bookBlurb ? `<h3 class="wk-h3">In the books' telling</h3><p>${linkify(c.bookBlurb)}</p>` : ""}
-          ${versus}
-          ${story}
           ${inBooks}
           ${journey}
-          ${road}
-          ${mentioned}
-          ${fate}
+          ${whiteBook}
         </div>
       </div>`;
   }
@@ -592,6 +985,7 @@
           <h1>${esc(h.name)}</h1>
           <p class="wk-lead">${linkify(h.blurb || "")}</p>
           ${paraBlock("The fuller tale", h.paras || ex.paras)}
+          ${sectionBlock(ex.sections)}
           ${paraBlock("The page and the screen", ex.vs)}
         </div>
       </div>`;
@@ -620,6 +1014,7 @@
           <h1>${esc(h.name)}</h1>
           <p class="wk-lead">${linkify(h.description || "")}</p>
           ${paraBlock("The fuller tale", extraFor("house:" + h.id).paras)}
+          ${sectionBlock(extraFor("house:" + h.id).sections)}
           ${paraBlock("The page and the screen", extraFor("house:" + h.id).vs)}
           ${members.length ? `<h3 class="wk-h3">The family & its people</h3><div class="wk-grid">` +
             members.map((n) => CHARACTERS[n]
@@ -648,6 +1043,7 @@
           <h1>${esc(g.name)}</h1>
           <p class="wk-lead">${linkify(g.blurb || "")}</p>
           ${paraBlock("The fuller tale", extraFor("group:" + g.id).paras)}
+          ${sectionBlock(extraFor("group:" + g.id).sections)}
           ${paraBlock("The page and the screen", extraFor("group:" + g.id).vs)}
           ${members.length ? `<h3 class="wk-h3">Its members</h3><div class="wk-grid">` +
             members.map((n) => CHARACTERS[n]
@@ -711,7 +1107,10 @@
 
     /* the archive: hand-written long-form paragraphs, where they exist */
     const lx = extraFor("loc:" + id);
-    const lArchive = paraBlock("The fuller tale", lx.paras) + paraBlock("The page and the screen", lx.vs);
+    /* the fuller tale, with its own headings where somebody has cut it into
+       them, and then how the two tellings differ if that is written */
+    const lArchive = paraBlock("The fuller tale", lx.paras) + sectionBlock(lx.sections) +
+                     paraBlock("The page and the screen", lx.vs);
 
     /* the chronicle here: every event line & chapter that names this place */
     const chron = [];
@@ -747,7 +1146,10 @@
           <div class="wk-badges"><span class="wk-badge wk-badge-flat">${esc(l.subtitle)}</span></div>
           <p class="wk-lead">${linkify(l.description || "")}</p>
           ${lArchive}
-          ${l.lore ? `<h3 class="wk-h3">In the first season</h3><p>${linkify(l.lore)}</p>` : ""}
+          <!-- "In the first season" used to sit here. Retired Aug 2026: it was one
+               paragraph about season one on a page whose whole lower half is the
+               chronicle of everything that ever happened here. l.lore is still in
+               js/data.js and still used by the interactive map's location card. -->
           ${chronicle}
           ${natives}
           ${souls}
@@ -834,8 +1236,18 @@
   }
 
   // ================= router =================
-  function route() {
-    const h = new URLSearchParams(window.location.hash.slice(1));
+  /* `hash` is optional and is ONLY passed by the prerender generator, which
+     needs to render a thousand routes in a loop without touching the URL a
+     thousand times. Chrome throttles rapid location changes and starts silently
+     ignoring them after about a hundred, which used to leave every page after
+     that point rendering whatever route was last accepted — that is why the
+     generated p/ tree had one character's article written into a hundred and
+     fifty different place files. Nothing else may pass an argument: the
+     hashchange and kw-shield listeners below are wrapped for that reason,
+     because both would otherwise hand this an Event object. */
+  function route(hash) {
+    const raw = hash != null ? String(hash) : window.location.hash;
+    const h = new URLSearchParams(raw.replace(/^#/, ""));
     window.scrollTo(0, 0);
     if (h.get("char")) return renderChar(h.get("char"));
     if (h.get("house")) return renderHouse(h.get("house"));
@@ -890,8 +1302,9 @@
       return rs;
     },
     render: function (href) {
-      window.location.hash = href || "";
-      route();
+      /* render straight from the string — see the note on route(). Assigning
+         window.location.hash here is what broke the whole generated tree. */
+      route(href || "");
       const h1 = out.querySelector("h1");
       const lead = out.querySelector("p");
       return {
@@ -903,7 +1316,22 @@
     },
   };
 
-  window.addEventListener("hashchange", route);
+  /* wrapped, not passed directly: an Event handed to route() would be read as
+     a hash string */
+  window.addEventListener("hashchange", function () { route(); });
+  /* The shield can be moved without leaving the page — its dialog rides the
+     realm bar everywhere — so redraw when it moves. js/shield.js announces
+     every change on this event. The page also redraws once the module itself
+     arrives, for the case where some other page loaded the engine before it. */
+  window.addEventListener("kw-shield", function () { route(); });
+  if (!window.KWShield) {
+    const waiting = setInterval(() => {
+      if (!window.KWShield) return;
+      clearInterval(waiting);
+      route();
+    }, 120);
+    setTimeout(() => clearInterval(waiting), 8000);
+  }
   initSearch();
   initRandom();
   route();

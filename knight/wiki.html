@@ -45,6 +45,12 @@ window.WIKI_CONFIG = {
   peopleDir: "assets/people/",
   sigilDir: "assets/sigils/",
   creditsHref: "../credits.html",
+  whiteBookHref: "../whitebook.html",
+  /* one season so far, against three novellas — the season covers the
+     first of them, so book one unlocks it and the other two stand alone */
+  shieldSeasonKey: "knightS", shieldBookKey: "knightB",
+  shieldSeasonMax: 1, shieldBookMax: 3,
+  unlock: { 1: { s: 1, b: 1 } },
 };
 /* wiki page pictures — the hero of the knight wiki is Ser Hugh's tilt */
 window.WIKI_IMAGES = {
@@ -66,6 +72,8 @@ window.WIKI_IMAGES = {
 <script src="js/wiki-x/episodes.js"></script>
 <script src="js/wiki-x/chapters.js"></script>
 <script src="../js/sigil-art.js"></script>
+<script src="../js/shield.js" data-kw-shield="1"></script>
+<script src="../js/whitebook-index.js"></script>
 <script src="../js/wiki-engine.js"></script>
 <script>
 window.KW_PRERENDER_CFG = {

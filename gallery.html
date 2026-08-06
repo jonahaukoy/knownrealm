@@ -152,6 +152,9 @@
   </div>
 </div>
 
+<!-- the shield before the pictures: a gallery whose captions name every turn
+     in the story must not paint them once and take them away a moment later -->
+<script src="js/shield.js" data-kw-shield="1"></script>
 <script src="js/sigil-art.js"></script>
 <script src="js/art-manifest.js"></script>
 <script>
@@ -173,6 +176,39 @@
      proportional to the ratios and the heights all match. No measuring, no
      resize handler — it re-justifies itself at any width.
      ------------------------------------------------------------------------ */
+
+  /* ================= the spoiler shield =================
+     Every caption in this room is a sentence about the story — "The Red
+     Wedding", "Hardhome", "Winterfell Hanging" — so a reader on their first
+     season could learn the whole plot by scrolling. Each scene carries the
+     season it belongs to (js/art-manifest.js); a picture of a PLACE or of the
+     deep history carries nothing and is always safe. Either the season or the
+     matching book opens one. */
+  function shieldNow() {
+    return window.KWShield ? window.KWShield.get() : { gotS: 0, gotB: 0 };
+  }
+  /* A reader who has NEVER answered the shield is shown everything, exactly as
+     on the wiki: they have not asked to be protected, and a gallery that opens
+     showing a third of itself reads as a thin gallery rather than a careful
+     one. The games are the other way round — they ask first, on a gate screen —
+     but this is a room you walk into, not a game you start. */
+  function shielded() { return !!(window.KWShield && window.KWShield.has()); }
+  function safe(a) {
+    if (!a || (a.s == null && a.b == null)) return true;
+    if (!shielded()) return true;
+    const st = shieldNow();
+    if (a.s != null && (st.gotS || 0) >= a.s) return true;
+    if (a.b != null && (st.gotB || 0) >= a.b) return true;
+    return false;
+  }
+  let heldCount = 0;
+  function keep(list) {
+    return (list || []).filter((a) => {
+      if (safe(a)) return true;
+      heldCount++;
+      return false;
+    });
+  }
 
   const ratio = (a) => (a && a.w && a.h) ? a.w / a.h : 1;
 
@@ -223,11 +259,15 @@
   }
 
   const n = (x) => (x || []).length;
+  heldCount = 0;
+  const scenes = keep(M.scenes);
   document.getElementById("gallery-body").innerHTML =
-    `<h2 class="gal-h2">Scenes of the Realm <span class="gal-count">${n(M.scenes)}</span></h2>
+    (heldCount && window.KWShield && window.KWShield.heldNotice
+      ? window.KWShield.heldNotice(heldCount, "painting", "paintings") : "") +
+    `<h2 class="gal-h2">Scenes of the Realm <span class="gal-count">${n(scenes)}</span></h2>
      <p class="gal-h2-note">Painted moments and places &mdash; many of them hang on their own pages across the
        wikis, the maps and the chronicle.</p>
-     ${render(M.scenes, "scene")}
+     ${render(scenes, "scene")}
 
      <h2 class="gal-h2">Valyrian Steel <span class="gal-count">${n(M.swords)}</span></h2>
      <p class="gal-h2-note">The named blades that cannot be replaced &mdash; every sword of dragonsteel in the

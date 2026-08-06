@@ -164,6 +164,19 @@
     return out;
   }
 
+  /* ================= how many leaves stand on one turn =================
+     A two-page spread needs the width for two columns of type. A phone has
+     room for one, so below 700px the book turns a single leaf at a time — the
+     way anybody reads a real book in one hand.
+
+     PER is read once and then used EVERYWHERE the code used to say 2. It is
+     re-read whenever the width crosses the boundary, and the book is recut,
+     because a page that fitted beside another does not fit alone. */
+  const NARROW = window.matchMedia ? window.matchMedia("(max-width: 700px)") : null;
+  function leavesPerTurn() { return NARROW && NARROW.matches ? 1 : 2; }
+  let PER = leavesPerTurn();
+  function turns() { return Math.ceil(pages.length / PER); }
+
   /* ---- the measurer: fills fixed-height leaves, block by block ---- */
   function paginate() {
     const keep = stage.innerHTML;
@@ -197,11 +210,13 @@
     }
 
     flow(contentsBlocks(), { kind: "contents" });
-    /* the contents always end on an even count so a brother opens a fresh spread */
-    if (built.length % 2) built.push({ kind: "contents", html: "", blank: true });
+    /* the contents end on an even count so a brother opens a fresh spread —
+       but only when there IS a spread. Turning one leaf at a time, a blank
+       filler page is just a blank page the reader has to turn past. */
+    if (PER > 1 && built.length % PER) built.push({ kind: "contents", html: "", blank: true });
 
     BOOK.forEach((k, i) => flow(knightBlocks(k), { kind: "knight", k: k, index: i }));
-    if (built.length % 2) built.push({ kind: "end", html: "", blank: true });
+    if (PER > 1 && built.length % PER) built.push({ kind: "end", html: "", blank: true });
 
     stage.innerHTML = keep;
     stage.className = keepCls;
@@ -211,7 +226,7 @@
 
   function spreadOfKnight(id) {
     const n = pages.findIndex((p) => p.kind === "knight" && p.k && p.k.id === id && p.first);
-    return n < 0 ? 0 : Math.floor(n / 2);
+    return n < 0 ? 0 : Math.floor(n / PER);
   }
 
   /* ================================================== RENDERING A SPREAD == */
@@ -237,20 +252,21 @@
       const open = document.getElementById("wb-open");
       if (open) open.addEventListener("click", () => go(0));
     } else {
-      const total = Math.ceil(pages.length / 2);
-      const left = pages[spread * 2], right = pages[spread * 2 + 1];
-      stage.className = "wb-book wb-open wb-paper-" + paperFor(spread, total);
+      const total = turns();
+      const left = pages[spread * PER], right = PER > 1 ? pages[spread * PER + 1] : null;
+      stage.className = "wb-book wb-open wb-paper-" + paperFor(spread, total) +
+        (PER === 1 ? " wb-single" : "");
       stage.innerHTML = `
         <div class="wb-spread">
           ${leafHTML(left, "l")}
-          ${leafHTML(right, "r")}
-          <div class="wb-gutter"></div>
+          ${PER > 1 ? leafHTML(right, "r") : ""}
+          ${PER > 1 ? '<div class="wb-gutter"></div>' : ""}
         </div>`;
       wireSearch();
     }
 
     btnPrev.disabled = spread <= -1;
-    btnNext.disabled = spread >= Math.ceil(pages.length / 2) - 1;
+    btnNext.disabled = spread >= turns() - 1;
 
     if (!quiet) {
       stage.classList.remove("wb-arriving");
@@ -267,11 +283,11 @@
       footline.innerHTML = `The book is closed. Open it with the arrows, or press <kbd>&rarr;</kbd>.`;
       return;
     }
-    const total = Math.ceil(pages.length / 2);
-    const left = pages[spread * 2];
+    const total = turns();
+    const left = pages[spread * PER];
     const who = left && left.kind === "knight" && left.k ? esc(left.k.name)
       : left && left.kind === "contents" ? "the roll of brothers" : "";
-    footline.innerHTML = `Spread <b>${spread + 1}</b> of ${total}` +
+    footline.innerHTML = `${PER === 1 ? "Page" : "Spread"} <b>${spread + 1}</b> of ${total}` +
       (who ? ` &mdash; ${who}` : "") +
       ` &middot; turn with <kbd>&larr;</kbd> <kbd>&rarr;</kbd>, or return to ` +
       `<a href="#contents" style="color:var(--gold-dim)">the contents</a>.`;
@@ -297,7 +313,7 @@
   function setHash() {
     let h = "#cover";
     if (spread >= 0) {
-      const left = pages[spread * 2], right = pages[spread * 2 + 1];
+      const left = pages[spread * PER], right = PER > 1 ? pages[spread * PER + 1] : null;
       const k = (left && left.k) || (right && right.k);
       h = k ? "#kg=" + encodeURIComponent(k.id) : "#contents";
     }
@@ -305,7 +321,7 @@
   }
 
   function go(next) {
-    const last = Math.ceil(pages.length / 2) - 1;
+    const last = turns() - 1;
     next = Math.max(-1, Math.min(last, next));
     if (next === spread || turning) return;
     const forward = next > spread;
@@ -376,22 +392,31 @@
   /* Recut the whole book and stay on the reader's page. */
   function recut() {
     const here = spread;
-    const keep = spread >= 0 && pages[spread * 2] && pages[spread * 2].k
-      ? pages[spread * 2].k.id : null;
+    const keep = spread >= 0 && pages[spread * PER] && pages[spread * PER].k
+      ? pages[spread * PER].k.id : null;
+    PER = leavesPerTurn();          /* the width may have crossed the boundary */
     paginate();
     spread = keep ? spreadOfKnight(keep)
-      : Math.max(-1, Math.min(here, Math.ceil(pages.length / 2) - 1));
+      : Math.max(-1, Math.min(here, turns() - 1));
     render(true);
   }
 
   /* the leaf size is responsive, so the flow has to be recut when it changes */
   let resizeTimer = null, lastWidth = 0;
   window.addEventListener("resize", () => {
-    if (Math.abs(window.innerWidth - lastWidth) < 40) return;
+    /* a 40px twitch is a phone's address bar, not a new layout — but crossing
+       the one-leaf boundary IS, however small the step that crossed it */
+    if (Math.abs(window.innerWidth - lastWidth) < 40 && leavesPerTurn() === PER) return;
     lastWidth = window.innerWidth;
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(recut, 180);
   });
+  /* turning a phone sideways changes how many leaves fit; recut for that too */
+  if (NARROW) {
+    const onBoundary = () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(recut, 60); };
+    if (NARROW.addEventListener) NARROW.addEventListener("change", onBoundary);
+    else if (NARROW.addListener) NARROW.addListener(onBoundary);
+  }
 
   lastWidth = window.innerWidth;
   stage.classList.add("wb-open");   /* the measurer needs the open geometry */

@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>The Timeline — The Known Realm</title>
+<meta name="description" content="Twelve thousand years of the Known World on one draggable bar, with a map that repaints itself as you move: who ruled where, and how many lived there." />
 <link rel="preload" href="css/fonts/cinzel-400-latin.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="preload" href="css/fonts/cinzel-600-latin.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="preload" href="css/fonts/ebgaramond-400-latin.woff2" as="font" type="font/woff2" crossorigin />
@@ -14,74 +15,75 @@
 </head>
 <body class="tl-body">
 
-<header class="topbar wiki-topbar">
-  <a class="brand home-brand" href="timeline.html" style="text-decoration:none;color:var(--text-light)">
+<header class="topbar tl-topbar">
+  <a class="brand home-brand" href="index.html" style="text-decoration:none;color:var(--text-light)">
     <span class="brand-icon">&#8987;</span>
     <span class="brand-name">THE TIMELINE</span>
   </a>
+  <div class="tl-topnote" id="tl-topnote">Drag the bar &mdash; the world follows.</div>
   <div style="flex:1"></div>
 </header>
 
-<main class="tl-main">
-
-  <div class="tl-hero">
-    <div class="tl-hero-art" id="tl-hero-art"></div>
-    <div class="tl-hero-text">
-      <div class="tl-flourish">&#10022;</div>
-      <h1>The Timeline of the Known World</h1>
-      <p>From the Dawn Age to the breaking of the wheel &mdash; twelve thousand years in one line.
-        Choose an age, then read it moment by moment. Both tellings are marked where they differ.</p>
+<!-- ============ the bar: twelve thousand years, and the age written on it ============ -->
+<section class="tl-bar" id="tl-bar" aria-label="The years of the Known World">
+  <div class="tl-bar-left">
+    <button class="tl-step tl-step-far" id="tl-back-far" type="button" title="Back to the moment before">&#171;</button>
+    <button class="tl-step" id="tl-back-one" type="button" title="One year back (or press &larr;)">&#8249;</button>
+    <div class="tl-readout">
+      <div class="tl-year" id="tl-year">&nbsp;</div>
+      <div class="tl-eraname" id="tl-eraname">&nbsp;</div>
     </div>
+    <button class="tl-step" id="tl-fwd-one" type="button" title="One year on (or press &rarr;)">&#8250;</button>
+    <button class="tl-step tl-step-far" id="tl-fwd-far" type="button" title="On to the next moment">&#187;</button>
   </div>
 
-  <div class="tl-erahead">Choose an age</div>
-  <div class="tl-eras" id="tl-eras"></div>
-
-  <section class="tl-focus" id="tl-focus"></section>
-
-  <div class="tl-player">
-    <button class="tl-btn tl-step" id="tl-prev" type="button" title="The moment before (or press &larr;)" aria-label="Earlier moment">&#8592;</button>
-    <div class="tl-bar">
-      <input type="range" id="tl-scrub" min="0" max="0" step="1" value="0" aria-label="Scrub the whole timeline" />
-      <div class="tl-bar-ends" id="tl-bar-ends"><span>&#8592; earlier</span><span>later &#8594;</span></div>
-    </div>
-    <button class="tl-btn tl-step" id="tl-next" type="button" title="The moment after (or press &rarr;)" aria-label="Later moment">&#8594;</button>
-    <button class="tl-btn tl-shield" id="tl-shield" title="Set how far you have come">&#128737; Spoiler shield</button>
+  <div class="tl-track" id="tl-track" tabindex="0" role="slider"
+       aria-label="Year" aria-valuemin="-12000" aria-valuemax="306" aria-valuenow="298">
+    <div class="tl-eraband" id="tl-eraband"></div>
+    <div class="tl-ruler" id="tl-ruler"></div>
+    <div class="tl-moments" id="tl-moments"></div>
+    <div class="tl-handle" id="tl-handle"><span class="tl-handle-flag" id="tl-handle-flag"></span></div>
   </div>
-  <p class="tl-bar-hint">Drag the bar to sweep the years, or step with the <kbd>&larr;</kbd> <kbd>&rarr;</kbd> keys.</p>
+</section>
 
-  <div class="tl-hidden-note" id="tl-hidden"></div>
+<!-- ============ the stage: what happened, and where ============ -->
+<div class="tl-stage" id="tl-stage">
 
-  <section class="tl-stream" id="tl-stream"></section>
+  <aside class="tl-panel" id="tl-panel">
+    <div class="tl-panel-inner" id="tl-panel-inner"></div>
+  </aside>
 
-  <div class="tl-footart" id="tl-footart"></div>
+  <div class="tl-mapwrap" id="tl-mapwrap">
+    <svg id="tl-map" viewBox="0 0 5652 3682" preserveAspectRatio="xMidYMid meet">
+      <g id="tl-map-vp">
+        <image id="tl-basemap" href="assets/ASOIAF_map_redrawn_v6.jpg" x="0" y="0" width="5652" height="3682" />
+        <g id="tl-terr-layer"></g>
+        <g id="tl-label-layer"></g>
+      </g>
+    </svg>
 
-</main>
+    <div class="tl-maptip" id="tl-maptip" hidden></div>
+    <div class="tl-legend" id="tl-legend"></div>
 
-<!-- ============ the spoiler shield ============ -->
-<div class="tl-gate" id="tl-gate">
-  <div class="tl-gate-panel">
-    <div class="tl-gate-kicker">Before you walk the years</div>
-    <h2>How far have you come?</h2>
-    <p class="tl-gate-sub">The timeline runs to the very end of the tale. Tell the maesters how far you have
-      travelled and everything beyond it stays sealed &mdash; in every telling, and in the games too.</p>
-    <div id="tl-gate-controls"></div>
-    <div class="tl-gate-count" id="tl-gate-count"></div>
-    <div class="tl-gate-actions">
-      <button class="tl-gate-btn" id="tl-gate-all">I fear no spoilers &mdash; open everything</button>
-      <button class="tl-gate-btn tl-gate-go" id="tl-gate-save">Raise the shield &amp; walk &rarr;</button>
+    <div class="tl-maphint" id="tl-maphint">Hover a land to see who holds it &middot; click it to read on</div>
+
+    <div class="tl-mapctl">
+      <button id="tl-zoom-in" type="button" title="Zoom in" aria-label="Zoom in">+</button>
+      <button id="tl-zoom-out" type="button" title="Zoom out" aria-label="Zoom out">&minus;</button>
+      <button id="tl-zoom-fit" type="button" title="The whole world" aria-label="Fit the whole world">&#9974;</button>
     </div>
-    <button class="tl-gate-close" id="tl-gate-close" title="Close">&times;</button>
+
+    <button class="tl-mapsize" id="tl-mapsize" type="button" aria-expanded="false">Expand the map</button>
   </div>
 </div>
 
-<footer class="tl-footer">
-  Unofficial companion &mdash; not affiliated with, endorsed, sponsored, or approved by George R.R. Martin, HBO,
-  or Warner Bros. Discovery. All chronicle text is original to this site.
-  <a href="credits.html">Credits &amp; licenses</a>.
-</footer>
-
+<script src="js/shield.js" data-kw-shield="1"></script>
+<script src="js/timeline-axis.js"></script>
+<script src="js/peoples-data.js"></script>
+<script src="js/timeline-territories.js"></script>
 <script src="js/timeline-data.js"></script>
+<script src="js/popgraph.js"></script>
+<script src="js/timeline-map.js"></script>
 <script src="js/timeline-engine.js"></script>
 <script src="js/realm-nav.js" data-root=""></script>
 </body>

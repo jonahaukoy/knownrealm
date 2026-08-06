@@ -540,64 +540,18 @@
     lab.innerHTML = progressLabel();
   }
 
-  /* ---------- spoiler gate ---------- */
-  function buildGate() {
-    const g = document.createElement("div");
-    g.className = "spoiler-gate hidden"; g.id = "spoiler-gate";
-    g.innerHTML =
-      '<div class="gate-card">' +
-      '<div class="gate-kicker">Before you trace the blood</div>' +
-      '<div class="gate-title">How far along are you?</div>' +
-      '<p class="gate-note">These trees hide what you have not yet reached &mdash; the truth of Jon Snow&rsquo;s parents, the fates that become titles, and more. Set how far you have come in each telling; pick from both if you have watched <i>and</i> read. This is remembered across the whole site, so the games and the chronicle will hide the same things.</p>' +
-      '<div class="gate-cols">' +
-        '<div class="gate-col"><div class="gate-col-head">&#128250; The Show</div><div class="gate-chips" id="gate-show"></div></div>' +
-        '<div class="gate-col"><div class="gate-col-head">&#128214; The Books</div><div class="gate-chips" id="gate-book"></div></div>' +
-      "</div>" +
-      '<button class="gate-all" id="gate-all" data-mode="all">I have finished the tale &mdash; show me everything</button>' +
-      '<button class="gate-close" id="gate-close" title="Close">&times;</button></div>';
-    document.body.appendChild(g);
-    /* The two columns are now INDEPENDENT — the shield holds a season and a
-       book at once, so a reader who has watched to S5 and read to ACOK can say
-       exactly that instead of having to pick one and lose the other. Tapping
-       a chip that is already chosen clears that telling back to nothing. */
-    const showBox = g.querySelector("#gate-show");
-    for (let s = 1; s <= 8; s++) showBox.appendChild(chip("S" + s, "show", s, () => setOne("gotS", s)));
-    const bookBox = g.querySelector("#gate-book");
-    for (let b = 1; b <= 5; b++) bookBox.appendChild(chip(BOOK_SHORT[b], "book", b, () => setOne("gotB", b)));
-    g.querySelector("#gate-all").addEventListener("click", () => {
-      KWShield.setAll(); afterShieldChange(); closeGate();
-    });
-    g.querySelector("#gate-close").addEventListener("click", () => { markAnswered(); closeGate(); });
+  /* ---------- the spoiler shield ----------
+     These trees used to raise a shield dialog of their own. There is now exactly
+     ONE on the site — the dialog realm-nav.js hangs off the Shield button in the
+     realm bar, on every page — so this page only OPENS it and follows the
+     "kw-shield" event it fires. Anything carrying [data-open-shield] opens it
+     too, without a listener here. */
+  function openGate() {
+    if (window.KWShieldUI) window.KWShieldUI.open();
   }
-  function chip(label, mode, n, fn) { const b = document.createElement("button"); b.className = "gate-chip"; b.dataset.mode = mode; b.dataset.n = n; b.textContent = label; b.addEventListener("click", fn); return b; }
-
-  function setOne(key, n) {
-    const cur = KWShield.get()[key];
-    const patch = {}; patch[key] = cur === n ? 0 : n;   /* tap again to unset */
-    KWShield.set(patch);
-    afterShieldChange();
-  }
-  /* a reader who closes the gate without choosing has still answered ("none of
-     it"), so the gate does not ambush them again on the next visit */
+  /* a reader who never touches the shield has still answered ("none of it"), so
+     the bar does not ambush them again on the next visit */
   function markAnswered() { if (!KWShield.has()) KWShield.set({}); }
-
-  function afterShieldChange() {
-    paintGate();
-    updateProgressBox();
-    if (state.house) showHouse(state.house);
-  }
-  function paintGate() {
-    const g = byId("spoiler-gate"); if (!g) return;
-    const s = KWShield.get();
-    g.querySelectorAll(".gate-chip.sel, .gate-all.sel").forEach((el) => el.classList.remove("sel"));
-    const selShow = g.querySelector('.gate-chip[data-mode="show"][data-n="' + s.gotS + '"]');
-    if (selShow) selShow.classList.add("sel");
-    const selBook = g.querySelector('.gate-chip[data-mode="book"][data-n="' + s.gotB + '"]');
-    if (selBook) selBook.classList.add("sel");
-    if (s.gotS >= 8 && s.gotB >= 5) { const a = byId("gate-all"); if (a) a.classList.add("sel"); }
-  }
-  function openGate() { byId("spoiler-gate").classList.remove("hidden"); paintGate(); }
-  function closeGate() { byId("spoiler-gate").classList.add("hidden"); }
 
   /* another page (or another tab) moved the shield — follow it */
   window.addEventListener("kw-shield", () => { updateProgressBox(); if (state.house) showHouse(state.house); });
@@ -681,10 +635,10 @@
   }
 
   /* ---------- init ---------- */
-  buildRail(); buildGate(); buildLegend(); initPanZoom();
+  buildRail(); buildLegend(); initPanZoom();
   /* step house to house with the arrow keys, as one would turn a page */
   window.addEventListener("keydown", (e) => {
-    if (byId("spoiler-gate") && !byId("spoiler-gate").classList.contains("hidden")) { if (e.key === "Escape") closeGate(); return; }
+    if (document.querySelector(".kws-overlay.open")) return;   /* the shield owns the keys */
     if (byId("trees-layout").classList.contains("rail-open") && e.key === "Escape") { closeRail(); return; }
     if (e.target && /^(INPUT|TEXTAREA)$/.test(e.target.tagName)) return;
     if (e.key === "ArrowLeft") flipHouse(-1);
@@ -704,6 +658,6 @@
   showHouse(houseById[hp.get("house")] ? hp.get("house") : "targaryen");
   if (hp.get("sel")) selectNode(parseInt(hp.get("sel"), 10));
   if (hp.get("who")) { const want = hp.get("who").toLowerCase(); for (let i = 0; i < reg.length; i++) { if (effective(reg[i].node).n.toLowerCase() === want) { selectNode(i); break; } } }
-  if (gated) openGate();
+  if (gated) { markAnswered(); openGate(); }
   setTimeout(fadeHint, 6000);
 })();

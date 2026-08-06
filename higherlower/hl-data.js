@@ -14,6 +14,12 @@
      img    path RELATIVE TO higherlower/ ("../assets/...")
      frame  "face" (portrait, filled) or "sigil" (arms on a plate)
 
+   SPOILER TAGS, same shape as the trivia pool: `s` = safe once you have seen
+   that season of Game of Thrones, `b` = safe once you have read that book.
+   Either one satisfies the shield. A tag on the DECK hides the whole metric; a
+   tag on an ITEM hides that one entry and leaves the rest of the deck playable.
+   An untagged deck or item is ambient lore and always safe.
+
    Accuracy: reigns + history are hard canon (Fire & Blood / TWOIAF dates);
    hosts + populations + kills + POV-counts are the figures the books/fandom
    give and are flagged APPROXIMATE in-game (the deck's `src` line). Ties are
@@ -46,7 +52,9 @@ window.HL_DECKS = [
       { name: "Daeron I", sub: "the Young Dragon · 157–161 AC", v: 4, img: "../assets/sigils/targaryen.svg", frame: "sigil" },
       { name: "Jaehaerys II", sub: "259–262 AC", v: 3, img: "../assets/sigils/targaryen.svg", frame: "sigil" },
       { name: "Aegon II", sub: "129–131 AC", v: 2, img: "../hotd/assets/people/aegon-ii.jpg", frame: "face" },
-      { name: "Joffrey I", sub: "Baratheon · 298–300 AC", v: 2, img: "../assets/people/joffrey-baratheon.jpg", frame: "face" },
+      /* the only reign here that ends INSIDE the story — the dates alone say
+         when he stops being king, so this one entry waits for the shield */
+      { name: "Joffrey I", sub: "Baratheon · 298–300 AC", v: 2, s: 4, b: 3, img: "../assets/people/joffrey-baratheon.jpg", frame: "face" },
       { name: "Viserys II", sub: "171–172 AC", v: 1, img: "../assets/sigils/targaryen.svg", frame: "sigil" }
     ]
   },
@@ -130,7 +138,10 @@ window.HL_DECKS = [
 
   /* ------------------------------------------------------------------- kills */
   {
-    id: "kills", name: "On-Screen Kills", emoji: "🗡️",
+    /* THE WHOLE DECK waits for the end of the show. A tally of kills across
+       eight seasons tells you plainly who is still standing in the eighth, and
+       several of the subtitles below give away a turn of their own. */
+    id: "kills", name: "On-Screen Kills", emoji: "🗡️", s: 8,
     tag: "Foes cut down on screen", prompt: "Who has the higher body count?",
     more: "More kills", less: "Fewer kills", unit: "kills",
     fmt: function (v) { return "≈ " + v + (v === 1 ? " kill" : " kills"); },
@@ -171,7 +182,10 @@ window.HL_DECKS = [
 
   /* --------------------------------------------------------------- povcount */
   {
-    id: "povchapters", name: "Point-of-View Chapters", emoji: "📖",
+    /* Likewise: who is still narrating by the fifth book is a list of who
+       lived that long, and "and Lady Stoneheart" is a book-three ending in
+       three words. The whole deck waits for a reader who has finished them. */
+    id: "povchapters", name: "Point-of-View Chapters", emoji: "📖", b: 5,
     tag: "Chapters told through their eyes", prompt: "Who narrates more of the books?",
     more: "More chapters", less: "Fewer chapters", unit: "chapters",
     fmt: function (v) { return v + (v === 1 ? " chapter" : " chapters"); },

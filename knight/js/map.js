@@ -5,7 +5,21 @@
 const VB_WIDTH = 5652;
 const VB_HEIGHT = 3682;
 const MIN_SCALE = 0.9;
-const MAX_SCALE = 10;
+
+/* THE ZOOM CEILING MUST FOLLOW THE VIEWPORT, NOT BE A CONSTANT.
+   `scale` is a multiplier on "the whole map fits in the box", so the same
+   number means wildly different magnification on different screens. At the old
+   fixed ceiling of 10, a 1400px desktop got about 2.5 screen pixels per map
+   pixel and a 390px phone got about 0.7 — three and a half times less, which is
+   precisely why the map was unreadable on a phone however hard you pinched.
+
+   So the ceiling is expressed in the thing the reader actually cares about:
+   screen pixels per map pixel. MAX_SCALE stays as a floor so no desktop can
+   zoom LESS than it used to; HARD_MAX_SCALE stops a very narrow window from
+   asking for a magnification the basemap has no detail to fill. */
+const MAX_SCALE = 10;          /* the floor of the ceiling — old desktop behaviour */
+const MAX_ZOOM_PX = 2.6;       /* screen pixels per map pixel when fully zoomed in */
+const HARD_MAX_SCALE = 40;
 /* markers are designed in "1000-wide" units; this factor keeps them the same
    apparent size in the much larger image coordinate space */
 const MARKER_BASE = VB_WIDTH / 1000;
@@ -317,9 +331,20 @@ class MapView {
     return 1 / scaleFit;
   }
 
+  /* how far in this particular screen is allowed to go — see the note by
+     MAX_ZOOM_PX. Recomputed on every gesture so a rotated phone or a resized
+     window gets the right ceiling without anything having to listen for it. */
+  _maxScale() {
+    const rect = this.svg.getBoundingClientRect();
+    if (!rect.width || !rect.height) return MAX_SCALE;
+    const scaleFit = Math.min(rect.width / VB_WIDTH, rect.height / VB_HEIGHT);
+    if (!scaleFit) return MAX_SCALE;
+    return clamp(Math.max(MAX_SCALE, MAX_ZOOM_PX / scaleFit), MAX_SCALE, HARD_MAX_SCALE);
+  }
+
   zoomAt(clientX, clientY, factor) {
     const p = this.screenToViewbox(clientX, clientY);
-    const newScale = clamp(this.state.scale * factor, MIN_SCALE, MAX_SCALE);
+    const newScale = clamp(this.state.scale * factor, MIN_SCALE, this._maxScale());
     const contentX = (p.x - this.state.x) / this.state.scale;
     const contentY = (p.y - this.state.y) / this.state.scale;
     this.state.x = p.x - contentX * newScale;
@@ -339,7 +364,7 @@ class MapView {
   }
 
   focusOn(x, y, targetScale = 3.5, durationMs = 700) {
-    const s = clamp(targetScale, MIN_SCALE, MAX_SCALE);
+    const s = clamp(targetScale, MIN_SCALE, this._maxScale());
     this._animateTo({ scale: s, x: VB_WIDTH / 2 - x * s, y: VB_HEIGHT / 2 - y * s }, durationMs);
   }
 
@@ -363,7 +388,7 @@ class MapView {
     const cy = (minY + maxY) / 2;
     const scale = clamp(
       Math.min(VB_WIDTH / (w * (1 + paddingRatio * 2)), VB_HEIGHT / (h * (1 + paddingRatio * 2))),
-      MIN_SCALE, MAX_SCALE
+      MIN_SCALE, this._maxScale()
     );
     this._animateTo({ scale, x: VB_WIDTH / 2 - cx * scale, y: VB_HEIGHT / 2 - cy * scale }, durationMs);
   }

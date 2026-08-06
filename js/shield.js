@@ -116,6 +116,34 @@
     return okS || okB;
   }
 
+  /* ================= saying what is held back =================
+     A shield that hides silently is worse than no shield: the reader cannot
+     tell the difference between "there is nothing here" and "you have not
+     reached it yet", and quietly assumes the site is thin. So every surface
+     that hides something says so, in one line, with the one button that opens
+     the shield. `data-open-shield` is picked up by js/realm-nav.js on every
+     page, so this needs no wiring wherever it is dropped.
+
+     It returns "" for a count of zero — an honest notice appears ONLY when
+     something really was held back, which also means its absence is never a
+     promise that nothing was coming. */
+  function esc(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+  function heldNotice(n, one, many) {
+    n = n | 0;
+    if (n <= 0) return "";
+    var what = n === 1 ? esc(one || "one of these") : n + " " + esc(many || one || "of these");
+    return '<div class="kw-held" role="status">' +
+      '<span class="kw-held-icon" aria-hidden="true">&#128737;</span>' +
+      '<span class="kw-held-text">' + what +
+      (n === 1 ? " is" : " are") + ' held back by your spoiler shield, because ' +
+      (n === 1 ? "it comes" : "they come") + ' after where you said you had got to. ' +
+      '<button type="button" class="kw-held-btn" data-open-shield>Move the shield</button>' +
+      "</span></div>";
+  }
+
   window.KWShield = {
     MAX: MAX,
     get: get,
@@ -124,6 +152,7 @@
     clear: clear,
     has: has,
     reach: reach,
+    heldNotice: heldNotice,
     reachGot: function (th) { return reach(th, "gotS", "gotB"); },
     reachHotd: function (th) { return reach(th, "hotdS", "hotdB"); },
     reachKnight: function (th) { return reach(th, "knightS", "knightB"); }

@@ -48,6 +48,15 @@ window.WIKI_CONFIG = {
   peopleDir: "assets/people/",
   sigilDir: "assets/sigils/",
   creditsHref: "credits.html",
+  whiteBookHref: "whitebook.html",
+  /* which fields of the shared spoiler shield are this saga's, and which
+     book covers the same ground as each season (either one unlocks it) */
+  shieldSeasonKey: "gotS", shieldBookKey: "gotB",
+  shieldSeasonMax: 8, shieldBookMax: 5,
+  /* b: 99 means "no book covers this and none ever will" — leaving the
+     field out instead would read as a threshold already met */
+  unlock: { 1: { s: 1, b: 1 }, 2: { s: 2, b: 2 }, 3: { s: 3, b: 3 }, 4: { s: 4, b: 3 },
+            5: { s: 5, b: 5 }, 6: { s: 6, b: 99 }, 7: { s: 7, b: 99 }, 8: { s: 8, b: 99 } },
 };
 /* real pictures for wiki page slots — keyed by page ("home", "loc:<id>",
    "house:<id>", "char:<name>", "episode:<s>-<e>"). Missing keys fall back to an
@@ -229,6 +238,9 @@ window.WIKI_IMAGES = {
 <script src="js/whereabouts.js"></script>
 <script src="js/deaths.js"></script>
 <script src="js/books.js"></script>
+<!-- whose eyes each chapter looks through, so a character page can list
+     their own chapters under each book -->
+<script src="js/chapter-pov.js"></script>
 <script src="js/people.js"></script>
 <script src="js/characters.js"></script>
 <script src="js/groups.js"></script>
@@ -245,6 +257,7 @@ window.WIKI_IMAGES = {
 <script src="js/wiki-x/places-south.js"></script>
 <script src="js/wiki-x/places-east.js"></script>
 <script src="js/wiki-x/houses-orders.js"></script>
+<script src="js/wiki-x/whitecloaks.js"></script>
 <script src="js/wiki-x/episodes.js"></script>
 <script src="js/wiki-x/episodes-2.js"></script>
 <script src="js/wiki-x/chapters-1.js"></script>
@@ -252,14 +265,39 @@ window.WIKI_IMAGES = {
 <script src="js/wiki-x/chapters-3.js"></script>
 <script src="js/wiki-x/chapters-4.js"></script>
 <script src="js/wiki-x/chapters-5.js"></script>
+<!-- LAST of the wiki-x files on purpose: it merges season prose into
+     whichever earlier file finally claimed each character key -->
+<script src="js/wiki-x/seasons-principals.js"></script>
 <script src="js/col/dragons.js"></script>
 <script src="js/col/steel.js"></script>
 <script src="js/col/wolves.js"></script>
-<script src="js/col/kingsguard.js"></script>
 <script src="js/col/battles.js"></script>
 <script src="js/col/prophecies.js"></script>
+<!-- the peoples of the world: one article per banner on the timeline's map,
+     built from the chronicle's own data (js/col/peoples.js reads these three) -->
+<script src="js/timeline-axis.js"></script>
+<script src="js/peoples-data.js"></script>
+<script src="js/timeline-territories.js"></script>
+<script src="js/popgraph.js"></script>
+<script src="js/col/peoples.js"></script>
+<!-- the chronicle: one article per moment on the timeline -->
+<script src="js/timeline-data.js"></script>
+<script src="js/moments/01-dawn.js"></script>
+<script src="js/moments/02-kingdoms.js"></script>
+<script src="js/moments/03-conquest.js"></script>
+<script src="js/moments/04-dance.js"></script>
+<script src="js/moments/05-hedge.js"></script>
+<script src="js/moments/06-rebellion.js"></script>
+<script src="js/moments/07-saga.js"></script>
+<script src="js/col/moments.js"></script>
 <script src="js/sigil-art.js"></script>
 <script src="js/eras.js"></script>
+<!-- the spoiler shield, loaded up front so the first paint is already
+     gated rather than flashing prose the reader asked not to see -->
+<script src="js/shield.js" data-kw-shield="1"></script>
+<!-- which painting stands for whom, and which belong inside the text -->
+<script src="js/wiki-art.js"></script>
+<script src="js/whitebook-index.js"></script>
 <script src="js/wiki-engine.js"></script>
 <script>
 /* prerender settings for the static-site generator (see js/prerender-driver.js).

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The Iron Ladder — make your character</title>
+<meta name="description" content="Take a name, take a birth, and climb. Make a character for The Iron Ladder, a persistent realm on The Known Realm." />
+<link rel="preload" href="../css/fonts/cinzel-400-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="../css/fonts/cinzel-600-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="stylesheet" href="../css/fonts.css" />
+<link rel="stylesheet" href="../css/style.css" />
+<link rel="stylesheet" href="game.css" />
+<script>try{var t=localStorage.getItem("kwTheme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
+</head>
+<body class="il-body">
+
+<header class="topbar">
+  <a class="brand home-brand" href="../trivia/index.html" style="text-decoration:none;color:var(--text-light)">
+    <span class="brand-icon">&#9876;&#65039;</span>
+    <span class="brand-name">THE IRON LADDER</span>
+  </a>
+  <div style="flex:1"></div>
+</header>
+
+<main class="il-main">
+
+  <!-- ============ what this is, honestly, at the top of the page ============ -->
+  <div class="il-alpha" id="il-alpha">
+    <b>One player, one life, and it ends.</b> This is the single-player realm:
+    it runs entirely in this browser, needs no account, and nothing is sent
+    anywhere. Your character has one life &mdash; when they die, the chronicle is
+    written and you start a new one. The shared realm (other players, chat, wars
+    between real people) needs a server and is not built yet.
+  </div>
+
+  <!-- a life already in progress gets the door, not the wizard -->
+  <div class="il-resume hidden" id="il-resume"></div>
+
+  <div class="il-hero">
+    <div class="il-hero-crest" aria-hidden="true">&#9876;&#65039;</div>
+    <h1>The Iron Ladder</h1>
+    <p>Everyone starts somewhere. Almost nobody starts at the top.</p>
+  </div>
+
+  <!-- ============ the stepper ============ -->
+  <ol class="il-steps" id="il-steps" aria-label="Steps"></ol>
+
+  <form class="il-form" id="il-form" autocomplete="off">
+
+    <!-- ---------- 1. name ---------- -->
+    <section class="il-step" data-step="1">
+      <h2 class="il-h2">Your name</h2>
+      <p class="il-sub">What they will call you in the songs, or in the ledgers, or not at all.</p>
+      <div class="il-namerow">
+        <label class="il-field">
+          <span>Given name</span>
+          <input type="text" id="il-first" maxlength="18" placeholder="Jonos" required />
+        </label>
+        <label class="il-field" id="il-lastwrap">
+          <span id="il-lastlabel">Family name</span>
+          <input type="text" id="il-last" maxlength="18" placeholder="Rivers" />
+        </label>
+        <button type="button" class="il-dice" id="il-roll-name" title="Roll a name">&#127922;</button>
+      </div>
+      <p class="il-hint" id="il-namehint"></p>
+    </section>
+
+    <!-- ---------- 2. the realm ---------- -->
+    <section class="il-step" data-step="2">
+      <h2 class="il-h2">Which kingdom</h2>
+      <p class="il-sub">The world is not one country and never has been. Where you open your eyes decides
+        what you eat, who you owe, and what everyone assumes about you before you have said anything.
+        Essos is on this list too, and it is a different game.</p>
+      <div class="il-realmside">Westeros</div>
+      <div class="il-grid il-grid-region" id="il-regions-westeros" role="radiogroup" aria-label="Westerosi realms"></div>
+      <div class="il-realmside">Across the narrow sea</div>
+      <div class="il-grid il-grid-region" id="il-regions-essos" role="radiogroup" aria-label="Essosi realms"></div>
+    </section>
+
+    <!-- ---------- 3. the place ---------- -->
+    <section class="il-step" data-step="3">
+      <h2 class="il-h2">And where in it</h2>
+      <p class="il-sub" id="il-placelead">A castle, a city, a village on a cold shore. The place decides
+        which of the world's scenes can find you at all &mdash; a harbour brings ships and smugglers,
+        a court brings lords, a mining village brings neither.</p>
+      <div class="il-grid il-grid-place" id="il-places" role="radiogroup" aria-label="Birthplace"></div>
+    </section>
+
+    <!-- ---------- 4. birth ---------- -->
+    <section class="il-step" data-step="4">
+      <h2 class="il-h2">What you were born</h2>
+      <p class="il-sub">The single biggest choice on this page. It is not a difficulty setting &mdash;
+        a nobody has no standing and no leash, and both of those are worth something.</p>
+      <div class="il-grid il-grid-birth" id="il-births" role="radiogroup" aria-label="Birth"></div>
+      <div class="hidden" id="il-housewrap">
+        <h3 class="il-h3">Into which house</h3>
+        <p class="il-sub">A great house opens every door and is watched by everybody. A bannerman's
+          hall is quieter, poorer, and answerable to the house above it.</p>
+        <div class="il-grid il-grid-house" id="il-houses" role="radiogroup" aria-label="House"></div>
+      </div>
+    </section>
+
+    <!-- ---------- 5. work ---------- -->
+    <section class="il-step" data-step="5">
+      <h2 class="il-h2">Your trade</h2>
+      <p class="il-sub">What you do on a day when nothing is happening. Every trade earns, every trade
+        adds to what you are good at, and each one opens a different set of doors later.</p>
+      <div class="il-grid il-grid-work" id="il-works" role="radiogroup" aria-label="Trade"></div>
+    </section>
+
+    <!-- ---------- 6. perks ---------- -->
+    <section class="il-step" data-step="6">
+      <h2 class="il-h2">What you are like</h2>
+      <p class="il-sub">Choose <b id="il-perkn">three</b>. Each adds to an attribute <em>and</em> unlocks
+        choices in the world that nobody else is offered. <span id="il-perkleft" class="il-left"></span></p>
+      <div class="il-grid il-grid-perk" id="il-perks" role="group" aria-label="Perks"></div>
+    </section>
+
+    <!-- ---------- 7. ambition ---------- -->
+    <section class="il-step" data-step="7">
+      <h2 class="il-h2">What you are after</h2>
+      <p class="il-sub">This forbids nothing. It leans the world toward you &mdash; and at the end, it is
+        what the chronicle measures your life against.</p>
+      <div class="il-grid il-grid-amb" id="il-ambitions" role="radiogroup" aria-label="Ambition"></div>
+    </section>
+
+    <!-- ---------- 8. the sheet ---------- -->
+    <section class="il-step" data-step="8">
+      <h2 class="il-h2">Your character</h2>
+      <p class="il-sub">Read it once more. You can change any of it until you take the first step &mdash;
+        and after that, you cannot change any of it at all.</p>
+      <div class="il-sheet" id="il-sheet"></div>
+    </section>
+
+  </form>
+
+  <!-- ============ the sticky footer: summary + the two buttons ============ -->
+  <div class="il-bar" id="il-bar">
+    <div class="il-bar-sum" id="il-bar-sum">Begin by choosing a name.</div>
+    <div class="il-bar-btns">
+      <button type="button" class="il-btn il-btn-ghost" id="il-back">&larr; Back</button>
+      <button type="button" class="il-btn" id="il-next" disabled>Next &rarr;</button>
+      <button type="button" class="il-btn il-btn-go hidden" id="il-done">Begin the life &rarr;</button>
+    </div>
+  </div>
+
+  <p class="il-foot">
+    <button type="button" class="il-linkbtn" id="il-surprise">&#127922; Surprise me &mdash; roll the whole character</button>
+    <button type="button" class="il-linkbtn" id="il-wipe">Start again</button>
+  </p>
+
+</main>
+
+<footer class="wiki-footer">
+  The Iron Ladder is an original game set in a world of George R. R. Martin's making.
+  Unofficial &mdash; not affiliated with, endorsed, sponsored, or approved by
+  George R. R. Martin, HBO, or Warner Bros. Discovery.
+  <a href="../credits.html">Credits &amp; licenses</a>.
+</footer>
+
+<script src="game-data.js"></script>
+<script src="data-world.js"></script>
+<script src="engine.js"></script>
+<script src="game.js"></script>
+<script src="../js/realm-nav.js" data-root="../"></script>
+</body>
+</html>

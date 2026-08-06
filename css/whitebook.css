@@ -353,8 +353,10 @@ body.wb-body {
 :root[data-theme="light"] .wb-cover-title { color: #6b5a34; }
 
 /* ------------------------------------------------------------ narrow view --
-   Below this width a two-page spread is unreadable, so the book lies open as
-   one column: the two leaves stack, still in reading order. */
+   Between 700 and 900px there is not room for two columns of type side by
+   side, but there is still room for a wide leaf: the two stack, in reading
+   order. Below 700 the engine stops sending two (see leavesPerTurn() in
+   js/whitebook-engine.js) and this becomes a one-page book. */
 @media (max-width: 900px) {
   .wb-main { padding: 14px 8px 6px; }
   .wb-stage { gap: 5px; }
@@ -370,4 +372,83 @@ body.wb-body {
   .wb-gutter { display: none; }
   .wb-knight-name { font-size: 20px; }
   .wb-p { font-size: 13.5px; text-align: left; }
+}
+
+/* ================================================================= PHONE ===
+   A book in one hand. Everything below follows from three decisions:
+
+   1. ONE leaf per turn. The engine does that half (PER); this does the layout.
+   2. The arrows leave the sides of the page and become a bar under the thumb.
+      Centred on a 1200px-tall column they were eight hundred pixels down the
+      page, on top of the text, and nobody would ever have found them.
+   3. The paper stops being stretched. `background-size: 100% 100%` over a
+      leaf that is now three times taller than it is wide smears the texture
+      into vertical streaks that read as a rendering fault. `cover` keeps it.
+   ========================================================================= */
+@media (max-width: 700px) {
+  /* ---- the top bar was the horizontal scrollbar ----
+     Two nowrap buttons plus the brand cannot fit 390px, and .topbar does not
+     wrap, so the whole DOCUMENT was ~90px wider than the screen and every page
+     slid sideways under the thumb. That is most of what "totally broken" was. */
+  .wb-body .topbar {
+    height: auto; min-height: 0; flex-wrap: wrap;
+    padding: 7px 10px; gap: 6px 8px; row-gap: 6px;
+  }
+  .wb-body .topbar .brand-name { font-size: 12px; letter-spacing: 1px; }
+  .wb-body .topbar > div[style] { display: none; }   /* the flex:1 spacer */
+  .wb-topbtn { font-size: 10.5px; padding: 6px 10px; letter-spacing: 0.8px; }
+
+  .wb-main { padding: 12px 10px 96px; }              /* room for the arrow bar */
+
+  /* ---- the leaf ---- */
+  /* `perspective` MUST go. It is what gives the page-turn its depth, and it
+     also makes .wb-stage the containing block for every `position: fixed`
+     descendant — so the arrows below, pinned to the bottom of the screen,
+     were instead pinned to the bottom of a 1200px-tall book and floated in
+     the middle of the text. There is no room for a 3D turn on a phone
+     anyway. */
+  .wb-stage { display: block; perspective: none; }
+  .wb-spread {
+    padding: 22px 0 18px; border-radius: 6px;
+    background-size: cover; background-position: center top;
+  }
+  /* the paper has a frame printed on it; the leaf has to sit inside that, and
+     on a phone there are no percentage insets to do it (the leaf is in normal
+     flow now), so it is done with width and padding instead */
+  /* the printed corner flourishes reach about thirty pixels down the paper at
+     this size, so the first line starts below them rather than through them */
+  .wb-leaf { width: 84%; padding-top: 30px; }
+  .wb-leaf-r { display: none; }                      /* the engine sends only one */
+
+  /* ---- the arms no longer sit on the knight's name ----
+     A 104px float inside a 250px column left the name 140px, so it wrapped to
+     three lines DOWN THE SIDE of the shield and collided with it. On a phone
+     the shield goes above the name, at its own size, and the name gets the
+     whole width. */
+  .wb-arms { float: none; width: auto; margin: 0 0 10px; display: flex; align-items: center; gap: 12px; text-align: left; }
+  .wb-arms-shield { width: 56px; height: 65px; margin: 0; flex: 0 0 auto; }
+  .wb-arms-glyph { font-size: 22px; }
+  .wb-arms-blazon { margin-top: 0; font-size: 10.5px; text-align: left; }
+  .wb-knight-name { font-size: 22px; line-height: 1.14; }
+  .wb-head + .wb-p::first-letter { font-size: 30px; }
+
+  /* ---- the arrows, under the thumb ---- */
+  .wb-arrow {
+    position: fixed; bottom: 14px; z-index: 40;
+    width: 40%; max-width: 190px; height: 50px; font-size: 20px;
+    background: rgba(20, 16, 11, 0.94);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+  }
+  .wb-arrow-prev { left: 12px; }
+  .wb-arrow-next { right: 12px; }
+  /* the cookie bar is fixed to the bottom too (z-index 300) and would bury
+     them on a first visit — the same fix the game's action bar needed */
+  body:has(.kw-consent:not(.gone)) .wb-arrow { bottom: 196px; }
+
+  .wb-footline { margin-top: 14px; font-size: 12px; }
+  .wb-cover-title { font-size: 18px; letter-spacing: 2px; }
+  .wb-cover-sub { font-size: 13px; }
+  .wb-fold-panel { padding: 22px 18px 20px; }
+  .wb-toc { font-size: 13px; }
+  .wb-toc-note { max-width: 38%; }
 }

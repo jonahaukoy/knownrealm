@@ -36,7 +36,39 @@
     <div class="tv-streak hidden" id="tv-streak"></div>
 
     <div class="tv-games" id="tv-games">
-      <!-- the three daily games first, so they fill the top row -->
+      <!-- THE BIG ONE. It takes the whole first row on purpose (.tv-game-hero
+           sets grid-column: 1 / -1) because it is not a five-minute puzzle like
+           everything under it — it is a persistent world you keep a character
+           in. See game/README.md for what is built and what still needs a
+           server behind it. -->
+      <a class="tv-game-card tv-game-hero" href="../game/index.html" id="tv-ladder-link">
+        <span class="tv-game-flag tv-game-flag-new">New</span>
+        <span class="tv-game-emoji">&#9876;&#65039;</span>
+        <span class="tv-game-hero-text">
+          <b>The Iron Ladder</b>
+          <span>One life, one season at a time, anywhere from Winterfell to the
+            fighting pits of Meereen. Every uncertain thing is a roll of the die
+            against a number you can see &mdash; steal it, fight for it, swear to
+            it or run from it, and live with what the die says. You can be
+            knighted, imprisoned, enslaved, crowned or hanged, and when you die
+            the chronicle is written and you begin again as somebody else.</span>
+          <i id="tv-ladder-cta">Make your character &rarr;</i>
+        </span>
+      </a>
+      <script>
+        /* if a life is already running, the hero goes straight back to it —
+           the creation wizard is the wrong door for a player mid-story */
+        (function () {
+          var live = null;
+          try { live = JSON.parse(localStorage.getItem("ilLife") || "null"); } catch (e) {}
+          if (!live || !live.name || live.dead) return;
+          var a = document.getElementById("tv-ladder-link");
+          a.href = "../game/play.html";
+          document.getElementById("tv-ladder-cta").textContent =
+            "Return to " + live.name + ", aged " + live.age + " →";
+        })();
+      </script>
+      <!-- the three daily games next, so they fill the second row -->
       <a class="tv-game-card tv-game-daily" href="../smallcouncil/index.html">
         <span class="tv-game-flag">Daily</span>
         <span class="tv-game-emoji">&#9819;</span>
@@ -97,6 +129,17 @@
       </button>
     </div>
 
+    <!-- ============ THE CABINET ============
+         What you have earned across every game: a rank that only rises, and a
+         shelf of relics. A locked relic still shows what it is for, so the
+         shelf reads as a list of things to try. Built by the script below. -->
+    <section class="tv-cabinet" id="tv-cabinet" hidden>
+      <h2 class="tv-cab-h2">Your Cabinet</h2>
+      <div class="tv-cab-rank" id="tv-cab-rank"></div>
+      <div class="tv-cab-grid" id="tv-cab-grid"></div>
+      <p class="tv-cab-note" id="tv-cab-note"></p>
+    </section>
+
     <p class="tv-hub-foot">One spoiler shield serves them all &mdash; tell any game how far you have
       travelled and the rest will remember.</p>
   </section>
@@ -104,6 +147,8 @@
 </main>
 
 <script src="../js/streak.js"></script>
+<script src="../js/collection-data.js"></script>
+<script src="../js/collection.js"></script>
 <script>
   /* show the player's daily streak on the hub, if they have one going */
   (function () {
@@ -118,6 +163,52 @@
       el.classList.remove("hidden");
     }
   })();
+</script>
+<script>
+/* ---------------------------------------------------------------------------
+   The Cabinet, painted from window.KWCollection. It repaints on "kw-cabinet",
+   so winning a relic in another tab — or raising the shield in the bar right
+   here — updates it without a reload.
+   --------------------------------------------------------------------------- */
+(function () {
+  if (!window.KWCollection) return;
+  var sec = document.getElementById("tv-cabinet");
+  var rankEl = document.getElementById("tv-cab-rank");
+  var grid = document.getElementById("tv-cab-grid");
+  var note = document.getElementById("tv-cab-note");
+  var esc = function (x) { return String(x).replace(/[&<>]/g, function (c) {
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]; }); };
+
+  function paint() {
+    var st = KWCollection.get();
+    var r = st.rank;
+    sec.hidden = false;
+    rankEl.innerHTML =
+      '<div class="tv-cab-rankrow">' +
+        '<span class="tv-cab-rankname">' + esc(r.name) + "</span>" +
+        '<span class="tv-cab-renown">' + st.renown + " renown</span>" +
+      "</div>" +
+      '<div class="tv-cab-note-sm">' + esc(r.note) + "</div>" +
+      '<div class="tv-cab-bar"><span style="width:' + Math.round(r.progress * 100) + '%"></span></div>' +
+      '<div class="tv-cab-next">' + (r.next
+        ? esc(r.next) + " at " + r.nextAt + " renown"
+        : "There is nowhere further up.") + "</div>";
+
+    grid.innerHTML = KWCollection.relics().map(function (rel) {
+      var got = !!st.relics[rel.id];
+      return '<div class="tv-relic tv-relic-' + rel.rare + (got ? " got" : "") + '">' +
+        '<span class="tv-relic-glyph">' + (got ? rel.glyph : "&#128274;") + "</span>" +
+        '<span class="tv-relic-name">' + esc(rel.name) + "</span>" +
+        '<span class="tv-relic-how">' + esc(rel.how) + "</span>" +
+      "</div>";
+    }).join("");
+
+    note.textContent = st.have + " of " + st.total + " relics found" +
+      (st.right ? " · " + st.right + " right answers all told" : "");
+  }
+  paint();
+  document.addEventListener("kw-cabinet", paint);
+})();
 </script>
 <script src="../js/realm-nav.js" data-root="../"></script>
 </body>

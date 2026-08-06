@@ -9,7 +9,7 @@
 
   /* ===================== THE CONQUEST — AEGON I ========================== */
 
-  { id: "corlys-velaryon-kg", name: "Ser Corlys Velaryon", house: "Velaryon of Driftmark",
+  { id: "corlys-velaryon-kg", wiki: "hotd/wiki.html#char=Corlys Velaryon", name: "Ser Corlys Velaryon", house: "Velaryon of Driftmark",
     epithet: "The first of the seven", era: "The Conquest — Aegon I",
     armsGlyph: "⚓",
     blazon: "A silver seahorse upon a sea-green field.",

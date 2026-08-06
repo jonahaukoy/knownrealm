@@ -45,6 +45,11 @@ window.WIKI_CONFIG = {
   peopleDir: "assets/people/",
   sigilDir: "assets/sigils/",
   creditsHref: "../credits.html",
+  whiteBookHref: "../whitebook.html",
+  /* Fire & Blood covers the whole Dance, so either season answers to it */
+  shieldSeasonKey: "hotdS", shieldBookKey: "hotdB",
+  shieldSeasonMax: 2, shieldBookMax: 1,
+  unlock: { 1: { s: 1, b: 1 }, 2: { s: 2, b: 1 } },
 };
 /* real pictures for wiki page slots (see the GoT wiki for the key scheme).
    Scenes live in the shared root assets/scenes/ folder, one level up. */
@@ -70,6 +75,8 @@ window.WIKI_IMAGES = {
 <script src="js/wiki-x/episodes.js"></script>
 <script src="js/wiki-x/chapters.js"></script>
 <script src="../js/sigil-art.js"></script>
+<script src="../js/shield.js" data-kw-shield="1"></script>
+<script src="../js/whitebook-index.js"></script>
 <script src="../js/wiki-engine.js"></script>
 <script>
 window.KW_PRERENDER_CFG = {

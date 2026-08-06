@@ -931,13 +931,36 @@
   }
 
   function closeDropdowns() {
-    els.modeNav.querySelectorAll(".mode-item").forEach((mi) => mi.classList.remove("open"));
+    els.modeNav.querySelectorAll(".mode-item").forEach((mi) => {
+      mi.classList.remove("open");
+      mi.classList.remove("pinned");
+    });
   }
 
-  // hover intent: open on enter, close on leave (CSS handles visuals via .open)
+  /* ---- opening the mode menus ----
+     On a mouse, hovering a mode button opens its menu and a CLICK pins it open
+     until you press that button again or press somewhere outside the bar.
+     Pressing things inside the menu never dismisses it, so the legend's
+     checkboxes can be worked through one after another.
+
+     The touch guard is the important part. These were plain mouseenter /
+     mouseleave handlers, and a phone fires a synthetic mouseenter BEFORE the
+     click: the tap opened the menu on mouseenter, the click handler then saw a
+     menu that was already open and closed it again, and nothing appeared until
+     you tapped a SECOND time. Binding to pointerenter and ignoring every
+     pointer that is not a real mouse means a tap is only ever a click — so one
+     tap opens the menu, as it should always have done. */
   els.modeNav.querySelectorAll(".mode-item").forEach((mi) => {
-    mi.addEventListener("mouseenter", () => { closeDropdowns(); mi.classList.add("open"); });
-    mi.addEventListener("mouseleave", () => mi.classList.remove("open"));
+    mi.addEventListener("pointerenter", (e) => {
+      if (e.pointerType && e.pointerType !== "mouse") return;
+      closeDropdowns();
+      mi.classList.add("open");
+    });
+    mi.addEventListener("pointerleave", (e) => {
+      if (e.pointerType && e.pointerType !== "mouse") return;
+      if (mi.classList.contains("pinned")) return;   /* a pinned menu stays put */
+      mi.classList.remove("open");
+    });
   });
 
   // ================= modes =================
@@ -978,7 +1001,7 @@
       /* Pressing the same button again puts the menu away. It used to always
          re-open, so on a phone — where the menu covers most of the screen —
          there was no way to dismiss it with the control you had just used. */
-      const wasOpen = mi.classList.contains("open");
+      const wasPinned = mi.classList.contains("pinned");
       if (btn.dataset.mode === "regions" && state.selectedRegionId) {
         state.selectedRegionId = null;
         if (state.season && state.episode) renderEpisodePanel(state.season, state.episode);
@@ -991,7 +1014,9 @@
          menu. It now only switches mode and opens the dropdown; the full reset
          lives on the brand square in the top-left, which exists for that. */
       closeDropdowns();
-      if (!wasOpen) mi.classList.add("open");
+      /* pressing the button whose menu is already pinned open puts it away;
+         pressing any other pins the one you pressed */
+      if (!wasPinned) { mi.classList.add("open"); mi.classList.add("pinned"); }
     });
   });
 
@@ -999,6 +1024,50 @@
   document.addEventListener("click", (e) => {
     if (!els.modeNav.contains(e.target)) closeDropdowns();
   });
+
+  /* ---- on a phone, bring the answer into view ----
+     The map owns the top of a narrow screen and the panel that answers a press
+     sits BELOW it, off the bottom edge. Pressing a castle, a banner, a skull or
+     a name in one of the menus filled a panel the reader could not see, so the
+     press read as having done nothing at all. Any press on something the map
+     actually answers for now glides that panel up to just beneath the map.
+     Wide screens are untouched: there the panel is a column beside the map and
+     was never out of sight. */
+  function narrow() { return !!(window.matchMedia && window.matchMedia("(max-width: 820px)").matches); }
+  let revealTimer = null;
+  function revealSoon(getEl) {
+    if (!narrow()) return;
+    clearTimeout(revealTimer);
+    /* after the render, not before it — what was drawn decides where to stop */
+    revealTimer = setTimeout(() => {
+      const el = getEl();
+      if (!el) return;
+      const top = Math.max(0, el.getBoundingClientRect().top + window.pageYOffset - 6);
+      if (Math.abs(window.pageYOffset - top) < 24) return;   /* already looking at it */
+      try { window.scrollTo({ top: top, behavior: "smooth" }); }
+      catch (err) { window.scrollTo(0, top); }               /* older browsers */
+    }, 90);
+  }
+  /* the panel: castles, banners, houses, regions and the rows of the menus all
+     answer in the column below the map */
+  const REVEAL_PANEL = ".marker, .banner-clickable, .stop-marker, .dd-item, .region-link, .house-link, .loc-link";
+  /* the card: a person's chip and a skull answer in the character card, which
+     floats ON the map — so those scroll BACK UP to the map, not down past it */
+  const REVEAL_CARD = ".person-chip, .death-pin, .dd-member, [data-char-open], .char-link";
+  /* CAPTURE phase, and it must stay that way. Every pin, banner, skull and
+     person chip on the map calls e.stopPropagation() inside its own click
+     handler — deliberately, so a press on a castle is not also read as a press
+     on the map behind it. A listener on `document` in the ordinary bubble phase
+     is therefore never reached by any of the things this cares about, and the
+     whole feature silently does nothing. Capturing runs us on the way DOWN,
+     before the target's handler gets to stop anything. */
+  document.addEventListener("click", (e) => {
+    const t = e.target;
+    if (!t || !t.closest) return;
+    if (t.closest(".dd-member-toggle")) return;      /* unfolding a roster is not an answer */
+    if (t.closest(REVEAL_CARD)) revealSoon(() => byId("map-stage"));
+    else if (t.closest(REVEAL_PANEL)) revealSoon(() => els.sidebar);
+  }, true);
 
   function refreshMarkers() {
     const locs = visibleLocations();

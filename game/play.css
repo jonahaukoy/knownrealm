@@ -1,0 +1,630 @@
+/* ============================================================================
+   THE IRON LADDER — the play screen.
+
+   Two ideas hold the whole layout together.
+
+   1. THE TABLE. The scene sits in the middle of the screen on something that
+      reads as a sheet of vellum on a dark table, because that is what the game
+      is pretending to be: somebody reading you a situation and waiting. Nothing
+      competes with it for attention — the rail is quiet, the actions sit below
+      the fold of the card, and when a roll happens everything else dims.
+
+   2. THE LEDGER IS ALWAYS VISIBLE. A life sim in which you have to go looking
+      for your own numbers is a life sim nobody replays. Vitals, attributes and
+      what you are carrying are on screen at all times on desktop, and one tap
+      away on a phone.
+
+   Colours come from css/style.css (--gold, --parchment, --ink…) so this page
+   turns over with the rest of the site when the reader flips to the day theme.
+   ========================================================================== */
+
+.il-play-body { overflow-y: auto; overflow-x: hidden; }
+.il-play-body html, .il-play-body { height: auto; }
+html:has(.il-play-body) { height: auto; overflow-y: auto; }
+
+.ilp {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 14px 16px 90px;
+}
+.ilp .hidden { display: none !important; }
+
+/* ------------------------------------------------------------- the crown -- */
+.ilp-crown {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px 20px;
+  align-items: center;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  background: linear-gradient(180deg, rgba(201,161,90,.13), rgba(201,161,90,.04));
+  border: 1px solid var(--gold-dim);
+  border-radius: 12px;
+}
+.ilp-who { min-width: 0; }
+.ilp-name {
+  font-family: var(--serif-display);
+  font-size: clamp(19px, 3.4vw, 27px);
+  color: var(--gold-bright);
+  letter-spacing: .5px;
+  line-height: 1.15;
+}
+.ilp-sub { font-size: 13px; color: var(--text-muted); margin-top: 3px; }
+.ilp-where { font-size: 13px; color: var(--text-light); opacity: .85; margin-top: 4px; }
+
+.ilp-rank { text-align: right; min-width: 190px; }
+.ilp-rank-name {
+  font-family: var(--serif-display);
+  font-size: 14px; color: var(--gold-bright); letter-spacing: .6px;
+}
+.ilp-rank-note { font-size: 11.5px; color: var(--text-muted); font-style: italic; margin-top: 2px; }
+.ilp-bar {
+  height: 5px; border-radius: 3px; margin-top: 7px;
+  background: rgba(255,255,255,.09); overflow: hidden;
+}
+.ilp-bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--gold-dim), var(--gold-bright)); transition: width .6s ease; }
+.ilp-rank-next { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+/* ------------------------------------------------------------ the layout -- */
+.ilp-grid { display: grid; grid-template-columns: 268px 1fr; gap: 18px; align-items: start; }
+@media (max-width: 900px) { .ilp-grid { grid-template-columns: 1fr; } }
+
+/* ------------------------------------------------------------- the rail --- */
+.ilp-rail { position: sticky; top: 12px; display: grid; gap: 12px; }
+@media (max-width: 900px) { .ilp-rail { position: static; } }
+
+.ilp-box {
+  background: var(--ink-2);
+  border: 1px solid rgba(201,161,90,.28);
+  border-radius: 11px;
+  padding: 12px 13px;
+}
+.ilp-box h3 {
+  margin: 0 0 9px;
+  font-family: var(--serif-display);
+  font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--gold); font-weight: 600;
+}
+
+.ilp-vitals { display: grid; gap: 8px; }
+.ilp-vital { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 8px; font-size: 13px; }
+.ilp-vital b { font-variant-numeric: tabular-nums; color: var(--text-light); }
+.ilp-vital span { color: var(--text-muted); }
+.ilp-hp { grid-column: 1 / -1; height: 6px; border-radius: 3px; background: rgba(255,255,255,.08); overflow: hidden; }
+.ilp-hp i { display: block; height: 100%; transition: width .5s ease, background .5s ease; }
+
+.ilp-attrs { display: grid; grid-template-columns: 1fr 1fr; gap: 7px 10px; }
+.ilp-attr {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 6px;
+  font-size: 12.5px; color: var(--text-muted);
+  padding-bottom: 3px; border-bottom: 1px dotted rgba(201,161,90,.2);
+}
+.ilp-attr b { font-size: 15px; color: var(--gold-bright); font-variant-numeric: tabular-nums; }
+.ilp-attr.bumped b { animation: ilp-bump .9s ease; }
+@keyframes ilp-bump {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.55); color: #fff; }
+  100% { transform: scale(1); }
+}
+
+.ilp-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.ilp-chip {
+  font-size: 10.5px; letter-spacing: .4px;
+  padding: 3px 8px; border-radius: 999px;
+  background: rgba(201,161,90,.12); border: 1px solid rgba(201,161,90,.3);
+  color: var(--gold-bright);
+}
+.ilp-chip.bad { background: rgba(156,59,59,.16); border-color: rgba(185,80,80,.45); color: #e6a3a3; }
+.ilp-empty { font-size: 12px; color: var(--text-muted); font-style: italic; }
+
+/* --------------------------------------------------------------- the DM --- */
+.ilp-stage { min-width: 0; }
+
+.ilp-card {
+  position: relative;
+  background:
+    radial-gradient(120% 90% at 50% 0%, rgba(255,255,255,.05), transparent 60%),
+    var(--parchment);
+  color: var(--text-dark);
+  border-radius: 4px;
+  padding: 26px clamp(18px, 4vw, 40px) 22px;
+  box-shadow: var(--shadow), 0 0 0 1px var(--parchment-edge);
+  animation: ilp-in .45s ease both;
+}
+@keyframes ilp-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+.ilp-kicker {
+  font-family: var(--serif-display);
+  font-size: 10.5px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--gold-dim); margin-bottom: 12px;
+}
+.ilp-dm {
+  font-size: clamp(16px, 2.1vw, 19px);
+  line-height: 1.62;
+  color: var(--text-dark);
+}
+.ilp-dm::first-letter {
+  font-family: var(--serif-display);
+  float: left; font-size: 3.1em; line-height: .82;
+  padding: 4px 9px 0 0; color: var(--gold-dim);
+}
+
+/* --------------------------------------------------------- the choices --- */
+.ilp-opts { display: grid; gap: 9px; margin-top: 22px; }
+.ilp-opt {
+  display: block; width: 100%; text-align: left;
+  background: rgba(43,32,21,.055);
+  border: 1px solid var(--parchment-edge);
+  border-left: 3px solid var(--gold-dim);
+  border-radius: 3px;
+  padding: 11px 14px;
+  font-family: var(--serif-body);
+  font-size: 16px; color: var(--text-dark);
+  cursor: pointer;
+  transition: background .16s, transform .16s, border-color .16s;
+}
+.ilp-opt:hover:not(:disabled) { background: rgba(201,161,90,.2); border-left-color: var(--gold); transform: translateX(3px); }
+.ilp-opt:disabled { opacity: .48; cursor: not-allowed; }
+.ilp-opt-lab { display: block; }
+.ilp-opt-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; align-items: center; }
+.ilp-tag {
+  font-size: 10.5px; letter-spacing: .4px;
+  padding: 2px 7px; border-radius: 3px;
+  background: rgba(43,32,21,.1); color: var(--text-dark-soft);
+  border: 1px solid rgba(43,32,21,.16);
+  font-variant-numeric: tabular-nums;
+}
+.ilp-tag.roll { background: rgba(201,161,90,.24); border-color: var(--gold-dim); color: #5a4212; }
+.ilp-tag.odds-good { background: rgba(72,120,72,.18); border-color: rgba(72,120,72,.4); color: #2f5a2f; }
+.ilp-tag.odds-fair { background: rgba(180,140,50,.2); border-color: rgba(160,120,40,.45); color: #6b5010; }
+.ilp-tag.odds-bad { background: rgba(156,59,59,.16); border-color: rgba(156,59,59,.42); color: #7d2a2a; }
+.ilp-tag.cost { background: rgba(156,59,59,.1); color: #7d2a2a; }
+.ilp-opt-why { font-size: 12px; font-style: italic; color: var(--text-dark-soft); margin-top: 5px; }
+
+/* ----------------------------------------------------------- the outcome -- */
+.ilp-roll {
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  margin: 20px 0 4px; padding: 14px 16px;
+  background: rgba(43,32,21,.07);
+  border: 1px solid var(--parchment-edge);
+  border-radius: 4px;
+}
+.ilp-die {
+  width: 62px; height: 62px; flex: none;
+  display: grid; place-items: center;
+  font-family: var(--serif-display); font-size: 26px; font-weight: 600;
+  color: var(--parchment);
+  background: linear-gradient(160deg, #4a3a22, #2a2013);
+  border: 2px solid var(--gold-dim);
+  clip-path: polygon(50% 0%, 95% 25%, 95% 75%, 50% 100%, 5% 75%, 5% 25%);
+  font-variant-numeric: tabular-nums;
+}
+.ilp-die.rolling { animation: ilp-shake .5s ease; }
+.ilp-die.crit { background: linear-gradient(160deg, #7a6320, #3f3312); border-color: var(--gold-bright); color: #fff6dc; box-shadow: 0 0 22px rgba(224,189,124,.5); }
+.ilp-die.fumble { background: linear-gradient(160deg, #5c2323, #2b1111); border-color: #b95050; color: #ffd9d9; }
+@keyframes ilp-shake {
+  0%,100% { transform: rotate(0) scale(1); }
+  20% { transform: rotate(-13deg) scale(1.12); }
+  45% { transform: rotate(11deg) scale(1.08); }
+  70% { transform: rotate(-6deg) scale(1.04); }
+}
+.ilp-sum { font-size: 14px; color: var(--text-dark-soft); line-height: 1.5; }
+.ilp-sum b { color: var(--text-dark); font-variant-numeric: tabular-nums; }
+.ilp-verdict { font-family: var(--serif-display); font-size: 15px; letter-spacing: 1.4px; text-transform: uppercase; }
+.ilp-verdict.ok { color: #2f6b2f; }
+.ilp-verdict.no { color: #9c3b3b; }
+
+.ilp-result { margin-top: 16px; font-size: clamp(15.5px, 2vw, 18px); line-height: 1.6; }
+.ilp-ledger { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+.ilp-led {
+  font-size: 12px; padding: 3px 9px; border-radius: 3px;
+  background: rgba(43,32,21,.09); border: 1px solid rgba(43,32,21,.15);
+  color: var(--text-dark-soft); font-variant-numeric: tabular-nums;
+}
+.ilp-led.good { background: rgba(72,120,72,.16); border-color: rgba(72,120,72,.35); color: #2f5a2f; }
+.ilp-led.bad { background: rgba(156,59,59,.13); border-color: rgba(156,59,59,.35); color: #7d2a2a; }
+.ilp-led.big { font-weight: 600; font-size: 12.5px; }
+
+.ilp-go {
+  margin-top: 20px; width: 100%;
+  font-family: var(--serif-display); font-size: 14px; letter-spacing: 1.6px; text-transform: uppercase;
+  padding: 13px; border-radius: 3px; cursor: pointer;
+  background: linear-gradient(180deg, var(--gold), var(--gold-dim));
+  color: #241a09; border: 1px solid var(--gold-bright);
+  transition: filter .15s, transform .15s;
+}
+.ilp-go:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+.ilp-turnnotes { margin-top: 12px; display: grid; gap: 4px; }
+.ilp-note { font-size: 13px; color: var(--text-dark-soft); }
+.ilp-note.bad { color: #7d2a2a; }
+.ilp-note.good { color: #2f5a2f; }
+
+/* ------------------------------------------------------------- actions --- */
+.ilp-below { margin-top: 18px; }
+.ilp-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.ilp-tab {
+  font-family: var(--serif-display); font-size: 11px; letter-spacing: 1.4px; text-transform: uppercase;
+  padding: 8px 14px; border-radius: 999px; cursor: pointer;
+  background: transparent; color: var(--text-muted);
+  border: 1px solid rgba(201,161,90,.32);
+  transition: all .15s;
+}
+.ilp-tab:hover { color: var(--gold-bright); }
+.ilp-tab.on { background: rgba(201,161,90,.16); color: var(--gold-bright); border-color: var(--gold); }
+
+.ilp-panel { background: var(--ink-2); border: 1px solid rgba(201,161,90,.24); border-radius: 11px; padding: 14px; }
+.ilp-panel-lead { font-size: 13px; color: var(--text-muted); margin: 0 0 12px; font-style: italic; }
+
+.ilp-acts { display: grid; grid-template-columns: repeat(auto-fill, minmax(214px, 1fr)); gap: 9px; }
+.ilp-act {
+  text-align: left; cursor: pointer;
+  background: rgba(255,255,255,.028);
+  border: 1px solid rgba(201,161,90,.26);
+  border-radius: 8px; padding: 11px 12px;
+  color: var(--text-light); font-family: var(--serif-body);
+  transition: background .15s, border-color .15s, transform .15s;
+}
+.ilp-act:hover { background: rgba(201,161,90,.14); border-color: var(--gold); transform: translateY(-2px); }
+.ilp-act-top { display: flex; align-items: center; gap: 8px; }
+.ilp-act-icon { font-size: 17px; }
+.ilp-act-name { font-family: var(--serif-display); font-size: 13px; color: var(--gold-bright); letter-spacing: .4px; }
+.ilp-act-blurb { display: block; font-size: 12.5px; color: var(--text-muted); margin-top: 5px; line-height: 1.45; }
+.ilp-act-group { font-size: 10px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--gold-dim); margin: 12px 0 6px; font-family: var(--serif-display); }
+.ilp-act-group:first-child { margin-top: 0; }
+
+/* --------------------------------------------------------------- travel --- */
+.ilp-trav { display: grid; grid-template-columns: repeat(auto-fill, minmax(238px, 1fr)); gap: 9px; }
+.ilp-dest { text-align: left; cursor: pointer; background: rgba(255,255,255,.028);
+  border: 1px solid rgba(201,161,90,.24); border-radius: 8px; padding: 11px 12px; color: var(--text-light); font-family: var(--serif-body); transition: all .15s; }
+.ilp-dest:hover:not(:disabled) { background: rgba(201,161,90,.13); border-color: var(--gold); transform: translateY(-2px); }
+.ilp-dest:disabled { opacity: .4; cursor: not-allowed; }
+.ilp-dest-name { font-family: var(--serif-display); font-size: 13.5px; color: var(--gold-bright); }
+.ilp-dest-kind { font-size: 10.5px; letter-spacing: 1px; text-transform: uppercase; color: var(--gold-dim); }
+.ilp-dest-blurb { display: block; font-size: 12px; color: var(--text-muted); margin-top: 5px; line-height: 1.42; }
+
+/* ------------------------------------------------------------ chronicle --- */
+.ilp-log { display: grid; gap: 7px; max-height: 460px; overflow-y: auto; padding-right: 6px; }
+.ilp-log-row { font-size: 13.5px; line-height: 1.5; color: var(--text-light); opacity: .9;
+  padding-left: 11px; border-left: 2px solid rgba(201,161,90,.3); }
+.ilp-log-row.bad { border-left-color: var(--red-bright); }
+.ilp-log-row.ok { border-left-color: #4d8a4d; }
+.ilp-log-row.death { border-left-color: var(--gold-bright); font-family: var(--serif-display); letter-spacing: 1px; }
+.ilp-log-when { font-size: 10.5px; letter-spacing: 1px; text-transform: uppercase; color: var(--gold-dim); display: block; }
+
+/* ---------------------------------------------------------------- death --- */
+.ilp-end { text-align: center; padding: 34px clamp(16px, 4vw, 46px) 30px; }
+.ilp-end-kicker { font-family: var(--serif-display); font-size: 11px; letter-spacing: 4px; text-transform: uppercase; color: var(--gold-dim); }
+.ilp-end-name { font-family: var(--serif-display); font-size: clamp(26px, 6vw, 46px); color: var(--gold-bright); margin: 10px 0 4px; }
+.ilp-end-death { font-size: clamp(16px, 2.4vw, 20px); font-style: italic; color: var(--text-dark-soft); }
+.ilp-end-rank { font-family: var(--serif-display); font-size: 17px; color: var(--text-dark); margin-top: 18px; letter-spacing: 1px; }
+.ilp-end-verdict { margin: 16px auto 0; max-width: 560px; font-size: 15.5px; line-height: 1.66; color: var(--text-dark); }
+.ilp-end-amb { margin: 20px auto 0; max-width: 560px; padding: 14px 16px; border-radius: 4px; font-size: 15px; line-height: 1.55; }
+.ilp-end-amb.met { background: rgba(72,120,72,.14); border: 1px solid rgba(72,120,72,.4); color: #2c542c; }
+.ilp-end-amb.missed { background: rgba(156,59,59,.11); border: 1px solid rgba(156,59,59,.36); color: #7d2a2a; }
+.ilp-end-stats { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 20px; }
+.ilp-end-stat { background: rgba(43,32,21,.08); border: 1px solid var(--parchment-edge); border-radius: 4px; padding: 8px 13px; min-width: 84px; }
+.ilp-end-stat b { display: block; font-family: var(--serif-display); font-size: 19px; color: var(--text-dark); font-variant-numeric: tabular-nums; }
+.ilp-end-stat span { font-size: 10.5px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-dark-soft); }
+
+.ilp-end-acts { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 26px; }
+.ilp-end-acts a, .ilp-end-acts button {
+  font-family: var(--serif-display); font-size: 12.5px; letter-spacing: 1.4px; text-transform: uppercase;
+  padding: 12px 22px; border-radius: 3px; cursor: pointer; text-decoration: none;
+  background: linear-gradient(180deg, var(--gold), var(--gold-dim)); color: #241a09;
+  border: 1px solid var(--gold-bright);
+}
+.ilp-end-acts .ghost { background: transparent; color: var(--text-dark); border: 1px solid var(--parchment-edge); }
+
+/* ------------------------------------------------------------- footwork --- */
+.ilp-foot { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 26px; }
+.ilp-foot a, .ilp-foot button {
+  background: none; border: none; cursor: pointer;
+  font-family: var(--serif-body); font-size: 13px; color: var(--text-muted); text-decoration: none;
+  border-bottom: 1px dotted rgba(201,161,90,.4); padding: 2px 0;
+}
+.ilp-foot a:hover, .ilp-foot button:hover { color: var(--gold-bright); }
+
+/* the rail on a phone: a strip you can open, not a wall of numbers */
+@media (max-width: 900px) {
+  .ilp-rail { display: grid; grid-template-columns: 1fr; gap: 10px; }
+  .ilp-attrs { grid-template-columns: repeat(3, 1fr); }
+  .ilp-card { padding: 20px 16px 18px; }
+  .ilp-dm::first-letter { font-size: 2.6em; }
+  .ilp-crown { grid-template-columns: 1fr; }
+  .ilp-rank { text-align: left; min-width: 0; }
+}
+
+/* ==========================================================================
+   THE BODY'S ACCOUNT — food, water, rest, and what want of them costs you.
+   ========================================================================== */
+.ilp-needs { display: grid; gap: 9px; }
+.ilp-need-top { display: flex; align-items: baseline; gap: 6px; font-size: 12.5px; color: var(--text-muted); }
+.ilp-need-top b { margin-left: auto; font-variant-numeric: tabular-nums; color: var(--text-light); }
+.ilp-need-word { font-style: italic; font-size: 11px; color: #e08a8a; }
+.ilp-need-bar { height: 6px; border-radius: 3px; background: rgba(255,255,255,.08); overflow: hidden; margin-top: 3px; }
+.ilp-need-bar i { display: block; height: 100%; transition: width .4s ease, background .4s ease; }
+
+/* the red numbers: what you were, struck through, and what you are now */
+.ilp-attr.starved b { color: #e08a8a; }
+.ilp-attr.starved s { color: var(--text-muted); text-decoration-color: #b95050; margin-right: 3px; font-size: 12px; opacity: .8; }
+.ilp-attr-note { margin: 9px 0 0; font-size: 11.5px; line-height: 1.5; color: #e08a8a; }
+.ilp-attr-note b { color: #f0a5a5; }
+
+/* ==========================================================================
+   THE TURN LOCK. A decision, once made, is made — you may not answer the scene
+   and then also go and do something else with the same turn. (This is not a cap
+   on how MUCH you may play: there is no daily allowance anywhere in this game,
+   and there will not be one while it is single-player.)
+   ========================================================================== */
+.ilp-lockmsg {
+  margin: 14px 0 10px; padding: 11px 14px; border-radius: 8px;
+  background: rgba(201,161,90,.1); border: 1px solid var(--gold-dim);
+  color: var(--gold-bright); font-size: 13.5px; line-height: 1.5;
+}
+.ilp-locked { opacity: .42; pointer-events: none; filter: grayscale(.6); }
+.ilp-locked .ilp-tabs { opacity: 1; pointer-events: auto; filter: none; }
+
+/* a scene that will not wait reads differently from a season that is spent */
+.ilp-lockmsg.urgent {
+  background: rgba(156,59,59,.16); border-color: #b95050; color: #f0b8b8;
+  animation: ilp-urgent 1.6s ease-in-out infinite;
+}
+.ilp-lockmsg.urgent b { color: #ffd9d9; }
+@keyframes ilp-urgent { 0%,100% { border-color: #b95050 } 50% { border-color: #e08a8a } }
+
+/* ==========================================================================
+   GO SOMEWHERE. A town is not one room. Walking between these is FREE — no
+   turn is spent and nothing is locked — because deciding where to stand is
+   not a decision the world should charge for.
+   ========================================================================== */
+.ilp-venue-lead {
+  font-family: var(--serif-display); font-size: 10.5px; letter-spacing: 2.2px;
+  text-transform: uppercase; color: var(--gold); margin: 4px 0 7px;
+}
+.ilp-venue-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.ilp-venue {
+  display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+  padding: 8px 12px; border-radius: 20px;
+  background: rgba(255,255,255,.04); border: 1px solid rgba(201,161,90,.3);
+  color: var(--text-light); font-family: var(--serif-body); font-size: 13px;
+  transition: background .14s, border-color .14s, color .14s;
+}
+.ilp-venue:hover { background: rgba(201,161,90,.16); border-color: var(--gold); }
+.ilp-venue.on {
+  background: linear-gradient(180deg, var(--gold), var(--gold-dim));
+  border-color: var(--gold-bright); color: #241a09; font-weight: 600;
+}
+.ilp-venue-icon { font-size: 14px; line-height: 1; }
+.ilp-venue-here {
+  margin: 11px 0 4px; padding: 9px 12px; border-radius: 7px;
+  background: rgba(255,255,255,.03); border-left: 3px solid var(--gold-dim);
+  font-size: 13px; line-height: 1.55; color: var(--text-muted);
+}
+.ilp-venue-here b { color: var(--gold-bright); font-family: var(--serif-display); }
+.ilp-venue-here:empty { display: none; }
+
+.ilp-look b { font-size: 12px; color: var(--gold-bright); text-align: right; }
+
+.ilp-nudge {
+  padding: 13px 15px; border-radius: 4px;
+  background: rgba(201,161,90,.16); border: 1px dashed var(--gold-dim);
+  color: #6b5010; font-size: 15px;
+}
+
+/* ==========================================================================
+   THE MAP. Same basemap and same 5652x3682 space as map.html, so a dot here is
+   where the dot over there is. Tap a pin to travel; tap bare ground to walk out
+   into the country at that exact spot.
+   ========================================================================== */
+.ilp-map-wrap {
+  position: relative; width: 100%;
+  border: 1px solid var(--gold-dim); border-radius: 8px; overflow: hidden;
+  background: #0e0b08;
+}
+/* touch-action MUST be none: the panel does its own panning and pinching off
+   pointer events, and any browser gesture handling steals them first. */
+/* The viewBox is computed from the element's own shape (viewAspect in play.js),
+   so this box may be any shape it likes and the chart fills it exactly. On a
+   phone it is made TALLER than the world is, because a 390px-wide slice of a
+   3:2 map is 200px of nothing much. */
+#ilp-map-svg {
+  display: block; width: 100%; aspect-ratio: 5652 / 3682; height: auto;
+  cursor: crosshair; touch-action: none; user-select: none;
+}
+.ilp-map-wrap, .ilp-map-wrap * { -webkit-user-select: none; user-select: none; }
+
+.ilp-pin { cursor: pointer; }
+.ilp-pin-hit { fill: transparent; }
+.ilp-pin-dot { fill: var(--gold-bright); stroke: #2a2013; stroke-width: 2.5; }
+.ilp-pin-near .ilp-pin-dot { fill: #7fd07f; }
+.ilp-pin-far  .ilp-pin-dot { fill: var(--gold-bright); }
+.ilp-pin-sea  .ilp-pin-dot { fill: #7fb6e0; }
+.ilp-pin.poor .ilp-pin-dot { fill: #6a6152; }
+.ilp-pin:hover .ilp-pin-dot { stroke: #fff; stroke-width: 4; }
+/* Labels are drawn only when the view is close enough to hold them (see
+   drawPins), so when one exists it is meant to be read — never hover-only.
+   Sized in map units by the renderer and counter-scaled with the zoom. */
+.ilp-pin-label {
+  fill: #fff; font-family: var(--serif-display); text-anchor: middle;
+  paint-order: stroke; stroke: #14100d; stroke-width: 4; stroke-linejoin: round;
+  pointer-events: none;
+}
+
+.ilp-me-dot { fill: #b95050; stroke: #fff; stroke-width: 2.5; }
+.ilp-me-ring { fill: none; stroke: #b95050; stroke-width: 2.5; opacity: .7; }
+.ilp-me-label { fill: #ffd9d9; }
+
+/* where you last put your finger on open country */
+.ilp-mark circle { fill: none; stroke: #7fb6e0; stroke-width: 3; }
+.ilp-mark .ilp-mark-in { fill: #7fb6e0; stroke: none; }
+
+/* ------------------------------------------------------------ the zoom --- */
+.ilp-map-zoom {
+  position: absolute; right: 9px; top: 9px;
+  display: grid; gap: 5px;
+}
+.ilp-map-zoom button {
+  width: 34px; height: 34px; border-radius: 6px; cursor: pointer;
+  background: rgba(14,11,8,.82); border: 1px solid var(--gold-dim);
+  color: var(--gold-bright); font-size: 17px; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+}
+.ilp-map-zoom button:hover { background: rgba(201,161,90,.24); border-color: var(--gold); }
+
+.ilp-map-read {
+  margin-top: 10px; padding: 11px 13px; border-radius: 8px;
+  background: rgba(255,255,255,.03); border: 1px solid rgba(201,161,90,.24);
+  font-size: 13.5px; line-height: 1.55; color: var(--text-light);
+}
+.ilp-map-read b { color: var(--gold-bright); }
+.ilp-map-cost { color: var(--text-muted); font-size: 12.5px; }
+.ilp-map-go {
+  display: inline-block; margin-top: 9px;
+  font-family: var(--serif-display); font-size: 11.5px; letter-spacing: 1.3px; text-transform: uppercase;
+  padding: 9px 16px; border-radius: 3px; cursor: pointer;
+  background: linear-gradient(180deg, var(--gold), var(--gold-dim));
+  color: #241a09; border: 1px solid var(--gold-bright);
+}
+.ilp-map-go:hover { filter: brightness(1.1); }
+
+@media (max-width: 700px) {
+  /* A phone does NOT get a sideways-scrolling map any more — it gets the same
+     pinch-and-drag chart as everything else, opened close in, which is the
+     only way a thumb can tell one pin from another. The box is made taller
+     than the world is wide so the visible slice is worth zooming into. */
+  #ilp-map-svg { aspect-ratio: 3 / 4; }
+  .ilp-map-zoom button { width: 40px; height: 40px; font-size: 19px; }
+  /* thumb-sized, and stacked: a Yes and a No side by side at 390px are two
+     narrow targets and a mis-tap costs a journey */
+  .ilp-ask-yes, .ilp-ask-no { padding: 15px 16px; min-height: 48px; flex-basis: 100%; }
+  .ilp-venue { padding: 10px 13px; }
+  .ilp-modal-box { padding: 17px 15px 15px; }
+}
+
+/* the destinations this basemap does not reach — see the note in paintMap() */
+.ilp-map-offhead {
+  font-family: var(--serif-display); font-size: 11px; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--gold); margin: 16px 0 4px;
+}
+.ilp-map-offnote { margin: 0 0 9px; font-size: 12px; line-height: 1.5; color: var(--text-muted); font-style: italic; }
+.ilp-offlist { display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 7px; }
+.ilp-off {
+  text-align: left; cursor: pointer; padding: 8px 10px; border-radius: 6px;
+  background: rgba(255,255,255,.028); border: 1px solid rgba(201,161,90,.24);
+  color: var(--gold-bright); font-family: var(--serif-body); font-size: 13px;
+  transition: background .14s, border-color .14s;
+}
+.ilp-off:hover:not(:disabled) { background: rgba(201,161,90,.14); border-color: var(--gold); }
+.ilp-off:disabled { opacity: .38; cursor: not-allowed; }
+
+/* ==========================================================================
+   WHAT IS IN THIS PLACE. The engine derives this from the place's own tags and
+   the action panel is gated on exactly the same list, so this line is a
+   promise: if a well is not named here, nothing below will offer you one.
+   ========================================================================== */
+.ilp-hashere { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 5px; align-items: center; font-size: 11.5px; }
+.ilp-am {
+  padding: 2px 7px; border-radius: 20px;
+  background: rgba(255,255,255,.05); border: 1px solid rgba(201,161,90,.22);
+  color: var(--text-muted);
+}
+.ilp-am-none { font-style: italic; }
+.ilp-holder {
+  margin-left: 4px; color: var(--gold); font-family: var(--serif-display);
+  font-size: 11px; letter-spacing: .6px;
+}
+.ilp-purse b { color: var(--gold-bright); }
+
+/* ==========================================================================
+   WHAT YOU CARRY. Only the best thing in a slot counts towards the dice, and
+   the panel says which, because a player who owns a sword and a cudgel should
+   not have to guess which one the roll is using.
+   ========================================================================== */
+.ilp-kit { display: grid; gap: 7px; }
+.ilp-kititem {
+  padding: 7px 9px; border-radius: 6px;
+  background: rgba(255,255,255,.028); border: 1px solid rgba(201,161,90,.2);
+}
+.ilp-kititem.spare { opacity: .55; }
+.ilp-kit-name { font-size: 12.5px; color: var(--text-light); line-height: 1.35; }
+.ilp-kit-name em { font-style: italic; font-size: 10.5px; color: var(--text-muted); }
+.ilp-kit-bits { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.ilp-kit-attr {
+  font-size: 10.5px; padding: 1px 6px; border-radius: 20px;
+  font-variant-numeric: tabular-nums;
+}
+.ilp-kit-attr.up { background: rgba(77,138,77,.18); color: #9ad39a; border: 1px solid rgba(77,138,77,.4); }
+.ilp-kit-attr.down { background: rgba(185,80,80,.16); color: #e6a3a3; border: 1px solid rgba(185,80,80,.4); }
+
+/* gear can move a number UP as well as down; the struck-through original is
+   shown either way, because the roll uses the second figure */
+.ilp-attr.kitted b { color: #9ad39a; }
+.ilp-attr.kitted s { color: var(--text-muted); text-decoration-color: #4d8a4d; margin-right: 3px; font-size: 12px; opacity: .8; }
+.ilp-attr-note { color: var(--text-muted); }
+.ilp-attr-note i { font-style: italic; color: var(--gold); }
+
+.ilp-tag.bad { background: rgba(185,80,80,.14); border-color: rgba(185,80,80,.45); color: #e6a3a3; }
+
+/* ==========================================================================
+   ARE YOU SURE YOU WANT TO GO THERE.
+   Nothing is spent and nothing moves until Yes is pressed. Every way of making
+   the journey is priced on its own row — coin, days and how dangerous the road
+   is — and the sentence at the foot says it in words before you commit.
+   ========================================================================== */
+.ilp-modal {
+  position: fixed; inset: 0; z-index: 400;
+  display: flex; align-items: center; justify-content: center;
+  padding: 18px; background: rgba(8,6,4,.74); backdrop-filter: blur(2px);
+}
+.ilp-modal.hidden { display: none !important; }
+.ilp-modal-box {
+  width: min(560px, 100%); max-height: 88vh; overflow-y: auto;
+  padding: 20px 22px 18px; border-radius: 10px;
+  background: linear-gradient(180deg, #efe4cd, #e3d5b8);
+  border: 1px solid var(--gold); color: #241a09;
+  box-shadow: 0 24px 70px rgba(0,0,0,.6);
+  animation: ilp-ask-in .18s ease;
+}
+@keyframes ilp-ask-in { from { opacity: 0; transform: translateY(10px) } to { opacity: 1; transform: none } }
+.ilp-ask-kicker {
+  font-family: var(--serif-display); font-size: 10.5px; letter-spacing: 2.2px;
+  text-transform: uppercase; color: #8a6a22;
+}
+.ilp-ask-title { font-family: var(--serif-display); font-size: 22px; margin: 3px 0 6px; color: #3a2c10; }
+.ilp-ask-blurb { margin: 0 0 12px; font-size: 13.5px; line-height: 1.55; color: #4a3a1c; }
+.ilp-ask-ways { display: grid; gap: 7px; }
+.ilp-way {
+  display: block; width: 100%; text-align: left; cursor: pointer;
+  padding: 9px 11px; border-radius: 7px;
+  background: rgba(255,255,255,.42); border: 1px solid rgba(120,95,40,.32);
+  color: #33270f; font-family: var(--serif-body);
+}
+.ilp-way:hover { background: rgba(255,255,255,.7); border-color: #8a6a22; }
+.ilp-way.on { background: #fff8e8; border-color: #8a6a22; box-shadow: inset 0 0 0 1px #c9a15a; }
+.ilp-way.poor { opacity: .6; }
+.ilp-way.shut { opacity: .58; cursor: default; background: rgba(0,0,0,.05); }
+.ilp-way-name { display: block; font-family: var(--serif-display); font-size: 14px; color: #2c2109; }
+.ilp-way-note { display: block; font-size: 12px; line-height: 1.45; color: #5a4720; margin-top: 2px; }
+.ilp-way-why { display: block; font-size: 11.5px; font-style: italic; color: #8a4a2a; margin-top: 3px; }
+.ilp-way-nums { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+.ilp-way-nums .ilp-tag {
+  background: rgba(0,0,0,.06); border: 1px solid rgba(120,95,40,.3); color: #4a3a1c;
+}
+.ilp-way-nums .ilp-tag.cost { background: rgba(201,161,90,.28); color: #3a2c10; }
+.ilp-ask-line {
+  margin: 13px 0 12px; padding: 10px 12px; border-radius: 7px;
+  background: rgba(58,44,16,.09); border-left: 3px solid #8a6a22;
+  font-size: 14px; line-height: 1.5; color: #33270f;
+}
+.ilp-ask-acts { display: flex; flex-wrap: wrap; gap: 9px; }
+.ilp-ask-yes, .ilp-ask-no {
+  flex: 1 1 auto; cursor: pointer; padding: 11px 16px; border-radius: 4px;
+  font-family: var(--serif-display); font-size: 12px; letter-spacing: 1.4px; text-transform: uppercase;
+}
+.ilp-ask-yes { background: linear-gradient(180deg, var(--gold), var(--gold-dim)); color: #241a09; border: 1px solid #8a6a22; }
+.ilp-ask-yes:hover:not(:disabled) { filter: brightness(1.08); }
+.ilp-ask-yes:disabled { opacity: .45; cursor: not-allowed; }
+.ilp-ask-no { background: transparent; border: 1px solid rgba(120,95,40,.45); color: #5a4720; }
+.ilp-ask-no:hover { background: rgba(0,0,0,.06); }
+.ilp-off span { display: block; font-size: 11px; color: var(--text-muted); margin-top: 2px; }

@@ -29,30 +29,29 @@
     [0, "Summer Child", "Sweet summer child. The realm has much to teach you — start with the wiki."],
   ];
 
-  /* ------------- spoiler shield ------------- */
-  const GATE_DEFS = {
-    got: [
-      { key: "gotS", label: "Seen Game of Thrones up to…", opts: ["Nothing", "Season 1", "Season 2", "Season 3", "Season 4", "Season 5", "Season 6", "Season 7", "Season 8 — everything"] },
-      { key: "gotB", label: "Read A Song of Ice and Fire up to…", opts: ["Nothing", "A Game of Thrones", "A Clash of Kings", "A Storm of Swords", "A Feast for Crows", "A Dance with Dragons — everything"] },
-    ],
-    hotd: [
-      { key: "hotdS", label: "Seen House of the Dragon up to…", opts: ["Nothing", "Season 1", "Season 2 — everything"] },
-      { key: "hotdB", label: "Read Fire & Blood?", opts: ["No", "Yes"] },
-    ],
-    knight: [
-      { key: "knightS", label: "Seen A Knight of the Seven Kingdoms?", opts: ["No", "Yes — Season 1"] },
-      { key: "knightB", label: "Read the Dunk & Egg tales up to…", opts: ["None", "The Hedge Knight", "The Sworn Sword", "The Mystery Knight — all three"] },
-    ],
-  };
-  GATE_DEFS.all = GATE_DEFS.got.concat(GATE_DEFS.hotd, GATE_DEFS.knight);
-  const SHIELD_MAX = { gotS: 8, gotB: 5, hotdS: 2, hotdB: 1, knightS: 1, knightB: 3 };
+  /* ------------- the spoiler shield -------------
+     There is exactly ONE shield on this site: the dialog realm-nav.js hangs off
+     the Shield button in the realm bar, writing the single shared record in
+     js/shield.js. This game used to draw a second set of season/book chips of
+     its own; it no longer does. It reads the record, opens the one dialog, and
+     re-reads whenever the dialog fires "kw-shield". */
+  const SHIELD_MAX = window.KWShield ? window.KWShield.MAX
+    : { gotS: 8, gotB: 5, hotdS: 2, hotdB: 1, knightS: 1, knightB: 3 };
 
   let shield = { gotS: 0, gotB: 0, hotdS: 0, hotdB: 0, knightS: 0, knightB: 0 };
-  try {
-    const saved = JSON.parse(localStorage.getItem("tvShield") || "{}");
-    Object.keys(shield).forEach((k) => { if (typeof saved[k] === "number") shield[k] = saved[k]; });
-  } catch (e) { /* fresh shield */ }
-  function saveShield() { try { localStorage.setItem("tvShield", JSON.stringify(shield)); } catch (e) {} }
+  function readShield() {
+    if (window.KWShield) { shield = window.KWShield.get(); return; }
+    try {
+      const saved = JSON.parse(localStorage.getItem("tvShield") || "{}");
+      Object.keys(shield).forEach((k) => { if (typeof saved[k] === "number") shield[k] = saved[k]; });
+    } catch (e) { /* a fresh shield */ }
+  }
+  readShield();
+  window.addEventListener("kw-shield", () => {
+    readShield();
+    if (typeof paintCounts === "function") paintCounts();
+    if (!$("tv-gate").classList.contains("hidden")) renderGate();
+  });
 
   // every question knows its saga, so the right shield keys apply even in "All the Realm"
   ["got", "hotd", "knight"].forEach((c) => (T[c] || []).forEach((q) => { q._cat = c; }));
@@ -100,11 +99,29 @@
     window.scrollTo({ top: el.offsetTop - 90, behavior: "smooth" });
   }
 
-  /* ---------------- setup screen ---------------- */
-  ["got", "hotd", "knight", "all"].forEach((c) => {
-    const el = $("tv-count-" + c);
-    if (el) el.textContent = pool(c).length + " questions in the pool";
-  });
+  /* ---------------- setup screen ----------------
+     The count is of what this reader can ACTUALLY be asked, not of the whole
+     pool. Saying "300 questions" and then dealing from thirty is how a shielded
+     player concludes the game is broken rather than that it is protecting
+     them — so the held-back number is printed beside it, and repainted the
+     moment the shield moves. */
+  function paintCounts() {
+    let held = 0;
+    ["got", "hotd", "knight", "all"].forEach((c) => {
+      const el = $("tv-count-" + c);
+      if (!el) return;
+      const all = pool(c), open = all.filter(allowed);
+      if (c !== "all") held += all.length - open.length;
+      el.textContent = open.length + " questions you can be asked" +
+        (all.length > open.length ? " · " + (all.length - open.length) + " held back" : "");
+    });
+    const slot = $("tv-held");
+    if (slot) {
+      slot.innerHTML = (held && window.KWShield && window.KWShield.heldNotice)
+        ? window.KWShield.heldNotice(held, "question", "questions") : "";
+    }
+  }
+  paintCounts();
   document.querySelectorAll("#tv-cats .tv-cat").forEach((b) => {
     b.addEventListener("click", () => {
       document.querySelectorAll("#tv-cats .tv-cat").forEach((x) => x.classList.remove("active"));
@@ -130,25 +147,32 @@
   }
   syncWordleLink();
 
-  /* ---------------- spoiler gate screen ---------------- */
+  /* ---------------- spoiler gate screen ----------------
+     Not a shield of its own any more: it reports where the site-wide shield
+     currently stands and offers the one button that opens it. */
+  const SHIELD_LINES = {
+    got: [["gotS", "Game of Thrones", "season"], ["gotB", "A Song of Ice and Fire", "book"]],
+    hotd: [["hotdS", "House of the Dragon", "season"], ["hotdB", "Fire &amp; Blood", "book"]],
+    knight: [["knightS", "A Knight of the Seven Kingdoms", "season"], ["knightB", "The Dunk &amp; Egg tales", "tale"]],
+  };
+  SHIELD_LINES.all = SHIELD_LINES.got.concat(SHIELD_LINES.hotd, SHIELD_LINES.knight);
+  const BOOK_NAME = ["", "A Game of Thrones", "A Clash of Kings", "A Storm of Swords", "A Feast for Crows", "A Dance with Dragons"];
+  const TALE_NAME = ["", "The Hedge Knight", "The Sworn Sword", "The Mystery Knight"];
+
+  function shieldWord(key, n) {
+    if (!n) return "nothing yet";
+    if (key === "gotB") return "through " + BOOK_NAME[n];
+    if (key === "knightB") return "through " + TALE_NAME[n];
+    if (key === "hotdB") return "read";
+    return "through season " + n;
+  }
   function renderGate() {
-    const defs = GATE_DEFS[state.cat] || GATE_DEFS.all;
-    $("tv-gate-controls").innerHTML = defs.map((g) => `
-      <div class="tv-gate-group" data-key="${g.key}">
-        <div class="tv-gate-label">${g.label}</div>
-        <div class="tv-gate-opts">${g.opts.map((o, i) =>
-          `<button class="tv-gate-opt${shield[g.key] === i ? " active" : ""}" data-v="${i}">${o}</button>`).join("")}
-        </div>
-      </div>`).join("");
-    document.querySelectorAll("#tv-gate-controls .tv-gate-opt").forEach((b) => {
-      b.addEventListener("click", () => {
-        const key = b.closest(".tv-gate-group").dataset.key;
-        shield[key] = parseInt(b.dataset.v, 10);
-        saveShield();
-        b.closest(".tv-gate-opts").querySelectorAll(".tv-gate-opt").forEach((x) => x.classList.toggle("active", x === b));
-        updateGateCount();
-      });
-    });
+    const lines = SHIELD_LINES[state.cat] || SHIELD_LINES.all;
+    $("tv-gate-controls").innerHTML =
+      `<div class="tv-gate-state">${lines.map(([k, label]) =>
+        `<div class="tv-gate-line${shield[k] ? " on" : ""}"><span>${label}</span><b>${shieldWord(k, shield[k] || 0)}</b></div>`).join("")}
+      </div>
+      <button type="button" class="tv-gate-open" data-open-shield>&#128737; Change how far I have come</button>`;
     updateGateCount();
   }
 
@@ -166,9 +190,12 @@
   $("tv-start").addEventListener("click", () => { renderGate(); showScreen("tv-gate"); });
   $("tv-gate-back").addEventListener("click", () => showScreen("tv-setup"));
   $("tv-gate-nospoil").addEventListener("click", () => {
-    Object.keys(SHIELD_MAX).forEach((k) => { shield[k] = SHIELD_MAX[k]; });
-    saveShield();
-    renderGate();
+    if (window.KWShield) window.KWShield.setAll();          /* fires kw-shield → re-renders */
+    else {
+      Object.keys(SHIELD_MAX).forEach((k) => { shield[k] = SHIELD_MAX[k]; });
+      try { localStorage.setItem("tvShield", JSON.stringify(shield)); } catch (e) {}
+      renderGate();
+    }
   });
   $("tv-gate-go").addEventListener("click", start);
   $("tv-quit").addEventListener("click", () => showScreen("tv-setup"));
@@ -243,6 +270,13 @@
   });
 
   function renderResult() {
+    /* the Cabinet: one call, and it works out the renown and the relics */
+    if (window.KWCollection) {
+      KWCollection.record("trivia", {
+        right: state.score, of: state.deck.length,
+        hard: state.d === 3, saga: state.cat === "all" ? null : state.cat,
+      });
+    }
     const rank = RANKS.find((r) => state.score >= r[0]);
     const el = $("tv-result");
     el.innerHTML = `

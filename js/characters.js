@@ -287,6 +287,23 @@ const CHARACTERS = {
     death: { s: 5, e: 10, how: "Killed in Braavos" } },
   "Ilyn Payne": { house: null, born: "The Westerlands",
     blurb: "The King's Justice, the royal headsman — a gaunt, silent man whose tongue was torn out by order of the Mad King, so he can never speak of what he does." },
+  /* The white cloaks of the reign before this one. They had pages of their own
+     in a Kingsguard collection until Aug 2026, when that collection was retired
+     — the White Book tells the order properly and the collection was only ever
+     fifteen shorter copies of pages that existed elsewhere. These four had no
+     page anywhere else, so they are people now, filed with their brothers. */
+  "Arthur Dayne": { house: null, born: "Starfall",
+    blurb: "The Sword of the Morning: a knight of the Kingsguard in the last Targaryen reign, who carried the pale greatsword Dawn and is named by everyone who ever crossed blades with him as the finest sword of his age.",
+    death: { s: 0, e: 0, how: "Fell at a tower in the Dornish marches, before the story" } },
+  "Gerold Hightower": { house: null, born: "Oldtown",
+    blurb: "The White Bull: Lord Commander of the Kingsguard under Aerys II — brave, dutiful, entirely uncorrupt, and standing in the room for every single thing that king ever did.",
+    death: { s: 0, e: 0, how: "Fell at a tower in the Dornish marches, before the story" } },
+  "Oswell Whent": { house: null, born: "Harrenhal",
+    blurb: "A knight of the Kingsguard under Aerys II, of the house that held Harrenhal — Rhaegar's man, and the third of the three white cloaks who were not at the Trident.",
+    death: { s: 0, e: 0, how: "Fell at a tower in the Dornish marches, before the story" } },
+  "Lewyn Martell": { house: "martell", born: "Sunspear",
+    blurb: "A prince of Dorne in a white cloak, and Princess Elia's uncle: sworn to guard a king who was keeping his own niece and her children in the capital as hostages in all but name.",
+    death: { s: 0, e: 0, how: "Fell on the Trident, before the story" } },
 
   // ================= The Brotherhood Without Banners =================
   "Beric Dondarrion": { house: null, born: "Blackhaven",

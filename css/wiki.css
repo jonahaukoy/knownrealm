@@ -369,3 +369,186 @@ a.wk-row:hover { background: rgba(201,161,90,0.12); }
   transform: scale(1.55); transform-origin: 50% 24%;
 }
 .wk-card:hover .wk-col-thumb { border-color: var(--gold-bright); }
+
+/* ---- the peoples collection: the ground a banner held, and when ---- */
+.wk-people-lands {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 8px; margin: 10px 0 6px;
+}
+.wk-people-land {
+  display: block; text-decoration: none; padding: 9px 12px; border-radius: 9px;
+  background: rgba(240, 230, 210, 0.04); border: 1px solid rgba(201, 161, 90, 0.2);
+  transition: background 0.14s ease, border-color 0.14s ease;
+}
+.wk-people-land:hover { background: rgba(201, 161, 90, 0.14); border-color: var(--gold-dim); }
+.wk-people-land b {
+  display: block; font-family: var(--serif-display); font-size: 13px;
+  font-weight: 400; color: var(--gold-bright); letter-spacing: 0.4px;
+}
+.wk-people-land i {
+  display: block; font-family: var(--serif-body); font-size: 12.5px;
+  font-style: normal; color: var(--text-muted); margin-top: 2px;
+}
+:root[data-theme="light"] .wk-people-land { background: rgba(255, 255, 255, 0.5); border-color: rgba(138, 106, 44, 0.28); }
+:root[data-theme="light"] .wk-people-land b { color: #6f5320; }
+
+/* ================= the fuller tale, season by season =================
+   A character's story is no longer one wall of prose that assumes you have
+   finished the show. It is a stack of segments — one per season, then the
+   ending, then the whole-arc essay — and the spoiler shield decides which of
+   them are printed at all. The segments need to read as separate chapters of
+   one recap, so each gets a rule down its left edge rather than a box. */
+.wk-season {
+  margin: 0 0 4px;
+  padding: 2px 0 2px 16px;
+  border-left: 2px solid rgba(201, 161, 90, 0.22);
+}
+.wk-season + .wk-season { margin-top: 14px; }
+.wk-season-name {
+  margin: 0 0 6px;
+  font-family: var(--serif-display);
+  font-size: 12.5px; font-weight: 400; letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.wk-season .wk-para { margin: 0 0 9px; }
+.wk-season .wk-para:last-child { margin-bottom: 0; }
+/* the ending and the whole-arc essay are the two that carry weight */
+.wk-season-end { border-left-color: rgba(156, 59, 59, 0.55); }
+.wk-season-end .wk-season-name { color: #d08a80; }
+.wk-season-essay { border-left-color: rgba(201, 161, 90, 0.5); }
+
+/* the line that admits something was held back. Printed ONLY when something
+   actually was, so its presence is honest — and its absence is never a promise
+   that nothing is coming. */
+.wk-shielded {
+  display: flex; align-items: flex-start; gap: 9px;
+  margin: 6px 0 16px; padding: 10px 13px;
+  border: 1px solid rgba(190, 80, 70, 0.4);
+  border-radius: 9px;
+  background: rgba(140, 32, 32, 0.12);
+  font-family: var(--serif-body); font-size: 13.5px; line-height: 1.6;
+  color: #e2c6ba;
+}
+.wk-shielded-icon { flex: 0 0 auto; font-size: 14px; line-height: 1.5; }
+.wk-shieldbtn {
+  display: inline-block; margin-left: 4px; padding: 2px 9px;
+  border: 1px solid rgba(201, 161, 90, 0.5); border-radius: 999px;
+  background: rgba(201, 161, 90, 0.1);
+  font-family: var(--serif-display); font-size: 11.5px; letter-spacing: 0.8px;
+  color: var(--gold-bright); cursor: pointer;
+  transition: background 0.14s ease, border-color 0.14s ease;
+}
+.wk-shieldbtn:hover { background: rgba(201, 161, 90, 0.24); border-color: var(--gold); }
+:root[data-theme="light"] .wk-shielded { background: rgba(156, 59, 59, 0.08); color: #6d3129; }
+:root[data-theme="light"] .wk-shieldbtn { color: #6f5320; }
+:root[data-theme="light"] .wk-season { border-left-color: rgba(138, 106, 44, 0.3); }
+:root[data-theme="light"] .wk-season-name { color: #6f5320; }
+
+/* ================= who they are, in a few sentences ================= */
+.wk-intro { margin-top: -4px; color: var(--text-soft, #cfc4ab); }
+
+/* ================= their chapters, book by book =================
+   One row per chapter, carrying the retelling the chapter already has. A
+   chapter told through their own eyes gets the gold rule; a chapter that merely
+   names them stays quiet, so the difference is visible without a word. */
+.wk-season-count {
+  font-family: var(--serif-body); font-style: normal; font-size: 11.5px;
+  letter-spacing: 0; text-transform: none; color: var(--text-muted);
+  margin-left: 8px;
+}
+.wk-chaplines { display: flex; flex-direction: column; gap: 3px; margin-top: 4px; }
+.wk-chapline {
+  display: grid; grid-template-columns: 118px 1fr; gap: 12px;
+  padding: 7px 11px; border-radius: 6px; text-decoration: none;
+  background: rgba(240, 230, 210, 0.03);
+  border-left: 2px solid transparent;
+  transition: background 0.14s ease, border-color 0.14s ease;
+}
+.wk-chapline:hover { background: rgba(201, 161, 90, 0.12); border-left-color: var(--gold-dim); }
+.wk-chapline-pov { border-left-color: rgba(201, 161, 90, 0.55); }
+.wk-chapline-name {
+  font-family: var(--serif-display); font-size: 12px; letter-spacing: 0.6px;
+  color: var(--gold); align-self: start; padding-top: 1px;
+}
+.wk-chapline-text { font-size: 13.5px; line-height: 1.55; color: #cfc4ab; }
+.wk-lead-books { font-style: italic; }
+@media (max-width: 620px) {
+  .wk-chapline { grid-template-columns: 1fr; gap: 2px; }
+}
+
+/* ================= their journey, and where it forks =================
+   A row the two tellings agree on runs the whole width. A row where they part
+   splits down the middle: the screen keeps the left, the books the right —
+   the shape the owner sketched. */
+.wk-jnote { font-size: 13px; color: var(--text-muted); margin: 0 0 8px; }
+.wk-journey .wk-jrow { align-items: flex-start; }
+.wk-jsplit {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+  padding: 0; background: transparent; overflow: hidden;
+  border-radius: 6px;
+}
+.wk-jside {
+  display: flex; flex-direction: column; gap: 6px;
+  padding: 9px 12px; background: rgba(240, 230, 210, 0.03); min-width: 0;
+}
+.wk-jside-book { border-left: 1px solid rgba(201, 161, 90, 0.22); }
+.wk-jside-tag {
+  font-family: var(--serif-display); font-size: 10px; letter-spacing: 1.4px;
+  text-transform: uppercase; color: var(--gold-dim);
+}
+.wk-jside-stop { display: flex; align-items: baseline; gap: 10px; font-size: 14px; }
+.wk-jside-stop .wk-row-num { min-width: 58px; flex: 0 0 auto; }
+.wk-jside-stop > span:last-child { min-width: 0; }
+/* an empty side still holds its half, so the two roads stay aligned */
+.wk-jside:empty { background: rgba(240, 230, 210, 0.012); }
+.wk-season-where { color: var(--text-muted); font-size: 13px; }
+@media (max-width: 620px) {
+  /* two columns of forked road do not fit a phone — they stack, and the tag
+     above each half is what tells you which telling you are reading */
+  .wk-jsplit { grid-template-columns: 1fr; }
+  .wk-jside-book { border-left: none; border-top: 1px solid rgba(201, 161, 90, 0.22); }
+}
+:root[data-theme="light"] .wk-chapline-text { color: #4a4034; }
+:root[data-theme="light"] .wk-intro { color: #4a4034; }
+
+/* ================= pictures inside the running text =================
+   A plate beside the prose, not across it: the text wraps around and the
+   picture never takes more than a third of the column. On a phone there is no
+   column to sit beside, so it becomes a full-width plate between paragraphs. */
+.wk-fig {
+  margin: 2px 0 10px; padding: 0;
+  width: 34%; max-width: 300px; min-width: 190px;
+}
+.wk-fig-right { float: right; margin-left: 18px; }
+.wk-fig-left  { float: left;  margin-right: 18px; }
+.wk-fig img {
+  display: block; width: 100%; height: auto; border-radius: 7px;
+  border: 1px solid rgba(201, 161, 90, 0.34);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.4);
+}
+.wk-fig figcaption {
+  margin-top: 5px; font-family: var(--serif-display);
+  font-size: 11px; letter-spacing: 0.6px; line-height: 1.4;
+  color: var(--text-muted); text-align: center;
+}
+/* a section must never let its figure hang out of the bottom into the next one */
+.wk-season::after, .wk-body::after { content: ""; display: block; clear: both; }
+@media (max-width: 700px) {
+  .wk-fig, .wk-fig-left, .wk-fig-right {
+    float: none; width: 100%; max-width: none; margin: 10px 0 14px;
+  }
+}
+
+/* a chapter row that has its own painting gets a small plate on the left */
+.wk-chapline-art { grid-template-columns: 62px 118px 1fr; }
+.wk-chapline-thumb {
+  width: 62px; height: 46px; border-radius: 5px; overflow: hidden;
+  border: 1px solid rgba(201, 161, 90, 0.28); background: rgba(0, 0, 0, 0.25);
+}
+.wk-chapline-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+@media (max-width: 620px) {
+  .wk-chapline-art { grid-template-columns: 62px 1fr; }
+  .wk-chapline-art .wk-chapline-name { grid-column: 2; }
+  .wk-chapline-art .wk-chapline-text { grid-column: 2; }
+}

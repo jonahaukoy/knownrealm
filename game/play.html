@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The Iron Ladder — a life in the realm</title>
+<meta name="description" content="A life in Westeros and Essos, one season at a time. Roll for it, live with it, and see how far up the ladder you get before something takes you off it." />
+<link rel="preload" href="../css/fonts/cinzel-400-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="../css/fonts/cinzel-600-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="../css/fonts/ebgaramond-400-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="stylesheet" href="../css/fonts.css" />
+<link rel="stylesheet" href="../css/style.css" />
+<link rel="stylesheet" href="game.css" />
+<link rel="stylesheet" href="play.css" />
+<script>try{var t=localStorage.getItem("kwTheme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
+</head>
+<body class="il-play-body">
+
+<header class="topbar">
+  <a class="brand home-brand" href="../trivia/index.html" style="text-decoration:none;color:var(--text-light)">
+    <span class="brand-icon">&#9876;&#65039;</span>
+    <span class="brand-name">THE IRON LADDER</span>
+  </a>
+  <div style="flex:1"></div>
+</header>
+
+<div class="ilp" id="ilp">
+
+  <!-- ===================== no character yet ===================== -->
+  <section class="ilp-card hidden" id="ilp-none" style="text-align:center">
+    <div class="ilp-kicker">Before anything else</div>
+    <h1 style="font-family:var(--serif-display);color:var(--gold-dim);margin:.2em 0">You have no-one to be.</h1>
+    <p class="ilp-dm" style="font-size:17px">A life needs a name, a birth and a place to have been born in.
+      It takes about a minute, and then the world starts happening to you.</p>
+    <div class="ilp-end-acts">
+      <a href="index.html">Make a character &rarr;</a>
+    </div>
+  </section>
+
+  <!-- ===================== the living game ===================== -->
+  <div id="ilp-live" class="hidden">
+
+    <div class="ilp-crown">
+      <div class="ilp-who">
+        <div class="ilp-name" id="ilp-name">&mdash;</div>
+        <div class="ilp-sub" id="ilp-sub"></div>
+        <div class="ilp-where" id="ilp-where"></div>
+      </div>
+      <div class="ilp-rank">
+        <div class="ilp-rank-name" id="ilp-rank">&mdash;</div>
+        <div class="ilp-rank-note" id="ilp-rank-note"></div>
+        <div class="ilp-bar"><i id="ilp-rank-bar" style="width:0%"></i></div>
+        <div class="ilp-rank-next" id="ilp-rank-next"></div>
+      </div>
+    </div>
+
+    <div class="ilp-grid">
+
+      <!-- ---------------- the rail ---------------- -->
+      <aside class="ilp-rail">
+        <div class="ilp-box">
+          <h3>How you stand</h3>
+          <div class="ilp-vitals" id="ilp-vitals"></div>
+        </div>
+        <div class="ilp-box">
+          <h3>The body's account</h3>
+          <div class="ilp-needs" id="ilp-needs"></div>
+        </div>
+        <div class="ilp-box">
+          <h3>What you are</h3>
+          <div class="ilp-attrs" id="ilp-attrs"></div>
+          <p class="ilp-attr-note" id="ilp-attr-note"></p>
+        </div>
+        <div class="ilp-box">
+          <h3>What you carry</h3>
+          <div class="ilp-kit" id="ilp-kit"></div>
+        </div>
+        <div class="ilp-box">
+          <h3>What the world calls you</h3>
+          <div class="ilp-chips" id="ilp-chips"></div>
+        </div>
+      </aside>
+
+      <!-- ---------------- the stage ---------------- -->
+      <main class="ilp-stage">
+
+        <section class="ilp-card" id="ilp-scene">
+          <div class="ilp-kicker" id="ilp-kicker">The season turns</div>
+          <div class="ilp-dm" id="ilp-dm"></div>
+          <div class="ilp-opts" id="ilp-opts"></div>
+
+          <div class="hidden" id="ilp-outcome">
+            <div class="ilp-roll hidden" id="ilp-rollbox">
+              <div class="ilp-die" id="ilp-die">?</div>
+              <div class="ilp-sum" id="ilp-sum"></div>
+            </div>
+            <div class="ilp-result" id="ilp-text"></div>
+            <div class="ilp-ledger" id="ilp-ledger"></div>
+            <div class="ilp-turnnotes" id="ilp-notes"></div>
+            <button class="ilp-go" id="ilp-next">The season turns &rarr;</button>
+          </div>
+        </section>
+
+        <div class="ilp-lockmsg hidden" id="ilp-lockmsg">
+          &#128274; That was your decision for this turn. What is done is done &mdash;
+          take the season forward above to do anything else.
+        </div>
+
+        <div class="ilp-below" id="ilp-below">
+          <div class="ilp-tabs">
+            <button class="ilp-tab on" data-tab="act">Act on your own</button>
+            <button class="ilp-tab" data-tab="map">The map</button>
+            <button class="ilp-tab" data-tab="trav">Travel &mdash; list</button>
+            <button class="ilp-tab" data-tab="log">The chronicle</button>
+          </div>
+
+          <div class="ilp-panel" id="ilp-tab-act">
+            <p class="ilp-panel-lead">The world has offered you something above. You may ignore it entirely
+              and do this instead &mdash; but you get one thing out of a turn, and once you have chosen
+              it, it is chosen.</p>
+            <!-- GO SOMEWHERE. Walking about inside a place is free: it costs no
+                 turn and locks nothing, because deciding where to stand is not
+                 a decision the world should charge you for. -->
+            <div class="ilp-venues" id="ilp-venues"></div>
+            <div class="ilp-venue-here" id="ilp-venue-here"></div>
+            <div id="ilp-actions"></div>
+          </div>
+
+          <div class="ilp-panel hidden" id="ilp-tab-map">
+            <p class="ilp-panel-lead">Tap a place to travel there. Tap <b>open country</b> &mdash; a wood,
+              a road, bare desert, anywhere at all &mdash; to walk out into it instead. Out there a turn
+              is a <b>day</b>, nothing is provided, and you will have to find your own food and water.
+              <b>Pinch, scroll or use the buttons to zoom</b>, and drag to move about.</p>
+            <div id="ilp-map"></div>
+            <div id="ilp-map-off"></div>
+          </div>
+
+          <div class="ilp-panel hidden" id="ilp-tab-trav">
+            <p class="ilp-panel-lead">The same journeys as a list, including the places that have no dot
+              on the map. Prices are by distance; a port will take you further than a road will.</p>
+            <div class="ilp-trav" id="ilp-travel"></div>
+          </div>
+
+          <div class="ilp-panel hidden" id="ilp-tab-log">
+            <p class="ilp-panel-lead">Everything that has happened to you, in the order it happened.</p>
+            <div class="ilp-log" id="ilp-logbody"></div>
+          </div>
+        </div>
+
+        <div class="ilp-foot">
+          <a href="index.html">Character sheet</a>
+          <button id="ilp-restart">Abandon this life and begin another</button>
+          <a href="../trivia/index.html">All the games of the realm</a>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- ===================== the end ===================== -->
+  <section class="ilp-card ilp-end hidden" id="ilp-dead"></section>
+
+  <!-- =============== "are you sure you want to go there" ===============
+       Nothing is spent and nothing moves until Yes is pressed. play.js fills
+       this and reads the chosen way out of it; the engine is never asked to
+       do anything until then. -->
+  <div class="ilp-modal hidden" id="ilp-ask" role="dialog" aria-modal="true" aria-labelledby="ilp-ask-title">
+    <div class="ilp-modal-box">
+      <div class="ilp-ask-kicker" id="ilp-ask-kicker">A journey</div>
+      <h2 class="ilp-ask-title" id="ilp-ask-title">&mdash;</h2>
+      <p class="ilp-ask-blurb" id="ilp-ask-blurb"></p>
+      <div class="ilp-ask-ways" id="ilp-ask-ways"></div>
+      <p class="ilp-ask-line" id="ilp-ask-line"></p>
+      <div class="ilp-ask-acts">
+        <button type="button" class="ilp-ask-yes" id="ilp-ask-yes">Yes &mdash; set out</button>
+        <button type="button" class="ilp-ask-no" id="ilp-ask-no">No &mdash; stay where you are</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- SCRIPT ORDER IS THE DEPENDENCY GRAPH. There are no modules here.
+     data-events.js and data-actions.js ASSIGN their arrays; every file after
+     them CONCATS onto the same array, so a new deck file must load after its
+     owner or it will be silently overwritten. -->
+<script src="game-data.js"></script>
+<script src="data-world.js"></script>
+<script src="data-flavour.js"></script>
+<script src="data-events.js"></script>
+<script src="data-events-2.js"></script>
+<script src="data-scenes-town.js"></script>
+<script src="data-scenes-hall.js"></script>
+<script src="data-scenes-road.js"></script>
+<script src="data-scenes-echo.js"></script>
+<script src="data-actions.js"></script>
+<script src="data-chains.js"></script>
+<script src="data-more.js"></script>
+<script src="data-actions-2.js"></script>
+<script src="data-coords.js"></script>
+<script src="engine.js"></script>
+<script src="../js/collection-data.js"></script>
+<script src="../js/collection.js"></script>
+<script src="play.js"></script>
+<script src="../js/realm-nav.js" data-root="../"></script>
+</body>
+</html>

@@ -9,7 +9,7 @@
 
   /* ===================== THE BROAD REALM — VISERYS I ===================== */
 
-  { id: "criston-cole", name: "Ser Criston Cole",
+  { id: "criston-cole", wiki: "hotd/wiki.html#char=Criston Cole", name: "Ser Criston Cole",
     epithet: "The Kingmaker", era: "The Broad Realm — Viserys I",
     armsGlyph: "⚔",
     blazon: "No arms are set down here. A steward’s son of the Dornish Marches.",
@@ -26,7 +26,7 @@
       "In 130 AC his host was caught in the open near the God’s Eye, in the killing the singers named the Butcher’s Ball. Ser Criston was offered terms and refused them, and then called out any man who cared to face him alone. No one did. He was brought down by arrows. A later hand has added a line to this page about the manner of his courage that the first scribe plainly did not write.",
     ] },
 
-  { id: "erryk-cargyll", name: "Ser Erryk Cargyll",
+  { id: "erryk-cargyll", wiki: "hotd/wiki.html#char=Erryk Cargyll", name: "Ser Erryk Cargyll",
     epithet: "Twin to Ser Arryk", era: "The Broad Realm — Viserys I",
     armsGlyph: "✦",
     blazon: "The Book does not set down the arms of Cargyll.",
@@ -42,7 +42,7 @@
       "He came face to face with Arryk on Dragonstone, and the two of them fought, and neither walked away. The favoured account has them knowing each other at once, weeping, and going at it anyway for the better part of an hour, each asking pardon of the other at the end. The fool Mushroom, who was there or claims he was, calls that a singer’s tidy lie and says they simply died together in a confused scuffle with a dozen other men about them. The Book keeps the first version. It would.",
     ] },
 
-  { id: "arryk-cargyll", name: "Ser Arryk Cargyll",
+  { id: "arryk-cargyll", wiki: "hotd/wiki.html#char=Arryk Cargyll", name: "Ser Arryk Cargyll",
     epithet: "Twin to Ser Erryk", era: "The Broad Realm — Viserys I",
     armsGlyph: "✦",
     blazon: "The Book does not set down the arms of Cargyll.",
@@ -58,7 +58,7 @@
       "He and Ser Erryk killed each other, and the accounts of how are irreconcilable. The version the Book prefers is a long single combat between men who had shared a cradle, ending with both on the floor begging pardon of the other. Mushroom calls that a song and says the truth was uglier, quicker and more crowded. Whichever it was, House Cargyll lost both its sons in one afternoon, and the order has never quite stopped flinching from the page.",
     ] },
 
-  { id: "steffon-darklyn", name: "Ser Steffon Darklyn", house: "Darklyn of Duskendale",
+  { id: "steffon-darklyn", wiki: "hotd/wiki.html#char=Steffon Darklyn", name: "Ser Steffon Darklyn", house: "Darklyn of Duskendale",
     epithet: "Who reached for a dragon", era: "The Broad Realm — Viserys I",
     armsGlyph: "☾",
     served: ["Viserys I", "Rhaenyra"],

@@ -1,0 +1,309 @@
+/* THE IRON LADDER — character creation.
+   Sits on top of the site's own css/style.css, which supplies the palette, the
+   fonts and the realm bar. Everything here is prefixed .il- so it can never
+   reach into the wiki or the maps. */
+
+/* the base sheet pins html/body for the map pages; this page scrolls */
+html:has(.il-body), body.il-body { height: auto; min-height: 100%; overflow-y: auto; overflow-x: hidden; }
+
+.il-main {
+  max-width: 1080px; margin: 0 auto; padding: 18px 18px 190px;
+}
+
+/* ---------------- the alpha notice ---------------- */
+.il-alpha {
+  margin: 10px 0 22px; padding: 12px 16px; border-radius: 10px;
+  border: 1px solid rgba(224, 180, 100, 0.42);
+  background: rgba(201, 161, 90, 0.10);
+  font-size: 13.5px; line-height: 1.6; color: #e3d7bb;
+}
+.il-alpha b { color: var(--gold-bright); }
+
+/* ---------------- the hero ---------------- */
+.il-hero { text-align: center; padding: 6px 0 4px; }
+.il-hero-crest { font-size: 46px; line-height: 1; }
+.il-hero h1 {
+  font-family: var(--serif-display); font-size: 42px; letter-spacing: 5px;
+  margin: 8px 0 6px;
+  background: linear-gradient(180deg, #f6e7c5, #c9a15a);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.il-hero p { color: var(--text-muted); font-size: 14px; margin: 0; }
+
+/* ---------------- the stepper ---------------- */
+.il-steps {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 6px;
+  list-style: none; margin: 22px 0 8px; padding: 0;
+}
+.il-steps li {
+  display: flex; align-items: center; gap: 7px;
+  padding: 6px 13px; border-radius: 999px;
+  border: 1px solid rgba(201, 161, 90, 0.24);
+  font-family: var(--serif-display); font-size: 11px; letter-spacing: 1.2px;
+  color: var(--text-muted); cursor: pointer; white-space: nowrap;
+  transition: border-color .15s ease, color .15s ease, background .15s ease;
+}
+.il-steps li .il-stepno {
+  width: 17px; height: 17px; border-radius: 50%; flex: 0 0 auto;
+  display: grid; place-items: center; font-size: 9.5px;
+  background: rgba(201, 161, 90, 0.16); color: var(--gold);
+}
+.il-steps li.done { color: #cdbf9f; border-color: rgba(201, 161, 90, 0.4); }
+.il-steps li.done .il-stepno { background: rgba(201, 161, 90, 0.34); }
+.il-steps li.now {
+  color: var(--gold-bright); border-color: var(--gold);
+  background: rgba(201, 161, 90, 0.13);
+}
+.il-steps li.now .il-stepno { background: var(--gold); color: #1a1409; }
+.il-steps li[aria-disabled="true"] { opacity: 0.42; cursor: not-allowed; }
+
+/* ---------------- the steps themselves ---------------- */
+.il-step { display: none; animation: il-in .18s ease; }
+.il-step.now { display: block; }
+@keyframes il-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+.il-h2 {
+  font-family: var(--serif-display); font-size: 24px; letter-spacing: 2px;
+  color: var(--gold-bright); margin: 22px 0 6px; text-align: center;
+}
+.il-sub {
+  text-align: center; max-width: 68ch; margin: 0 auto 20px;
+  font-size: 14px; line-height: 1.65; color: var(--text-muted);
+}
+.il-hint { text-align: center; font-size: 12.5px; color: var(--text-muted); min-height: 18px; }
+
+/* ---------------- the name row ---------------- */
+.il-namerow {
+  display: flex; gap: 12px; align-items: flex-end; justify-content: center;
+  flex-wrap: wrap; margin-bottom: 6px;
+}
+.il-field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.il-field span {
+  font-family: var(--serif-display); font-size: 10.5px; letter-spacing: 1.6px;
+  text-transform: uppercase; color: var(--gold-dim);
+}
+.il-field input {
+  width: 220px; max-width: 44vw; padding: 11px 14px; border-radius: 9px;
+  background: rgba(240, 230, 210, 0.05);
+  border: 1px solid rgba(201, 161, 90, 0.32);
+  color: #f0e7d2; font-family: var(--serif-display); font-size: 17px; letter-spacing: 1px;
+}
+.il-field input:focus { outline: none; border-color: var(--gold); background: rgba(240, 230, 210, 0.09); }
+.il-field input::placeholder { color: rgba(200, 186, 158, 0.35); }
+.il-dice {
+  width: 46px; height: 44px; border-radius: 9px; font-size: 20px;
+  background: rgba(201, 161, 90, 0.12); border: 1px solid rgba(201, 161, 90, 0.36);
+  color: var(--gold-bright);
+}
+.il-dice:hover { background: rgba(201, 161, 90, 0.24); border-color: var(--gold); }
+
+/* ---------------- the choice grids ---------------- */
+.il-grid { display: grid; gap: 12px; }
+.il-grid-region { grid-template-columns: repeat(auto-fit, minmax(238px, 1fr)); }
+.il-grid-birth  { grid-template-columns: repeat(auto-fit, minmax(268px, 1fr)); }
+.il-grid-work   { grid-template-columns: repeat(auto-fit, minmax(216px, 1fr)); }
+.il-grid-perk   { grid-template-columns: repeat(auto-fit, minmax(206px, 1fr)); }
+
+.il-card {
+  position: relative; text-align: left; cursor: pointer;
+  display: flex; flex-direction: column; gap: 7px;
+  padding: 15px 16px 14px; border-radius: 12px;
+  background: rgba(240, 230, 210, 0.04);
+  border: 2px solid rgba(201, 161, 90, 0.2);
+  color: #e8dfcc;
+  transition: transform .13s ease, border-color .15s ease, background .15s ease, box-shadow .15s ease;
+}
+.il-card:hover { transform: translateY(-2px); border-color: rgba(201, 161, 90, 0.55); background: rgba(240, 230, 210, 0.07); }
+.il-card.sel {
+  border-color: var(--gold-bright); background: rgba(201, 161, 90, 0.14);
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.42);
+}
+.il-card.sel::after {
+  content: "\2713"; position: absolute; top: 9px; right: 11px;
+  width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--gold); color: #1a1409; font-size: 12px; font-weight: 700;
+}
+.il-card[aria-disabled="true"] { opacity: 0.34; cursor: not-allowed; }
+.il-card[aria-disabled="true"]:hover { transform: none; border-color: rgba(201, 161, 90, 0.2); background: rgba(240, 230, 210, 0.04); }
+
+.il-card-top { display: flex; align-items: baseline; gap: 9px; }
+.il-card-emoji { font-size: 20px; line-height: 1; flex: 0 0 auto; }
+.il-card-name {
+  font-family: var(--serif-display); font-size: 16px; letter-spacing: 0.9px;
+  color: var(--gold-bright);
+}
+.il-card-seat { font-size: 11px; color: var(--text-muted); margin-left: auto; white-space: nowrap; }
+.il-card-blurb { font-size: 13px; line-height: 1.55; color: #cfc4ab; }
+.il-card-note { font-size: 12px; font-style: italic; color: var(--gold-dim); }
+.il-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+.il-tag {
+  padding: 2px 9px; border-radius: 999px; font-size: 10.5px; letter-spacing: 0.5px;
+  border: 1px solid rgba(201, 161, 90, 0.28); color: #cbbd9c;
+}
+
+/* the four opening numbers on a birth card */
+.il-stats { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 2px; }
+.il-stat { display: flex; flex-direction: column; line-height: 1.1; }
+.il-stat b { font-family: var(--serif-display); font-size: 15px; color: var(--gold-bright); }
+.il-stat span { font-size: 9.5px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-muted); }
+
+.il-left { color: var(--gold-bright); font-family: var(--serif-display); letter-spacing: 1px; }
+
+/* ---------------- the finished sheet ---------------- */
+.il-sheet {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+  max-width: 820px; margin: 0 auto;
+}
+.il-sheet-hero {
+  grid-column: 1 / -1; text-align: center; padding: 20px 18px;
+  border-radius: 14px; border: 2px solid rgba(201, 161, 90, 0.42);
+  background: radial-gradient(120% 160% at 50% 0%, rgba(201, 161, 90, 0.18), transparent 66%), rgba(240, 230, 210, 0.04);
+}
+.il-sheet-name { font-family: var(--serif-display); font-size: 32px; letter-spacing: 3px; color: var(--gold-bright); }
+.il-sheet-line { font-size: 13.5px; color: var(--text-muted); margin-top: 5px; }
+.il-panel {
+  padding: 14px 16px; border-radius: 12px;
+  background: rgba(240, 230, 210, 0.04); border: 1px solid rgba(201, 161, 90, 0.2);
+}
+.il-panel h3 {
+  font-family: var(--serif-display); font-size: 11px; letter-spacing: 1.8px;
+  text-transform: uppercase; color: var(--gold-dim); margin: 0 0 8px;
+}
+.il-panel p { margin: 0 0 6px; font-size: 13.5px; line-height: 1.6; color: #cfc4ab; }
+.il-panel p:last-child { margin-bottom: 0; }
+@media (max-width: 700px) { .il-sheet { grid-template-columns: 1fr; } }
+
+/* ---------------- the sticky bar ---------------- */
+.il-bar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 60;
+  display: flex; align-items: center; gap: 14px;
+  padding: 11px 18px;
+  background: linear-gradient(180deg, rgba(13, 11, 8, 0.86), rgba(13, 11, 8, 0.98));
+  border-top: 1px solid rgba(201, 161, 90, 0.26);
+  backdrop-filter: blur(6px);
+}
+/* The cookie bar is also fixed to the bottom (z-index 300) and would sit right
+   on top of Next on a first visit, which is the one moment the player needs it.
+   Step up out of its way while it is there, and drop back down when it goes.
+   `body:has()` is already how style.css targets the map pages, so it is a tool
+   this codebase relies on. */
+body:has(.kw-consent:not(.gone)) .il-bar { bottom: 118px; }
+@media (max-width: 700px) { body:has(.kw-consent:not(.gone)) .il-bar { bottom: 190px; } }
+.il-bar-sum { flex: 1; min-width: 0; font-size: 13px; color: var(--text-muted); line-height: 1.45; }
+.il-bar-btns { display: flex; gap: 8px; flex: 0 0 auto; }
+.il-btn {
+  padding: 11px 20px; border-radius: 10px; cursor: pointer;
+  font-family: var(--serif-display); font-size: 13px; letter-spacing: 1.3px;
+  background: linear-gradient(180deg, #e7c98a, #c9a15a); border: none; color: #1e1709;
+  transition: filter .15s ease, opacity .15s ease;
+}
+.il-btn:hover:not(:disabled) { filter: brightness(1.1); }
+.il-btn:disabled { opacity: 0.38; cursor: not-allowed; }
+.il-btn-ghost {
+  background: transparent; border: 1px solid rgba(201, 161, 90, 0.4); color: #cbbd9c;
+}
+.il-btn-ghost:hover:not(:disabled) { border-color: var(--gold); color: var(--gold-bright); filter: none; }
+.il-btn-go { background: linear-gradient(180deg, #d8b46a, #b3873c); }
+.hidden { display: none !important; }
+
+.il-foot { text-align: center; margin: 26px 0 0; display: flex; gap: 18px; justify-content: center; flex-wrap: wrap; }
+.il-linkbtn {
+  background: none; border: none; color: var(--gold-dim); cursor: pointer;
+  font-family: var(--serif-display); font-size: 12px; letter-spacing: 1px;
+  text-decoration: underline; text-underline-offset: 3px;
+}
+.il-linkbtn:hover { color: var(--gold-bright); }
+
+@media (max-width: 620px) {
+  .il-hero h1 { font-size: 30px; letter-spacing: 3px; }
+  .il-h2 { font-size: 19px; }
+  .il-main { padding-bottom: 210px; }
+  .il-bar { flex-direction: column; align-items: stretch; gap: 8px; }
+  .il-bar-sum { text-align: center; }
+  .il-bar-btns { justify-content: center; }
+  .il-btn { flex: 1; padding: 12px 10px; }
+}
+
+/* the site's footer rule lives in css/wiki.css, which this page does not load —
+   so it gets its own, matching */
+.il-body .wiki-footer {
+  max-width: 1080px; margin: 0 auto; padding: 22px 18px 26px;
+  font-size: 11.5px; line-height: 1.7; color: var(--text-muted); text-align: center;
+  border-top: 1px solid rgba(201, 161, 90, 0.16);
+}
+.il-body .wiki-footer a { color: var(--gold-dim); }
+
+:root[data-theme="light"] .il-alpha { color: #4a4034; }
+:root[data-theme="light"] .il-card { color: #2f281f; }
+:root[data-theme="light"] .il-card-blurb, :root[data-theme="light"] .il-panel p { color: #4a4034; }
+:root[data-theme="light"] .il-bar { background: linear-gradient(180deg, rgba(246,240,228,.9), rgba(246,240,228,.99)); }
+
+/* ==========================================================================
+   Added with the eight-step creation: a side heading over each half of the
+   world, the birthplace and house grids, the ambition cards, the attribute
+   preview on the sheet, and the notice that appears when a life is already
+   running behind this page.
+   ========================================================================== */
+
+.il-realmside {
+  font-family: var(--serif-display);
+  font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--gold-dim);
+  margin: 22px 0 10px;
+  display: flex; align-items: center; gap: 12px;
+}
+.il-realmside::after {
+  content: ""; flex: 1; height: 1px;
+  background: linear-gradient(90deg, rgba(201,161,90,.4), transparent);
+}
+.il-realmside:first-of-type { margin-top: 4px; }
+
+.il-h3 {
+  font-family: var(--serif-display);
+  font-size: 15px; letter-spacing: 1.5px; color: var(--gold-bright);
+  margin: 26px 0 4px;
+}
+
+.il-grid-place  { grid-template-columns: repeat(auto-fit, minmax(224px, 1fr)); }
+.il-grid-house  { grid-template-columns: repeat(auto-fit, minmax(224px, 1fr)); }
+.il-grid-amb    { grid-template-columns: repeat(auto-fit, minmax(246px, 1fr)); }
+
+/* the attribute preview — the numbers the whole game rolls against, shown
+   before the player commits, because they are the character far more than the
+   prose is */
+.il-attrgrid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
+  gap: 10px; margin-bottom: 12px;
+}
+.il-attrcell {
+  background: rgba(201,161,90,.07);
+  border: 1px solid rgba(201,161,90,.24);
+  border-radius: 8px; padding: 10px 11px;
+}
+.il-attrcell b {
+  display: block; font-family: var(--serif-display);
+  font-size: 26px; line-height: 1; color: var(--gold-bright);
+  font-variant-numeric: tabular-nums;
+}
+.il-attrcell span {
+  display: block; font-size: 10.5px; letter-spacing: 1.4px;
+  text-transform: uppercase; color: var(--text-muted); margin-top: 4px;
+}
+.il-attrcell i {
+  display: block; font-size: 11.5px; line-height: 1.45;
+  color: var(--text-muted); opacity: .8; margin-top: 5px; font-style: normal;
+}
+
+.il-resume {
+  max-width: 760px; margin: 0 auto 18px;
+  padding: 13px 16px; border-radius: 10px;
+  background: rgba(201,161,90,.11);
+  border: 1px solid var(--gold-dim);
+  font-size: 14px; line-height: 1.6; color: #d8cdb4;
+}
+.il-resume b { color: var(--gold-bright); }
+.il-resume a { color: var(--gold-bright); }
+.il-resume-warn { display: block; margin-top: 4px; font-size: 12.5px; font-style: italic; color: var(--red-bright); }
+
+:root[data-theme="light"] .il-attrcell i,
+:root[data-theme="light"] .il-resume { color: #4a4034; }

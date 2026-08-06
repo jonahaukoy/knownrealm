@@ -85,7 +85,7 @@
       "The Book does not set down his end.",
     ] },
 
-  { id: "aemon-dragonknight", name: "Prince Aemon Targaryen", house: "Targaryen",
+  { id: "aemon-dragonknight", wiki: "knight/wiki.html#char=Aemon Targaryen", name: "Prince Aemon Targaryen", house: "Targaryen",
     epithet: "The Dragonknight", era: "The Long Regency — Aegon III and after",
     arms: "assets/sigils/targaryen.svg",
     blazon: "A three-headed dragon, red upon black.",
@@ -134,7 +134,7 @@
       "He was carried off the Redgrass Field alive and grievously hurt, by the order of the man who had done it to him. Of what became of him afterwards the Book keeps no clear record, and the honest answer is that the last line anyone can vouch for has him being lifted out of the grass.",
     ] },
 
-  { id: "roland-crakehall-kg", name: "Ser Roland Crakehall", house: "Crakehall",
+  { id: "roland-crakehall-kg", wiki: "knight/wiki.html#char=Ser Roland Crakehall", name: "Ser Roland Crakehall", house: "Crakehall",
     epithet: "Reckoned among the best", era: "The Blackfyre Years — Daeron II to Maekar I",
     arms: "assets/sigils/minor/crakehall.png",
     blazon: "A brindled boar.",
@@ -149,7 +149,7 @@
       "The Book does not set down his end. He is last written of in the reign of Aerys the First, still in the cloak.",
     ] },
 
-  { id: "donnel-duskendale", name: "Ser Donnel of Duskendale",
+  { id: "donnel-duskendale", wiki: "knight/wiki.html#char=Ser Donnel of Duskendale", name: "Ser Donnel of Duskendale",
     epithet: "Of the trial at Ashford", era: "The Blackfyre Years — Daeron II to Maekar I",
     armsGlyph: "☾",
     served: ["Daeron II", "Aerys I"],
@@ -163,7 +163,7 @@
       "The knight he put down in that first charge, Ser Humfrey Beesbury, never got up again. Of Ser Donnel’s own end nothing is written here; he is last set down still serving, in the reign of Aerys the First.",
     ] },
 
-  { id: "willem-wylde", name: "Ser Willem Wylde", house: "Wylde of the Rain House",
+  { id: "willem-wylde", wiki: "knight/wiki.html#char=Ser Willem Wylde", name: "Ser Willem Wylde", house: "Wylde of the Rain House",
     epithet: "Of the trial at Ashford", era: "The Blackfyre Years — Daeron II to Maekar I",
     arms: "assets/sigils/minor/rain-house.png",
     served: ["Daeron II", "Aerys I"],
@@ -178,7 +178,7 @@
 
   /* ======= THE HEDGE KNIGHT'S AGE — AEGON V AND JAEHAERYS II ======= */
 
-  { id: "duncan-the-tall", name: "Ser Duncan the Tall",
+  { id: "duncan-the-tall", wiki: "knight/wiki.html#char=Ser Duncan the Tall", name: "Ser Duncan the Tall",
     epithet: "Dunk of Flea Bottom", era: "The Hedge Knight's Age — Aegon V and Jaehaerys II",
     armsGlyph: "✶",
     blazon: "An elm tree, green, and above it a falling star.",

@@ -23,31 +23,35 @@ const RULERS = {
   "tyrell":       { name: "House Tyrell, Wardens of the South",    color: "#4c8a22" },
   "baratheon":    { name: "House Baratheon of Storm's End",        color: "#1f8a8a" },
   "martell":      { name: "House Martell, Princes of Dorne",       color: "#e06414" },
-  "nights-watch": { name: "The Night's Watch",                     color: "#3b4046" },
+  "nights-watch": { name: "The Night's Watch",                     color: "#9fb1c4" },
   "free-folk":    { name: "The Free Folk",                         color: "#77876f" },
   "blackfyre":    { name: "The Black Dragon (House Blackfyre)",    color: "#3a1220" },
 };
 
 const TERRITORIES = [
 
-  /* ---------------- beyond the Wall: no king's writ, ever ---------------- */
-  { id: "bw-far", name: "The Lands of Always Winter", base: "free-folk",
-    pts: [[240,40],[1660,40],[1660,120],[1200,125],[700,135],[400,140],[255,100]] },
-  { id: "bw-mid", name: "The haunted forest, deep", base: "free-folk",
-    pts: [[255,120],[400,175],[700,165],[1200,150],[1660,140],[1660,192],[1100,208],[600,232],[300,225]] },
-  { id: "bw-near", name: "The haunted forest", base: "free-folk",
-    pts: [[300,225],[600,232],[1100,208],[1660,192],[1660,240],[1620,252],[1546,248],[1424,262],[1300,272],[1180,285],[1100,310],[950,340],[700,350],[400,360],[260,300]] },
+  /* ---------------- beyond the Wall: no king's writ, ever ----------------
+     ONE land, not three (Aug 2026) — see the long note in js/territories.js.
+     Nothing walks up here in Dunk's century but free folk. Top edge is y=0:
+     the chart draws dry land all the way to its own top border. */
+  { id: "beyond-the-wall", name: "Beyond the Wall", base: "free-folk",
+    pts: [[240,0],[1660,0],[1660,240],[1620,252],[1546,248],[1424,262],[1300,272],[1180,285],[1100,310],[950,340],[700,350],[400,360],[260,300]] },
 
   /* ---------------- the North: Lord Beron Stark's, for the dragon ---------------- */
   { id: "the-north", name: "The North", base: "stark",
-    pts: [[360,380],[950,340],[1130,372],[1200,418],[1300,452],[1420,478],[1560,460],[1620,430],[1645,340],[1720,405],[1950,445],[1950,1230],[1600,1255],[1400,1240],[1250,1232],[1100,1258],[900,1285],[830,1310],[720,1352],[600,1362],[500,1345],[420,1330],[360,1335]] },
+    pts: [[360,380],[950,340],[1040,458],[1100,446],[1180,421],[1300,408],[1424,398],[1546,384],[1620,388],[1660,390],[1720,405],[1950,445],[1950,1230],[1600,1255],[1400,1240],[1250,1232],[1100,1258],[900,1285],[830,1310],[720,1352],[600,1362],[500,1345],[420,1330],[360,1335]] },
   { id: "the-north-isles", name: "Skagos & the northern isles", base: "stark",
     pts: [[1670,150],[1950,140],[1950,415],[1760,420],[1690,315]] },
 
-  /* The Gift: the Watch's band immediately south of the Wall, from the Shadow
-     Tower to Eastwatch (not out to Bear Island / the Grey Cliffs). */
-  { id: "the-gift", name: "The Gift & the New Gift", base: "nights-watch",
-    pts: [[1100,310],[1180,285],[1300,272],[1424,262],[1546,248],[1620,252],[1645,340],[1620,430],[1560,460],[1420,478],[1300,452],[1200,418],[1130,372]] },
+  /* The Gift and the New Gift: the Watch's two bands immediately south of the
+     Wall, from the Shadow Tower to Eastwatch (not out to Bear Island or the
+     Grey Cliffs). REDRAWN Aug 2026 as two straight 25-league bands at 2.75px
+     to the league — see js/territories.js for the working. By Dunk's day the
+     New Gift is two centuries of emptying farmland the Watch cannot defend. */
+  { id: "the-gift", name: "The Gift", base: "nights-watch",
+    pts: [[1040,322],[1100,310],[1180,285],[1300,272],[1424,262],[1546,248],[1620,252],[1660,254],[1660,322],[1620,320],[1546,316],[1424,330],[1300,340],[1180,353],[1100,378],[1040,390]] },
+  { id: "the-new-gift", name: "The New Gift", base: "nights-watch",
+    pts: [[1040,390],[1100,378],[1180,353],[1300,340],[1424,330],[1546,316],[1620,320],[1660,322],[1660,390],[1620,388],[1546,384],[1424,398],[1300,408],[1180,421],[1100,446],[1040,458]] },
 
   /* ---------------- the Vale: quiet behind its mountains ---------------- */
   { id: "the-vale", name: "The Vale", base: "arryn",

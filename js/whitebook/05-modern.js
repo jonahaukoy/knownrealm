@@ -111,7 +111,7 @@
     ],
     wiki: "wiki.html#char=Sandor Clegane" },
 
-  { id: "balon-swann", name: "Ser Balon Swann", house: "Swann of Stonehelm",
+  { id: "balon-swann", wiki: "wiki.html#char=Balon Swann", name: "Ser Balon Swann", house: "Swann of Stonehelm",
     epithet: "A true knight, late in the day", era: "The War of the Five Kings — Joffrey I and Tommen I",
     arms: "assets/sigils/minor/stonehelm.png",
     blazon: "Swans combatant, black and white, upon a field parted the same.",
@@ -145,7 +145,7 @@
       "When the crown fell out with the Faith, he was named in the accusations laid against the queen regent and was one of the men she looked to for a champion in the trial that followed. His page in the books is not yet closed, but nothing about the direction of it is encouraging.",
     ] },
 
-  { id: "loras-tyrell", name: "Ser Loras Tyrell", house: "Tyrell of Highgarden",
+  { id: "loras-tyrell", wiki: "wiki.html#char=Loras Tyrell", name: "Ser Loras Tyrell", house: "Tyrell of Highgarden",
     epithet: "The Knight of Flowers", era: "The War of the Five Kings — Joffrey I and Tommen I",
     arms: "assets/sigils/tyrell.svg",
     blazon: "A golden rose upon a field of green.",

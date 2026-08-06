@@ -67,31 +67,34 @@
   }
   function setPhase(p) { if (shell) shell.setAttribute("data-phase", p); }
 
-  /* ---------------- spoiler shield (shared with Trivia's localStorage key, so progress carries over) ---------------- */
-  /* the shield is shared with Trivia (localStorage "tvShield"), which tracks all six
-     dimensions; Who Said It only ever gates by the saga currently chosen. */
-  const GATE_BY_SAGA = {
-    got: [
-      { key: "gotS", label: "Seen Game of Thrones up to…", opts: ["Nothing", "Season 1", "Season 2", "Season 3", "Season 4", "Season 5", "Season 6", "Season 7", "Season 8 — everything"] },
-      { key: "gotB", label: "Read A Song of Ice and Fire up to…", opts: ["Nothing", "A Game of Thrones", "A Clash of Kings", "A Storm of Swords", "A Feast for Crows", "A Dance with Dragons — everything"] },
-    ],
-    hotd: [
-      { key: "hotdS", label: "Seen House of the Dragon up to…", opts: ["Nothing", "Season 1", "Season 2 — everything"] },
-      { key: "hotdB", label: "Read the Dance in Fire & Blood…", opts: ["Nothing", "The whole Dance"] },
-    ],
-    knight: [
-      { key: "knightS", label: "Seen A Knight of the Seven Kingdoms up to…", opts: ["Nothing", "Season 1 — everything"] },
-      { key: "knightB", label: "Read the Dunk & Egg tales up to…", opts: ["Nothing", "The Hedge Knight", "The Sworn Sword", "The Mystery Knight"] },
-    ],
+  /* ---------------- the spoiler shield ----------------
+     One shield serves the whole site: the dialog realm-nav.js hangs off the
+     Shield button in the realm bar, writing the single record in js/shield.js.
+     This game used to draw a second set of season/book chips of its own; it no
+     longer does. It reads the record and re-reads on "kw-shield". */
+  const SHIELD_LINES = {
+    got: [["gotS", "Game of Thrones", "season"], ["gotB", "A Song of Ice and Fire", "book"]],
+    hotd: [["hotdS", "House of the Dragon", "season"], ["hotdB", "Fire &amp; Blood", "book"]],
+    knight: [["knightS", "A Knight of the Seven Kingdoms", "season"], ["knightB", "The Dunk &amp; Egg tales", "tale"]],
   };
-  const SHIELD_MAX = { gotS: 8, gotB: 5, hotdS: 2, hotdB: 1, knightS: 1, knightB: 3 };
+  const BOOK_NAME = ["", "A Game of Thrones", "A Clash of Kings", "A Storm of Swords", "A Feast for Crows", "A Dance with Dragons"];
+  const TALE_NAME = ["", "The Hedge Knight", "The Sworn Sword", "The Mystery Knight"];
+  const SHIELD_MAX = window.KWShield ? window.KWShield.MAX
+    : { gotS: 8, gotB: 5, hotdS: 2, hotdB: 1, knightS: 1, knightB: 3 };
 
   let shield = { gotS: 0, gotB: 0, hotdS: 0, hotdB: 0, knightS: 0, knightB: 0 };
-  try {
-    const saved = JSON.parse(localStorage.getItem("tvShield") || "{}");
-    Object.keys(shield).forEach((k) => { if (typeof saved[k] === "number") shield[k] = saved[k]; });
-  } catch (e) { /* fresh shield */ }
-  function saveShield() { try { localStorage.setItem("tvShield", JSON.stringify(shield)); } catch (e) {} }
+  function readShield() {
+    if (window.KWShield) { shield = window.KWShield.get(); return; }
+    try {
+      const saved = JSON.parse(localStorage.getItem("tvShield") || "{}");
+      Object.keys(shield).forEach((k) => { if (typeof saved[k] === "number") shield[k] = saved[k]; });
+    } catch (e) { /* a fresh shield */ }
+  }
+  readShield();
+  window.addEventListener("kw-shield", () => {
+    readShield();
+    if (!$("ws-gate").classList.contains("hidden")) renderGate();
+  });
 
   function allowed(q) {
     if (q.s == null && q.b == null) return true;
@@ -116,11 +119,42 @@
   }
 
   /* ---------------- setup screen ---------------- */
+  /* the count is of what this reader can actually be asked — see the note in
+     trivia-engine.js; the same trap, the same answer */
   function updateCounts() {
+    let held = 0;
     ["show", "book"].forEach((f) => {
       const el = $("ws-count-" + f);
-      if (el) el.textContent = pool(f).length + " lines in the pool";
+      if (!el) return;
+      const all = pool(f), open = all.filter(allowed);
+      const chip = el.closest(".ws-fmt");
+      /* A saga can have nothing at all in one format — Dunk & Egg has no show
+         lines, because inventing screen dialogue would defeat the whole game.
+         Say so on the chip and take it out of play, rather than letting the
+         player choose it and hit an empty gate screen with no explanation. */
+      if (chip) chip.classList.toggle("ws-fmt-empty", all.length === 0);
+      if (all.length === 0) {
+        el.textContent = "nothing here yet";
+        return;
+      }
+      held += all.length - open.length;
+      el.textContent = open.length + " lines you can be asked" +
+        (all.length > open.length ? " · " + (all.length - open.length) + " held back" : "");
     });
+    /* never leave an empty format selected */
+    if (pool(state.fmt).length === 0) {
+      const other = state.fmt === "show" ? "book" : "show";
+      if (pool(other).length) {
+        state.fmt = other;
+        document.querySelectorAll("#ws-fmts .ws-fmt").forEach((x) =>
+          x.classList.toggle("active", x.dataset.fmt === state.fmt));
+      }
+    }
+    const slot = $("ws-held");
+    if (slot) {
+      slot.innerHTML = (held && window.KWShield && window.KWShield.heldNotice)
+        ? window.KWShield.heldNotice(held, "line", "lines") : "";
+    }
   }
   function syncSagaChips() {
     document.querySelectorAll("#ws-sagas .ws-saga").forEach((x) =>
@@ -138,6 +172,7 @@
   updateCounts();
   document.querySelectorAll("#ws-fmts .ws-fmt").forEach((b) => {
     b.addEventListener("click", () => {
+      if (b.classList.contains("ws-fmt-empty")) return;   /* nothing to play */
       document.querySelectorAll("#ws-fmts .ws-fmt").forEach((x) => x.classList.remove("active"));
       b.classList.add("active");
       state.fmt = b.dataset.fmt;
@@ -166,24 +201,23 @@
     el.classList.add("ws-anim-in");
   }
 
-  /* ---------------- spoiler gate screen ---------------- */
+  /* ---------------- spoiler gate screen ----------------
+     Reports where the site-wide shield stands and offers the one button that
+     opens it; it does not set anything itself. */
+  function shieldWord(key, n) {
+    if (!n) return "nothing yet";
+    if (key === "gotB") return "through " + BOOK_NAME[n];
+    if (key === "knightB") return "through " + TALE_NAME[n];
+    if (key === "hotdB") return "read";
+    return "through season " + n;
+  }
   function renderGate() {
-    $("ws-gate-controls").innerHTML = (GATE_BY_SAGA[state.saga] || GATE_BY_SAGA.got).map((g) => `
-      <div class="ws-gate-group" data-key="${g.key}">
-        <div class="ws-gate-label">${g.label}</div>
-        <div class="ws-gate-opts">${g.opts.map((o, i) =>
-          `<button class="ws-gate-opt${shield[g.key] === i ? " active" : ""}" data-v="${i}">${o}</button>`).join("")}
-        </div>
-      </div>`).join("");
-    document.querySelectorAll("#ws-gate-controls .ws-gate-opt").forEach((b) => {
-      b.addEventListener("click", () => {
-        const key = b.closest(".ws-gate-group").dataset.key;
-        shield[key] = parseInt(b.dataset.v, 10);
-        saveShield();
-        b.closest(".ws-gate-opts").querySelectorAll(".ws-gate-opt").forEach((x) => x.classList.toggle("active", x === b));
-        updateGateCount();
-      });
-    });
+    const lines = SHIELD_LINES[state.saga] || SHIELD_LINES.got;
+    $("ws-gate-controls").innerHTML =
+      `<div class="ws-gate-state">${lines.map(([k, label]) =>
+        `<div class="ws-gate-line${shield[k] ? " on" : ""}"><span>${label}</span><b>${shieldWord(k, shield[k] || 0)}</b></div>`).join("")}
+      </div>
+      <button type="button" class="ws-gate-open" data-open-shield>&#128737; Change how far I have come</button>`;
     updateGateCount();
   }
 
@@ -201,9 +235,12 @@
   $("ws-start").addEventListener("click", () => { renderGate(); showScreen("ws-gate"); });
   $("ws-gate-back").addEventListener("click", () => showScreen("ws-setup"));
   $("ws-gate-nospoil").addEventListener("click", () => {
-    Object.keys(SHIELD_MAX).forEach((k) => { shield[k] = SHIELD_MAX[k]; });
-    saveShield();
-    renderGate();
+    if (window.KWShield) window.KWShield.setAll();          /* fires kw-shield → re-renders */
+    else {
+      Object.keys(SHIELD_MAX).forEach((k) => { shield[k] = SHIELD_MAX[k]; });
+      try { localStorage.setItem("tvShield", JSON.stringify(shield)); } catch (e) {}
+      renderGate();
+    }
   });
   $("ws-gate-go").addEventListener("click", start);
   $("ws-quit").addEventListener("click", () => { resetHall(); showScreen("ws-setup"); });
@@ -325,6 +362,15 @@
   });
 
   function renderResult() {
+    /* the Cabinet — see the note in trivia-engine.js. `clean` means the round
+       was taken without spending either of the two once-a-round aids. */
+    if (window.KWCollection) {
+      KWCollection.record("whosaidit", {
+        right: state.score, of: state.deck.length,
+        hard: state.d === 3, fmt: state.fmt, saga: state.saga,
+        clean: !state.hintUsed && !state.fiftyUsed,
+      });
+    }
     const rank = RANKS.find((r) => state.score >= r[0]);
     const el = $("ws-result");
     el.innerHTML = `

@@ -7,7 +7,7 @@
 
 (window.WHITE_BOOK = window.WHITE_BOOK || []).push(
 
-  { id: "gerold-hightower", name: "Ser Gerold Hightower", house: "Hightower of Oldtown",
+  { id: "gerold-hightower", wiki: "wiki.html#char=Gerold Hightower", name: "Ser Gerold Hightower", house: "Hightower of Oldtown",
     epithet: "The White Bull", era: "The Mad King — Aerys II",
     arms: "assets/sigils/hightower.png",
     blazon: "A stepped tower crowned with fire, white upon smoke grey.",
@@ -44,7 +44,7 @@
     ],
     wiki: "wiki.html#char=Barristan Selmy" },
 
-  { id: "lewyn-martell", name: "Prince Lewyn Martell", house: "Nymeros Martell of Sunspear",
+  { id: "lewyn-martell", wiki: "wiki.html#char=Lewyn Martell", name: "Prince Lewyn Martell", house: "Nymeros Martell of Sunspear",
     epithet: "The Dornishman", era: "The Mad King — Aerys II",
     arms: "assets/sigils/martell.svg",
     blazon: "A red sun pierced by a golden spear.",
@@ -78,7 +78,7 @@
       "He rode with the royal host to the Trident and died there, in the press around the royal standard, in the same hour that took the crown prince and the Dornish commander. His house survived him and chose the losing side twice more afterwards.",
     ] },
 
-  { id: "oswell-whent", name: "Ser Oswell Whent", house: "Whent of Harrenhal",
+  { id: "oswell-whent", wiki: "wiki.html#char=Oswell Whent", name: "Ser Oswell Whent", house: "Whent of Harrenhal",
     epithet: "The black bat", era: "The Mad King — Aerys II",
     armsGlyph: "☾",
     blazon: "Nine black bats upon a field of gold.",
@@ -95,7 +95,7 @@
       "He was one of the three found at the tower in the Dornish mountains at the war’s end, and he died there with his Lord Commander and the Sword of the Morning against Lord Stark’s company. Only two men walked away from that field, and neither of them was ever willing to explain it fully.",
     ] },
 
-  { id: "arthur-dayne", name: "Ser Arthur Dayne", house: "Dayne of Starfall",
+  { id: "arthur-dayne", wiki: "wiki.html#char=Arthur Dayne", name: "Ser Arthur Dayne", house: "Dayne of Starfall",
     epithet: "The Sword of the Morning", era: "The Mad King — Aerys II",
     arms: "assets/sigils/minor/starfall.png",
     blazon: "A sword and a falling star, white upon lilac.",

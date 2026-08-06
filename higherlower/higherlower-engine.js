@@ -19,9 +19,64 @@
 (function () {
   "use strict";
 
-  var DECKS = window.HL_DECKS || [];
+  var ALL_DECKS = window.HL_DECKS || [];
   var GAME = "hol";
   var DAILY_ROUNDS = 10;
+
+  /* ================= the spoiler shield =================
+     This game had none, and two of its decks are series-wide spoilers on their
+     face (see the note in hl-data.js). Everything is filtered through the one
+     shared record in ../js/shield.js before it can be drawn.
+
+     A deck needs at least four playable items to be worth a round, so a deck
+     whose entries are mostly held back steps aside rather than asking the same
+     pair over and over. Everything this game shows is Game of Thrones, so the
+     `gotS` / `gotB` fields are the ones that apply. */
+  var MIN_ITEMS = 4;
+  function shieldAt() {
+    return window.KWShield ? window.KWShield.get()
+      : { gotS: 0, gotB: 0, hotdS: 0, hotdB: 0, knightS: 0, knightB: 0 };
+  }
+  function allowed(x) {
+    if (x.s == null && x.b == null) return true;   /* ambient lore */
+    var st = shieldAt();
+    if (x.s != null && (st.gotS || 0) >= x.s) return true;
+    if (x.b != null && (st.gotB || 0) >= x.b) return true;
+    return false;
+  }
+  var heldDecks = 0, heldItems = 0;
+  function buildDecks() {
+    heldDecks = 0; heldItems = 0;
+    var out = [];
+    ALL_DECKS.forEach(function (d) {
+      if (!allowed(d)) { heldDecks++; return; }
+      var items = (d.items || []).filter(function (it) {
+        if (allowed(it)) return true;
+        heldItems++;
+        return false;
+      });
+      if (items.length < MIN_ITEMS) { heldDecks++; return; }
+      /* a shallow copy so the filtered list never overwrites the pool itself */
+      var copy = {}; for (var k in d) copy[k] = d[k];
+      copy.items = items;
+      out.push(copy);
+    });
+    return out;
+  }
+  var DECKS = buildDecks();
+
+  /* the reader must be able to SEE that something is being kept from them */
+  function paintHeld() {
+    var slot = $("hl-held");
+    if (!slot) return;
+    var n = heldDecks + heldItems;
+    slot.innerHTML = (n && window.KWShield && window.KWShield.heldNotice)
+      ? window.KWShield.heldNotice(n, "measure of the realm", "measures of the realm") : "";
+  }
+  window.addEventListener("kw-shield", function () {
+    DECKS = buildDecks();
+    paintHeld();
+  });
 
   var $ = function (id) { return document.getElementById(id); };
   var esc = function (s) {
@@ -300,6 +355,10 @@
 
   /* ================================================== UNLIMITED OVER ===== */
   function gameOver() {
+    /* the Cabinet: an endless game is scored on the streak it reached */
+    if (window.KWCollection) {
+      KWCollection.record("higherlower", { streak: state.streak, saga: "got" });
+    }
     var record = state.streak > 0 && state.streak >= state.best;
     $("hl-over").innerHTML =
       '<div class="hl-over-card">' +
@@ -321,6 +380,13 @@
   }
 
   /* ================================================== boot ============== */
-  if (!DECKS.length) { $("hl-home").innerHTML = '<p class="hl-sub">The pool failed to load.</p>'; return; }
+  if (!DECKS.length) {
+    $("hl-home").innerHTML = ALL_DECKS.length
+      ? '<p class="hl-sub">Every measure in this game lies past where you said you had got to. ' +
+        '<button type="button" class="kw-held-btn" data-open-shield>Move the shield</button></p>'
+      : '<p class="hl-sub">The pool failed to load.</p>';
+    return;
+  }
+  paintHeld();
   renderHome();
 })();
