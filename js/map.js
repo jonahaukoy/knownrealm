@@ -647,12 +647,16 @@ class MapView {
     const t = f - i;
     const L = this._stopLens[i] + (this._stopLens[i + 1] - this._stopLens[i]) * t;
 
-    const pt = this._routePathEl.getPointAtLength(L);
+    const clampedL = clamp(L, 0, this._routeLen);
+    const pt = this._routePathEl.getPointAtLength(clampedL);
     this._travelerPt = { x: pt.x, y: pt.y };
     this._travelerEl.setAttribute("transform", `translate(${pt.x},${pt.y})`);
     this._travelerEl.querySelector(".marker-scale").setAttribute("transform", `scale(${markerK(this.state.scale)})`);
 
-    this._routePathEl.style.strokeDashoffset = `${this._routeLen - L}`;
+    // Keep a constant dasharray of the full path length and reveal by
+    // shifting the dash offset. This is less error-prone when scrubbing.
+    this._routePathEl.style.strokeDasharray = `${this._routeLen}`;
+    this._routePathEl.style.strokeDashoffset = `${Math.max(0, this._routeLen - clampedL)}`;
     this._stopEls.forEach((el, kdx) => {
       const visited = this._stopLens[kdx] <= L + 1;
       el.classList.toggle("visited", visited);

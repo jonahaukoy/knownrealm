@@ -570,6 +570,31 @@ body:not(.home-body).realm-ready { padding-top: 0; }
 
 .topbar-right { display: flex; align-items: center; gap: 14px; }
 
+@media (max-width: 980px) {
+  .topbar {
+    flex-wrap: wrap;
+    align-items: center;
+    height: auto;
+    gap: 16px;
+  }
+  .topbar .modes,
+  .topbar-right {
+    min-width: 0;
+  }
+  .topbar .modes {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+  .topbar-right {
+    flex: 1 1 auto;
+    justify-content: flex-end;
+  }
+  .search-wrap {
+    width: min(260px, 100%);
+    min-width: 0;
+  }
+}
+
 .search-wrap {
   position: relative;
   display: flex;
@@ -1752,10 +1777,14 @@ body.site-wordle .wordle-screen { display: block; }
 .route-path {
   fill: none;
   stroke-width: 3;
+  stroke-linecap: butt;
+  stroke-linejoin: round;
   opacity: 0.95;
   filter: drop-shadow(0 0 6px rgba(0, 0, 0, 0.6));
   vector-effect: non-scaling-stroke;
 }
+
+.traveler { pointer-events: none; }
 
 .stop-marker { cursor: pointer; }
 
