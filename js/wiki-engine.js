@@ -135,19 +135,34 @@
   function faceHTML(name, size) {
     const img = (typeof PEOPLE_IMGS !== "undefined") && PEOPLE_IMGS[name];
     const cls = size === "big" ? "wk-face wk-face-big" : "wk-face";
-    if (img) return `<span class="${cls}"><img src="${CFG.peopleDir}${img}" alt="" loading="lazy"/></span>`;
+    if (img) return `<span class="${cls}"><img src="${CFG.peopleDir}${img}" alt="${esc(name)}" loading="lazy"/></span>`;
     const init = name.replace(/^(Ser|House|Lady|Lord|King|Prince|Princess)\s+/i, "").split(" ").map((w) => w[0]).slice(0, 2).join("");
     return `<span class="${cls} wk-face-blank">${init}</span>`;
   }
-  function sigilHTML(id, size) {
+  function sigilHTML(id, size, label) {
     const cls = size === "big" ? "wk-sigil wk-sigil-big" : "wk-sigil";
     const src = (typeof sigilSrc === "function") ? sigilSrc(id, CFG.sigilDir) : CFG.sigilDir + id + ".svg";
-    return `<span class="${cls}"><img src="${src}" alt="" loading="lazy" onerror="this.parentNode.classList.add('wk-face-blank');this.remove()"/></span>`;
+    return `<span class="${cls}"><img src="${src}" alt="${esc(label || id)} sigil" loading="lazy" onerror="this.parentNode.classList.add('wk-face-blank');this.remove()"/></span>`;
   }
   /* like sigilHTML but from an explicit image path (extra houses carry their own art) */
-  function sigilImgHTML(src, size) {
+  function sigilImgHTML(src, size, label) {
     const cls = size === "big" ? "wk-sigil wk-sigil-big" : "wk-sigil";
-    return `<span class="${cls}"><img src="${esc(src)}" alt="" loading="lazy" onerror="this.parentNode.classList.add('wk-face-blank');this.remove()"/></span>`;
+    return `<span class="${cls}"><img src="${esc(src)}" alt="${esc(label ? label + " sigil" : "")}" loading="lazy" onerror="this.parentNode.classList.add('wk-face-blank');this.remove()"/></span>`;
+  }
+  /* a hanging cloth banner drawn entirely in CSS from an order's own emblem
+     colour+glyph — no HBO promotional art exists for the Night's Watch, the
+     Kingsguard and the rest, so this is their banner rather than an empty
+     placeholder. `card` renders the small grid-tile size. */
+  function orderBannerHTML(g) {
+    const em = g.emblem || {};
+    const color = esc(em.color || "#6a5636");
+    const glyph = esc(em.glyph || g.name.slice(0, 2).toUpperCase());
+    return `<div class="wk-genbanner" style="--gb-color:${color}">
+      <div class="wk-genbanner-flagwrap">
+        <div class="wk-genbanner-pole"></div>
+        <div class="wk-genbanner-flag"><span class="wk-genbanner-glyph">${glyph}</span></div>
+      </div>
+    </div>`;
   }
 
   const CATS = [
@@ -166,7 +181,20 @@
 
   // ================= search =================
   const INDEX = [];
-  Object.keys(CHARACTERS).forEach((n) => INDEX.push({ label: n, kind: "Person", href: "#char=" + encodeURIComponent(n) }));
+  /* Honorific aliases ("Lord Eddard Stark", "Ser Barristan Selmy"...) are merged
+     into CHARACTERS under their own keys purely so linkify() can auto-link that
+     phrasing when it appears in prose. They must NOT get their own entry here:
+     this list also drives KW_PRERENDER.routes(), and giving every alias its own
+     route means a second static page with byte-identical content and its own
+     self-canonical — which is exactly what produced ~39 "Google chose a
+     different canonical than the one this page declared" pages in Search
+     Console. A reader who does land on an alias's hash URL still gets redirected
+     to the one real page by renderChar()'s own alias check below; skipping it
+     here just stops a duplicate from being built for it. */
+  Object.keys(CHARACTERS).forEach((n) => {
+    if (typeof CHARACTER_ALIASES !== "undefined" && CHARACTER_ALIASES[n] && CHARACTER_ALIASES[n] !== n) return;
+    INDEX.push({ label: n, kind: "Person", href: "#char=" + encodeURIComponent(n) });
+  });
   WORLD.houses.forEach((h) => INDEX.push({ label: h.name, kind: "House", href: "#house=" + h.id }));
   groupsFlat.filter((x) => x.kind !== "great").forEach((x) => INDEX.push({ label: x.g.name, kind: "Order", href: "#group=" + x.g.id }));
   EXTRA_HS.forEach((h) => INDEX.push({ label: h.name, kind: "House", href: "#house=" + h.id }));
@@ -321,10 +349,10 @@
     const list = picturesFor(key);
     return list.length ? list[0] : null;
   }
-  function imgFrame(cls, label, key) {
+  function imgFrame(cls, label, key, alt) {
     const list = picturesFor(key);
     if (list.length) return list.map((src) =>
-      `<div class="wk-imgframe wk-imgframe-filled ${cls}"><img src="${src}" alt="${esc(label)}" loading="lazy"/></div>`).join("");
+      `<div class="wk-imgframe wk-imgframe-filled ${cls}"><img src="${src}" alt="${esc(alt || label)}" loading="lazy"/></div>`).join("");
     return `<div class="wk-imgframe ${cls}" aria-hidden="true">
       <span class="wk-imgframe-crest">&#10022;</span>
       <span class="wk-imgframe-label">${esc(label || "Illumination to come")}</span>
@@ -364,13 +392,13 @@
       return `
       <a class="wk-card wk-col-card${thumb ? " wk-col-card-art" : ""}" href="#${c.route}=${it.id}">
         ${thumb
-          ? `<span class="wk-col-thumb"><img src="${thumb}" alt="" loading="lazy"/></span>`
+          ? `<span class="wk-col-thumb"><img src="${thumb}" alt="${esc(it.name)}" loading="lazy"/></span>`
           : `<span class="wk-col-glyph">${c.glyph}</span>`}
         <span class="wk-col-text"><b>${esc(it.name)}</b><i>${esc(it.sub || "")}</i></span>
       </a>`;
     }).join("");
     out.innerHTML = crumbs([{ label: c.label }]) +
-      imgFrame("wk-banner", "An illustration will hang here", "col:" + c.id) + `
+      imgFrame("wk-banner", "An illustration will hang here", "col:" + c.id, c.label) + `
       <div class="wk-body wk-wide">
         <h1>${esc(c.label)}</h1>
         <p class="wk-lead">${linkify(c.intro)}</p>
@@ -397,7 +425,7 @@
     const inner = (fateParas + fateSecs) ||
       `<p>The chronicle records no ending here &mdash; or none the maesters have set down.</p>`;
     out.innerHTML = crumbs([{ label: c.label, href: "#cat=" + c.id }, { label: it.name }]) +
-      imgFrame("wk-banner", "An illustration will hang here", c.route + ":" + it.id) + `
+      imgFrame("wk-banner", "An illustration will hang here", c.route + ":" + it.id, it.name) + `
       <div class="wk-article">
         <div class="wk-side">
           <div class="wk-col-emblem">${c.glyph}</div>
@@ -448,7 +476,7 @@
         const h = WORLD.houses.filter((x) => x.id === id)[0];
         const label = h ? h.name : ("House " + id.charAt(0).toUpperCase() + id.slice(1));
         const names = byHouse[id].slice().sort();
-        return `<section class="wk-catsec"><h3 class="wk-h3">${sigilHTML(id)}<span>${esc(label)} <em>${names.length}</em></span></h3>
+        return `<section class="wk-catsec"><h3 class="wk-h3">${sigilHTML(id, null, label)}<span>${esc(label)} <em>${names.length}</em></span></h3>
           <div class="wk-grid">${names.map(cardFor).join("")}</div></section>`;
       }).join("");
       if (byHouse._none) {
@@ -458,11 +486,19 @@
       }
     } else if (cat === "houses") {
       body = `<h3 class="wk-h3">The Great Houses</h3><div class="wk-grid">` +
-        WORLD.houses.map((h) => `<a class="wk-card" href="#house=${h.id}">${sigilHTML(h.id)}<span>${esc(h.name)}</span></a>`).join("") + `</div>`;
-      const orders = groupsFlat.filter((x) => x.kind !== "great");
+        WORLD.houses.map((h) => `<a class="wk-card" href="#house=${h.id}">${sigilHTML(h.id, null, h.name)}<span>${esc(h.name)}</span></a>`).join("") + `</div>`;
+      const nobleHouses = groupsFlat.filter((x) => x.kind === "noble");
+      if (nobleHouses.length) {
+        body += `<h3 class="wk-h3">The Noble Houses</h3><div class="wk-grid">` +
+          nobleHouses.map((x) => `<a class="wk-card" href="#group=${x.g.id}"><span class="wk-face wk-face-blank">${esc((x.g.emblem && x.g.emblem.glyph) || "•")}</span><span>${esc(x.g.name)}</span></a>`).join("") + `</div>`;
+      }
+      /* the sworn brotherhoods, faiths and free peoples who answer to no house —
+         drawn as their own small banners rather than the plain circle badge
+         every other card uses, since that is what sets them apart here */
+      const orders = groupsFlat.filter((x) => x.kind === "order");
       if (orders.length) {
-        body += `<h3 class="wk-h3">Orders & Lesser Houses</h3><div class="wk-grid">` +
-          orders.map((x) => `<a class="wk-card" href="#group=${x.g.id}"><span class="wk-face wk-face-blank">${esc((x.g.emblem && x.g.emblem.glyph) || "•")}</span><span>${esc(x.g.name)}</span></a>`).join("") + `</div>`;
+        body += `<h3 class="wk-h3">The Unsworn &amp; Beyond</h3><div class="wk-grid">` +
+          orders.map((x) => `<a class="wk-card wk-card-order" href="#group=${x.g.id}">${orderBannerHTML(x.g)}<span>${esc(x.g.name)}</span></a>`).join("") + `</div>`;
       }
       if (EXTRA_HS.length) {
         const byRegion = {};
@@ -471,7 +507,7 @@
           const rn = (regionById[rid] || {}).name || rid;
           body += `<h3 class="wk-h3">Landed Houses &mdash; ${esc(rn)}</h3><div class="wk-grid">` +
             byRegion[rid].slice().sort((a, b) => a.name.localeCompare(b.name)).map((h) =>
-              `<a class="wk-card" href="#house=${h.id}">${sigilImgHTML(h.sigil)}<span>${esc(h.name)}</span></a>`).join("") + `</div>`;
+              `<a class="wk-card" href="#house=${h.id}">${sigilImgHTML(h.sigil, null, h.name)}<span>${esc(h.name)}</span></a>`).join("") + `</div>`;
         });
       }
     } else if (cat === "places") {
@@ -496,7 +532,7 @@
             const thumb = pictureFor("episode:" + s.n + "-" + e.n);
             return `<a class="wk-chrow" href="#episode=${s.n}-${e.n}">
               <span class="wk-chrow-thumb">${thumb
-                ? `<img src="${thumb}" alt="" loading="lazy"/>`
+                ? `<img src="${thumb}" alt="${esc(e.title)}" loading="lazy"/>`
                 : `<span class="wk-chrow-crest">&#127916;</span>`}</span>
               <span class="wk-chrow-num">S${s.n}·E${e.n}</span>
               <span class="wk-chrow-title">${esc(e.title)}</span>
@@ -515,7 +551,7 @@
           const thumb = pictureFor("chapter:" + b.n + "-" + (i + 1));
           return `<a class="wk-chrow" href="#chapter=${b.n}-${i + 1}">
             <span class="wk-chrow-thumb">${thumb
-              ? `<img src="${thumb}" alt="" loading="lazy"/>`
+              ? `<img src="${thumb}" alt="${esc(ch[0])}" loading="lazy"/>`
               : `<span class="wk-chrow-crest">&#10022;</span>`}</span>
             <span class="wk-chrow-num">${esc(b.short)} ${i + 1}</span>
             <span class="wk-chrow-title">${esc(ch[0])}</span>
@@ -524,7 +560,7 @@
         return `<section class="wk-book" data-book="${b.n}">
           <button class="wk-book-head" type="button" aria-expanded="false">
             <span class="wk-book-cover">${cover
-              ? `<img src="${cover}" alt="" loading="lazy"/>`
+              ? `<img src="${cover}" alt="${esc(b.name)} cover" loading="lazy"/>`
               : `<span class="wk-book-cover-crest">&#128214;</span>`}</span>
             <span class="wk-book-headtext">
               <span class="wk-book-name">${esc(b.name)}</span>
@@ -642,10 +678,23 @@
     const side = (list) => list.map((st) =>
       `<span class="wk-jside-stop"><span class="wk-row-num">${esc(st.when)}</span>
         <span>${stopHTML(st, notes[st.id])}</span></span>`).join("");
-    const split = (a, b) =>
+    /* an empty half is not a blank — it is one of two different true things,
+       and saying which is the whole point of the split (otherwise it just
+       reads as a label over nothing, which looked like a bug and was
+       reported as one). `tail` marks the LAST stretch of the road: for an
+       still-unfinished telling (the books), running out there means the
+       published pages simply have not caught up yet. An empty stretch in
+       the MIDDLE of the road means something else — that telling never
+       goes there at all, a real divergence rather than a gap still to fill. */
+    const emptyNote = (whichBookSide, tail) => whichBookSide
+      ? (tail ? "The books have not reached this point yet." : "Not part of the books&rsquo; road here.")
+      : "Not part of the show&rsquo;s road here.";
+    const split = (a, b, tail) =>
       `<span class="wk-row wk-row-plain wk-jrow wk-jsplit">
-        <span class="wk-jside wk-jside-show"><span class="wk-jside-tag">On the screen</span>${side(a)}</span>
-        <span class="wk-jside wk-jside-book"><span class="wk-jside-tag">In the books</span>${side(b)}</span>
+        <span class="wk-jside wk-jside-show"><span class="wk-jside-tag">On the screen</span>${
+          a.length ? side(a) : `<span class="wk-jside-empty">${emptyNote(false, tail)}</span>`}</span>
+        <span class="wk-jside wk-jside-book"><span class="wk-jside-tag">In the books</span>${
+          b.length ? side(b) : `<span class="wk-jside-empty">${emptyNote(true, tail)}</span>`}</span>
       </span>`;
 
     if (!book.length) show.forEach((st) => rows.push(whole(st, st.when)));
@@ -655,12 +704,12 @@
       let i = 0, k = 0;
       pairs.forEach(([pi, pk]) => {
         const onlyShow = show.slice(i, pi), onlyBook = book.slice(k, pk);
-        if (onlyShow.length || onlyBook.length) rows.push(split(onlyShow, onlyBook));
+        if (onlyShow.length || onlyBook.length) rows.push(split(onlyShow, onlyBook, false));
         rows.push(whole(show[pi], show[pi].when + " · " + book[pk].when));
         i = pi + 1; k = pk + 1;
       });
       const tailShow = show.slice(i), tailBook = book.slice(k);
-      if (tailShow.length || tailBook.length) rows.push(split(tailShow, tailBook));
+      if (tailShow.length || tailBook.length) rows.push(split(tailShow, tailBook, true));
     }
     const both = show.length && book.length;
     return `<h3 class="wk-h3">Their journey</h3>` +
@@ -806,6 +855,21 @@
       taleBits.push(`<section class="wk-season"><h4 class="wk-season-name">${esc(s.name)}</h4>${figs}${body}</section>`);
     });
 
+    /* For anyone with no hand-written season recap — chiefly the book-only cast,
+       who were never in the show for a season to be written about — the old
+       whole-arc essay is not a redundant second telling of the seasons above; it
+       is the ONLY telling of their story this page has. Losing its rendering
+       slot in the Aug 2026 redesign left pages like Jon Connington's with a
+       "fuller tale" heading over nothing. Shown only when no `.seasons` exists,
+       so nobody who already got the season-by-season treatment sees the same
+       arc told twice. */
+    if (!(extra.seasons && Object.keys(extra.seasons).length) &&
+        ((extra.paras && extra.paras.length) || (extra.sections && extra.sections.length))) {
+      const essay = (extra.paras || []).map((p) => `<p class="wk-para">${linkify(p)}</p>`).join("") +
+        sectionBlock(extra.sections);
+      taleBits.push(`<section class="wk-season wk-season-essay"><h4 class="wk-season-name">Their story</h4>${essay}</section>`);
+    }
+
     /* ---- how it ends for them ----
        Each telling's ending is gated on its own reckoning: the screen's death
        on its season, the books' on its book. Someone who has read all five
@@ -890,7 +954,7 @@
            plate on the row, not a banner */
         const art = pictureFor("chapter:" + b.n + "-" + (i + 1));
         rows.push(`<a class="wk-chapline${isPov ? " wk-chapline-pov" : ""}${art ? " wk-chapline-art" : ""}" href="#chapter=${b.n}-${i + 1}">
-          ${art ? `<span class="wk-chapline-thumb"><img src="${esc(art)}" alt="" loading="lazy"/></span>` : ""}
+          ${art ? `<span class="wk-chapline-thumb"><img src="${esc(art)}" alt="${esc(title)}" loading="lazy"/></span>` : ""}
           <span class="wk-chapline-name">${esc(title)}</span>
           <span class="wk-chapline-text">${esc(ch[1] || "")}</span></a>`);
       });
@@ -940,7 +1004,7 @@
 
     const hasImg = (typeof PEOPLE_IMGS !== "undefined") && PEOPLE_IMGS[name];
     out.innerHTML = crumbs([{ label: "Characters", href: "#cat=characters" }, { label: name }]) +
-      imgFrame("wk-banner", "A scene will hang here", "char:" + name) + `
+      imgFrame("wk-banner", "A scene will hang here", "char:" + name, name) + `
       <div class="wk-article">
         <div class="wk-side">
           ${faceHTML(name, "big")}
@@ -970,10 +1034,10 @@
     const seatLoc = h.seat ? locById[h.seat.toLowerCase().replace(/[''’]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")] : null;
     const ex = extraFor("house:" + h.id);
     out.innerHTML = crumbs([{ label: "Houses & Orders", href: "#cat=houses" }, { label: h.name }]) +
-      imgFrame("wk-banner", "A banner will hang here", "house:" + h.id) + `
+      imgFrame("wk-banner", "A banner will hang here", "house:" + h.id, h.name) + `
       <div class="wk-article">
         <div class="wk-side">
-          ${sigilImgHTML(h.sigil, "big")}
+          ${sigilImgHTML(h.sigil, "big", h.name)}
           <div class="wk-meta">
             ${metaRow("Words", h.words ? `&ldquo;${esc(h.words)}&rdquo;` : "")}
             ${metaRow("Seat", seatLoc ? `<a class="wk-link" href="#loc=${seatLoc.id}">${esc(h.seat)}</a>` : esc(h.seat || ""))}
@@ -998,10 +1062,10 @@
     const members = grp ? grp.g.members.map((m) => (typeof m === "string" ? m : m.n)) : [];
     const seat = locById[h.seat];
     out.innerHTML = crumbs([{ label: "Houses & Orders", href: "#cat=houses" }, { label: h.name }]) +
-      imgFrame("wk-banner", "A banner will hang here", "house:" + h.id) + `
+      imgFrame("wk-banner", "A banner will hang here", "house:" + h.id, h.name) + `
       <div class="wk-article">
         <div class="wk-side">
-          ${sigilHTML(h.id, "big")}
+          ${sigilHTML(h.id, "big", h.name)}
           <div class="wk-meta">
             ${metaRow("Words", `&ldquo;${esc(h.words)}&rdquo;`)}
             ${metaRow("Seat", seat ? `<a class="wk-link" href="#loc=${seat.id}">${esc(seat.name)}</a>` : esc(h.seat))}
@@ -1029,8 +1093,14 @@
     if (!x) { out.innerHTML = crumbs([{ label: id }]) + `<p class="wk-missing">No banner by that name.</p>`; return; }
     const g = x.g;
     const members = g.members.map((m) => (typeof m === "string" ? m : m.n));
+    /* orders have no HBO promotional art to fall back on, so a real photo
+       (once the owner adds one to WIKI_IMAGES) still wins, but the empty
+       "art will hang here" placeholder is replaced by their own drawn banner */
+    const banner = (x.kind === "order" && !picturesFor("group:" + g.id).length)
+      ? orderBannerHTML(g)
+      : imgFrame("wk-banner", "A banner will hang here", "group:" + g.id, g.name);
     out.innerHTML = crumbs([{ label: "Houses & Orders", href: "#cat=houses" }, { label: g.name }]) +
-      imgFrame("wk-banner", "A banner will hang here", "group:" + g.id) + `
+      banner + `
       <div class="wk-article">
         <div class="wk-side">
           <span class="wk-face wk-face-big wk-face-blank">${esc((g.emblem && g.emblem.glyph) || "•")}</span>
@@ -1130,10 +1200,10 @@
       ? `<h3 class="wk-h3">The chronicle here</h3><ul class="wk-list">${chron.join("")}</ul>` : "";
 
     out.innerHTML = crumbs([{ label: "Places", href: "#cat=places" }, { label: l.name }]) +
-      imgFrame("wk-banner", "A view of this place will hang here", "loc:" + id) + `
+      imgFrame("wk-banner", "A view of this place will hang here", "loc:" + id, l.name) + `
       <div class="wk-article">
         <div class="wk-side">
-          ${holder ? sigilHTML(holder.id, "big") : `<span class="wk-face wk-face-big wk-face-blank">${esc(l.name[0])}</span>`}
+          ${holder ? sigilHTML(holder.id, "big", holder.name) : `<span class="wk-face wk-face-big wk-face-blank">${esc(l.name[0])}</span>`}
           <div class="wk-meta">
             ${metaRow("Type", esc(l.type[0].toUpperCase() + l.type.slice(1)))}
             ${metaRow("Region", esc((regionById[l.region] || {}).name || l.region))}
@@ -1165,7 +1235,7 @@
     const prev = eN > 1 ? `#episode=${sN}-${eN - 1}` : null;
     const next = eN < season.episodes.length ? `#episode=${sN}-${eN + 1}` : null;
     out.innerHTML = crumbs([{ label: "Episodes", href: "#cat=episodes" }, { label: `S${sN}·E${eN}` }]) +
-      imgFrame("wk-banner", "A still from this hour will hang here", "episode:" + sN + "-" + eN) + `
+      imgFrame("wk-banner", "A still from this hour will hang here", "episode:" + sN + "-" + eN, "S" + sN + "·E" + eN + " — " + ep.title) + `
       <div class="wk-body wk-wide">
         <h1>S${sN}·E${eN} — ${esc(ep.title)}</h1>
         <div class="wk-badges"><span class="wk-badge wk-badge-flat">${esc(ep.throne.king)} holds the throne</span>
@@ -1193,7 +1263,7 @@
     const prev = chN > 1 ? `#chapter=${bN}-${chN - 1}` : null;
     const next = chN < book.chapters ? `#chapter=${bN}-${chN + 1}` : null;
     out.innerHTML = crumbs([{ label: "Chapters", href: "#cat=chapters" }, { label: `${book.short} · ${chN}` }]) +
-      imgFrame("wk-banner", "An illustration will hang here", "chapter:" + bN + "-" + chN) + `
+      imgFrame("wk-banner", "An illustration will hang here", "chapter:" + bN + "-" + chN, ch[0]) + `
       <div class="wk-body wk-wide">
         <h1>${esc(book.name)} — ${esc(ch[0])}</h1>
         <p class="wk-lead">${linkify(ch[1] || "")}</p>
@@ -1221,7 +1291,7 @@
       `<h3 class="wk-h3">${esc(s.h)}</h3>` + (s.paras || []).map((p) => `<p class="wk-para">${linkify(p)}</p>`).join("")
     ).join("");
     out.innerHTML = crumbs([{ label: "The Ages of the Realm", href: "#cat=ages" }, { label: e.title }]) +
-      imgFrame("wk-banner", "An illustration will hang here", "era:" + id) + `
+      imgFrame("wk-banner", "An illustration will hang here", "era:" + id, e.title) + `
       <div class="wk-body wk-wide">
         <div class="wk-badges"><span class="wk-badge wk-badge-flat">${esc(e.when || "")}</span></div>
         <h1>${esc(e.title)}</h1>

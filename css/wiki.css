@@ -67,8 +67,62 @@ html { height: auto; overflow-y: auto; }
   text-transform: uppercase; color: rgba(224,189,124,0.5);
 }
 .wk-hero-banner { width: 100%; max-width: 720px; height: 200px; margin: 0 auto 18px; }
-.wk-banner { width: 100%; height: 168px; margin: 2px 0 26px; }
+.wk-banner { width: 100%; height: 280px; margin: 2px 0 26px; }
+@media (max-width: 700px) {
+  .wk-banner { height: 190px; }
+}
 .wk-portrait-frame { width: 100%; min-height: 190px; }
+
+/* ===== generated order banners — no HBO art exists for the Watch, the
+   Kingsguard and the rest, so the cloth itself is drawn in CSS off each
+   order's own emblem colour, the same way the White Book's cover is drawn.
+   Used on an order's own page and in "The Unsworn & Beyond" grid. ===== */
+.wk-genbanner {
+  width: 100%; height: 280px; margin: 2px 0 26px; position: relative;
+  display: flex; align-items: center; justify-content: center;
+  background:
+    radial-gradient(120% 140% at 50% 0%, rgba(201,161,90,0.14), transparent 60%),
+    linear-gradient(180deg, rgba(44,35,24,0.55), rgba(20,16,12,0.55));
+  border: 1px solid rgba(201,161,90,0.30); border-radius: 12px; overflow: hidden;
+}
+.wk-genbanner::after {
+  content: ""; position: absolute; inset: 7px;
+  border: 1px solid rgba(201,161,90,0.16); border-radius: 8px; pointer-events: none;
+}
+/* the pole must sit OUTSIDE the flag's own clip-path (a clip-path clips its
+   whole box, absolutely-positioned children included) or it is invisible —
+   so it is a sibling of the flag inside this shared, unclipped wrapper */
+.wk-genbanner-flagwrap { position: relative; width: 150px; height: 224px; flex: 0 0 auto; }
+.wk-genbanner-flag {
+  position: absolute; inset: 0;
+  clip-path: polygon(0 0, 100% 0, 100% 78%, 50% 100%, 0 78%);
+  box-shadow: 0 14px 30px rgba(0,0,0,0.5);
+}
+.wk-genbanner-flag::before {
+  content: ""; position: absolute; inset: 0; background: var(--gb-color, #6a5636);
+}
+.wk-genbanner-flag::after {
+  content: ""; position: absolute; inset: 0;
+  background:
+    repeating-linear-gradient(100deg, rgba(255,255,255,0.09) 0 5px, rgba(0,0,0,0.10) 5px 13px),
+    linear-gradient(180deg, rgba(255,255,255,0.20), transparent 42%, rgba(0,0,0,0.38) 100%);
+}
+.wk-genbanner-pole {
+  position: absolute; left: -7px; top: -10px; bottom: -18px; width: 7px; z-index: 2;
+  background: linear-gradient(90deg, #3c2f1c, #7a5f38, #3c2f1c);
+  border-radius: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
+.wk-genbanner-glyph {
+  position: relative; z-index: 1; display: block; margin-top: 46px;
+  font-family: var(--serif-display); font-size: 40px; letter-spacing: 1px;
+  color: #f2e9d6; text-shadow: 0 3px 10px rgba(0,0,0,0.65);
+}
+/* the card version used in the grid — a small flag standing in for a sigil,
+   stacked above the name rather than beside it like the plain circle badges */
+.wk-card-order { flex-direction: column; text-align: center; padding: 14px 10px 10px; }
+.wk-card-order .wk-genbanner-flagwrap { width: 54px; height: 78px; margin: 0 auto 8px; }
+.wk-card-order .wk-genbanner-glyph { font-size: 16px; margin-top: 16px; }
+.wk-card-order .wk-genbanner-pole { left: -3px; top: -4px; bottom: -8px; width: 3px; }
 
 .wk-cats { display: grid; grid-template-columns: repeat(auto-fit, minmax(184px, 1fr)); gap: 16px; margin-top: 22px; }
 .wk-cat {
@@ -500,8 +554,9 @@ a.wk-row:hover { background: rgba(201,161,90,0.12); }
 .wk-jside-stop { display: flex; align-items: baseline; gap: 10px; font-size: 14px; }
 .wk-jside-stop .wk-row-num { min-width: 58px; flex: 0 0 auto; }
 .wk-jside-stop > span:last-child { min-width: 0; }
-/* an empty side still holds its half, so the two roads stay aligned */
-.wk-jside:empty { background: rgba(240, 230, 210, 0.012); }
+/* an empty side still holds its half, so the two roads stay aligned — and
+   says WHY it's empty rather than leaving a label over nothing */
+.wk-jside-empty { font-size: 12.5px; font-style: italic; color: var(--text-muted); opacity: 0.85; }
 .wk-season-where { color: var(--text-muted); font-size: 13px; }
 @media (max-width: 620px) {
   /* two columns of forked road do not fit a phone — they stack, and the tag

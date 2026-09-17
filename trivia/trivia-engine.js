@@ -230,7 +230,9 @@
 
     const imgBox = $("tv-qimg");
     if (q.img) {
-      imgBox.querySelector("img").src = q.img;
+      const qimg = imgBox.querySelector("img");
+      qimg.src = q.img;
+      qimg.alt = "Trivia question image"; // kept generic on purpose — a descriptive alt could give the answer away
       $("tv-qimg-credit").textContent = CREDITS[q.ic || "hbo"];
       imgBox.classList.remove("hidden");
     } else imgBox.classList.add("hidden");

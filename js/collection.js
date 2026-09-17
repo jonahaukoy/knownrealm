@@ -1,5 +1,8 @@
 /* ============================================================================
-   THE CABINET — renown, rank and relics, shared by every game on the site.
+   THE HALL OF RENOWN — renown, rank and relics, shared by every game on the
+   site. (Still stored under the old "kwCabinet" key/"kw-cabinet" event name —
+   renaming those would silently reset everyone's saved progress for no
+   functional gain, since neither is ever shown to a reader.)
 
    One record in localStorage["kwCabinet"], the same shape everywhere:
 
@@ -59,6 +62,69 @@
   }
   function announce(detail) {
     try { document.dispatchEvent(new CustomEvent("kw-cabinet", { detail: detail })); } catch (e) {}
+    if (detail && detail.won) {
+      var rel = RELICS.filter(function (r) { return r.id === detail.won; })[0];
+      if (rel) toastRelic(rel);
+    }
+    if (detail && detail.rankUp) toastRank(detail.rankUp);
+  }
+
+  /* ---- the popup: a small, fun toast whenever a relic or a rank is won.
+     Self-contained (styles live in css/style.css, injected structure lives
+     here) so every page that loads this file gets it for free — no per-game
+     wiring. One relic can trigger several at once (e.g. a perfect hard round
+     awards more than one relic in the same record() call), so they queue and
+     show one at a time rather than stacking on top of each other. ---- */
+  var toastQueue = [];
+  var toastShowing = false;
+  var toastEsc = function (s) {
+    return String(s).replace(/[&<>]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]; });
+  };
+  function toastHost() {
+    var host = document.getElementById("kw-toast-host");
+    if (!host) {
+      host = document.createElement("div");
+      host.id = "kw-toast-host";
+      document.body.appendChild(host);
+    }
+    return host;
+  }
+  function pumpToast() {
+    if (toastShowing || !toastQueue.length) return;
+    var el = toastQueue.shift();
+    toastShowing = true;
+    toastHost().appendChild(el);
+    requestAnimationFrame(function () { requestAnimationFrame(function () { el.classList.add("kw-toast-in"); }); });
+    var done = false;
+    function hide() {
+      if (done) return;
+      done = true;
+      el.classList.remove("kw-toast-in");
+      el.classList.add("kw-toast-out");
+      setTimeout(function () { el.remove(); toastShowing = false; pumpToast(); }, 340);
+    }
+    el.addEventListener("click", hide);
+    setTimeout(hide, 4200);
+  }
+  function queueToast(cls, glyph, kicker, name) {
+    if (!document.body) { document.addEventListener("DOMContentLoaded", function () { queueToast(cls, glyph, kicker, name); }); return; }
+    var el = document.createElement("div");
+    el.className = "kw-toast " + cls;
+    el.innerHTML =
+      '<span class="kw-toast-glyph">' + glyph + "</span>" +
+      '<span class="kw-toast-body">' +
+        '<span class="kw-toast-kicker">' + toastEsc(kicker) + "</span>" +
+        '<span class="kw-toast-name">' + toastEsc(name) + "</span>" +
+      "</span>";
+    toastQueue.push(el);
+    pumpToast();
+  }
+  var RARITY_LABEL = { common: "Relic Found", fine: "Fine Relic Found", rare: "Rare Relic Found", legend: "Legendary Relic" };
+  function toastRelic(rel) {
+    queueToast("kw-toast-" + rel.rare, rel.glyph, RARITY_LABEL[rel.rare] || "Relic Found", rel.name);
+  }
+  function toastRank(name) {
+    queueToast("kw-toast-rank", "&#128081;", "Rank Up", name);
   }
 
   function rankFor(renown) {

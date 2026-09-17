@@ -8,23 +8,33 @@
  * than the usual "not a word", because the owner wants that made explicit: this
  * is a game of words, not of who's-who.
  *
- * Reads window.WORDLE_WORDS (words.js) and, if present, window.PEOPLE_IMGS
- * (../js/people.js) to know which guesses are names.
+ * Reads window.WORDLE_ANSWERS and window.WORDLE_GUESSES (words.js), and, if
+ * present, window.PEOPLE_IMGS (../js/people.js) to know which guesses are
+ * names. Same two-pool shape the real game uses: the daily/random target
+ * only ever comes from ANSWERS (common words), but a submitted guess is
+ * accepted if it is in ANSWERS *or* GUESSES — a much larger dictionary of
+ * real words you can type strategically without it ever being the answer.
  */
 (function () {
   const $ = (id) => document.getElementById(id);
-  const POOLS = window.WORDLE_WORDS || { 4: [], 5: [], 6: [] };
+  const ANSWERS = window.WORDLE_ANSWERS || { 4: [], 5: [], 6: [] };
+  const GUESSES = window.WORDLE_GUESSES || { 4: [], 5: [], 6: [] };
   const MAX_GUESSES = 6;
   const MARK_RANK = { absent: 1, present: 2, correct: 3 };
   const EPOCH = Date.UTC(2026, 0, 1);
 
   /* clean the pools: drop anything not exactly its length, warn if we do */
-  Object.keys(POOLS).forEach((L) => {
-    const n = +L;
-    const bad = POOLS[L].filter((w) => w.length !== n);
-    if (bad.length) console.warn("WORDLE: wrong-length words for " + L + ":", bad);
-    POOLS[L] = Array.from(new Set(POOLS[L].filter((w) => w.length === n)));
-  });
+  function clean(pools) {
+    Object.keys(pools).forEach((L) => {
+      const n = +L;
+      const bad = pools[L].filter((w) => w.length !== n);
+      if (bad.length) console.warn("WORDLE: wrong-length words for " + L + ":", bad);
+      pools[L] = Array.from(new Set(pools[L].filter((w) => w.length === n)));
+    });
+  }
+  clean(ANSWERS); clean(GUESSES);
+  const VALID = {};
+  Object.keys(ANSWERS).forEach((L) => { VALID[L] = new Set(ANSWERS[L].concat(GUESSES[L] || [])); });
 
   /* ---------------- the names to refuse ----------------
      Every token of every character portrait key, 4-6 letters, uppercased. A
@@ -53,14 +63,14 @@
     len: 5, mode: "daily", answer: "", guesses: [], keyState: {}, over: false, won: false,
   };
 
-  function pool() { return POOLS[state.len] || []; }
+  function isValidGuess(w) { return (VALID[state.len] || new Set()).has(w); }
   function dailyAnswer(len) {
-    const p = POOLS[len] || [];
+    const p = ANSWERS[len] || [];
     if (!p.length) return "";
     return p[hash(len + "|" + dayNumber()) % p.length];
   }
   function randomAnswer(len, avoid) {
-    const p = POOLS[len] || [];
+    const p = ANSWERS[len] || [];
     if (!p.length) return "";
     let w = p[Math.floor(Math.random() * p.length)];
     if (w === avoid && p.length > 1) w = p[(p.indexOf(w) + 1) % p.length];
@@ -173,7 +183,7 @@
     if (state.over) return;
     const g = typed.value;
     if (g.length !== state.len) { setMsg(numberWord(state.len) + " letters are needed.", "warn"); shakeRow(); return; }
-    if (!pool().includes(g)) {
+    if (!isValidGuess(g)) {
       if (NAME_TOKENS.has(g)) setMsg("There are no names in this game — only words of the realm.", "warn");
       else setMsg("Not a word of the realm.", "warn");
       shakeRow();
@@ -211,6 +221,9 @@
 
   function finish() {
     saveDailyProgress();   /* records done:true, since state.over is set */
+    if (window.KWCollection) {
+      KWCollection.record("wordle", { right: state.won ? 1 : 0, of: 1 });
+    }
     if (state.mode === "daily") {
       if (window.KWStreak) KWStreak.mark();              /* today's daily is done */
       if (window.DailyRealm) DailyRealm.markDone("wordle", state.won);

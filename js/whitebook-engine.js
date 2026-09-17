@@ -70,7 +70,7 @@
 
   function armsHTML(k) {
     const inner = k.arms
-      ? `<img src="${esc(k.arms)}" alt="" loading="lazy" />`
+      ? `<img src="${esc(k.arms)}" alt="${esc(k.name)} arms" loading="lazy" />`
       : `<span class="wb-arms-glyph">${k.armsGlyph || "&#9876;"}</span>`;
     return `
       <div class="wb-arms">

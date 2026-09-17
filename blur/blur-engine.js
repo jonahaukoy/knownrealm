@@ -199,7 +199,7 @@
     setSharp();
 
     $("bl-img").src = s.src;
-    $("bl-img").alt = "";
+    $("bl-img").alt = "Blurred image to guess"; // kept generic on purpose — a real alt would give the answer away
     coverInstant();   /* boxes close over the new picture before it can show */
     revealTiles();    /* then open this step's fragments */
     $("bl-progress").textContent = "Vision " + (state.i + 1) + " of " + state.deck.length;

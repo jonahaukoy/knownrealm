@@ -107,8 +107,8 @@
   const groupIdByName = {};
   GROUP_SECTIONS.forEach((sec) => sec.groups.forEach((g) => { groupIdByName[groupInfoById[g.id].name] = g.id; }));
 
-  function emblemHTML(emblem, extraClass) {
-    if (emblem && emblem.img) return `<span class="dd-sigil ${extraClass || ""}"><img src="assets/sigils/${emblem.img}" alt=""/></span>`;
+  function emblemHTML(emblem, extraClass, label) {
+    if (emblem && emblem.img) return `<span class="dd-sigil ${extraClass || ""}"><img src="assets/sigils/${emblem.img}" alt="${label || ""}"/></span>`;
     const e = emblem || { glyph: "?", color: "#6b6b6b" };
     return `<span class="dd-sigil group-emblem ${extraClass || ""}" style="background:${e.color}">${e.glyph}</span>`;
   }
@@ -252,7 +252,7 @@
     const seen = new Set();
     const badges = groups.filter((g) => { if (seen.has(g.id)) return false; seen.add(g.id); return true; })
       .map((g) => { const info = groupInfoById[g.id];
-        return `<button class="char-house-badge" data-group="${g.id}" title="${info.name}${g.note ? " — " + g.note : ""}">${emblemHTML(info.emblem, "char-house-emblem")}<span>${info.name}</span></button>`; });
+        return `<button class="char-house-badge" data-group="${g.id}" title="${info.name}${g.note ? " — " + g.note : ""}">${emblemHTML(info.emblem, "char-house-emblem", info.name)}<span>${info.name}</span></button>`; });
     const housesHTML = badges.length
       ? `<div class="char-houses">${badges.join("")}</div>`
       : `<div class="char-house char-house-none">Sworn to no house</div>`;
@@ -920,7 +920,7 @@
           : (info.words ? `&ldquo;${info.words}&rdquo;` : (sec.kind === "order" ? "an order of the world" : ""));
         html += `
           <button class="dd-item" data-group="${group.id}">
-            ${emblemHTML(info.emblem)}
+            ${emblemHTML(info.emblem, "", info.name)}
             <span class="dd-item-text"><span class="dd-item-title">${info.name}</span>
             <span class="dd-item-sub">${sub}</span></span>
             ${rows ? `<span class="dd-member-toggle" data-group-members="${group.id}" title="Its people">&#9662;</span>` : ""}
@@ -933,7 +933,7 @@
       <div class="dropdown-title">Other Seats of the Realm</div>`;
     html += nobleSeats.map((l) => {
       const shield = l.minorArms.img
-        ? `<img src="assets/sigils/${l.minorArms.img}" alt=""/>`
+        ? `<img src="assets/sigils/${l.minorArms.img}" alt="${l.minorArms.house || l.name}"/>`
         : minorShieldSVG(l.minorArms);
       return `<button class="dd-item dd-item-noble" data-noble="${l.id}">
         <span class="dd-sigil dd-sigil-noble">${shield}</span>
@@ -1199,7 +1199,7 @@
     let minorChip = "";
     if (!house && loc.minorArms) {
       const shield = loc.minorArms.img
-        ? `<img src="assets/sigils/${loc.minorArms.img}" alt=""/>`
+        ? `<img src="assets/sigils/${loc.minorArms.img}" alt="${loc.minorArms.house}"/>`
         : minorShieldSVG(loc.minorArms);
       minorChip = `<div class="loc-house-chip">${shield}<span>${loc.minorArms.house}</span></div>`;
     }
@@ -1207,7 +1207,7 @@
       <div class="loc-kicker">${TYPE_LABEL[loc.type]} &middot; ${region ? region.name : ""}</div>
       <div class="loc-title">${loc.name}</div>
       <div class="loc-subtitle">${loc.subtitle}</div>
-      ${house ? `<div class="loc-house-chip"><img src="assets/sigils/${house.id}.svg" alt=""/><span>${house.name} &middot; &ldquo;${house.words}&rdquo;</span></div>` : ""}
+      ${house ? `<div class="loc-house-chip"><img src="assets/sigils/${house.id}.svg" alt="${house.name}"/><span>${house.name} &middot; &ldquo;${house.words}&rdquo;</span></div>` : ""}
       ${minorChip}
       <div class="sidebar-divider"></div>
       <p class="loc-desc">${linkifyNames(loc.description)}</p>
@@ -1600,7 +1600,7 @@
 
     const shieldHTML = info.emblem && info.emblem.img
       ? `<img src="assets/sigils/${info.emblem.img}" alt="${info.name}"/>`
-      : emblemHTML(info.emblem, "house-shield-emblem");
+      : emblemHTML(info.emblem, "house-shield-emblem", info.name);
 
     els.sidebar.innerHTML = `
       <div class="loc-kicker">${kicker}</div>
@@ -2025,7 +2025,7 @@
       .map(([hid, score]) => {
         const h = houseById[hid];
         return `<div class="power-row">
-          <img class="power-sigil" src="${sigilSrc(hid)}" alt=""/>
+          <img class="power-sigil" src="${sigilSrc(hid)}" alt="${h.name}"/>
           <span class="power-name">${h.name.replace("House ", "")}</span>
           <span class="power-bar"><span class="power-fill" style="width:${score * 10}%"></span></span>
           <span class="power-score">${score}</span>
@@ -2206,7 +2206,7 @@
       .map(([hid, score]) => {
         const h = houseById[hid];
         return `<div class="power-row">
-          <img class="power-sigil" src="${sigilSrc(hid)}" alt=""/>
+          <img class="power-sigil" src="${sigilSrc(hid)}" alt="${h.name}"/>
           <span class="power-name">${h.name.replace("House ", "")}</span>
           <span class="power-bar"><span class="power-fill" style="width:${score * 10}%"></span></span>
           <span class="power-score">${score}</span>

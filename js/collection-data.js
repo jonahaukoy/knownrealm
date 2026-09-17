@@ -1,5 +1,5 @@
 /* ============================================================================
-   THE CABINET — what there is to collect, and the ladder you climb.
+   THE HALL OF RENOWN — what there is to collect, and the ladder you climb.
 
    Two things make a game worth coming back to when there is no opponent: a
    number that only goes up, and a shelf with gaps in it. This file is both.

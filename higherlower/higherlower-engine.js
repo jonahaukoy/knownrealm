@@ -221,7 +221,7 @@
     var bar = '<span class="hl-bar"><span class="hl-bar-fill" style="width:' +
       (revealed ? barPct(item.v) : 0) + '%"></span></span>';
     return '<div class="hl-c-media' + frame + '">' +
-        '<img src="' + item.img + '" alt="" loading="lazy" onerror="this.classList.add(\'hl-img-fail\')"/>' +
+        '<img src="' + item.img + '" alt="' + esc(item.name) + '" loading="lazy" onerror="this.classList.add(\'hl-img-fail\')"/>' +
         '<span class="hl-c-scrim"></span></div>' +
       '<div class="hl-c-body">' +
         '<span class="hl-c-name">' + esc(item.name) + '</span>' +

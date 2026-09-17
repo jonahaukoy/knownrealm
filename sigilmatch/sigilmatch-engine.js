@@ -149,7 +149,7 @@
     const answersBox = $("sm-answers-box");
 
     if (bannerToHouse) {
-      promptBox.innerHTML = `<div class="sm-banner-box"><img src="${house.img}" alt="" /></div>
+      promptBox.innerHTML = `<div class="sm-banner-box"><img src="${house.img}" alt="A house banner to identify" /></div>
         <div class="sm-prompt">Which house does this banner belong to?</div>`;
       answersBox.innerHTML = `<div class="sm-answers-text" id="sm-answers"></div>`;
       const row = $("sm-answers");
@@ -169,7 +169,7 @@
       options.forEach((opt) => {
         const b = document.createElement("button");
         b.className = "sm-a-img";
-        b.innerHTML = `<img src="${opt.img}" alt="" />`;
+        b.innerHTML = `<img src="${opt.img}" alt="A house banner option" />`;
         b.dataset.right = opt.id === house.id ? "1" : "0";
         b.addEventListener("click", () => pick(b, opt.id === house.id, house));
         row.appendChild(b);
@@ -208,6 +208,9 @@
   });
 
   function renderResult() {
+    if (window.KWCollection) {
+      KWCollection.record("sigilmatch", { right: state.score, of: state.deck.length });
+    }
     const rank = RANKS.find((r) => state.score >= r[0]);
     const el = $("sm-result");
     el.innerHTML = `

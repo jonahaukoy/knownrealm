@@ -663,46 +663,6 @@ class MapView {
       el.classList.toggle("upcoming", !visited);
     });
   }
-    // Debug overlay: show computed traveler point vs revealed-path endpoint
-    try {
-      const dbg = /mapDebug=1/.test(window.location.search) || window.__MAP_DEBUG;
-      if (dbg) {
-        const svgns = "http://www.w3.org/2000/svg";
-        const dashOff = parseFloat(getComputedStyle(this._routePathEl).strokeDashoffset) || 0;
-        const revealLen = Math.max(0, this._routeLen - dashOff);
-        const revealPt = this._routePathEl.getPointAtLength(revealLen);
-        let r = this.routeLayer.querySelector('.debug-reveal');
-        if (!r) {
-          r = document.createElementNS(svgns, 'circle');
-          r.setAttribute('class', 'debug-reveal');
-          r.setAttribute('r', '6');
-          r.setAttribute('fill', 'rgba(255,0,0,0.85)');
-          r.setAttribute('stroke', '#000');
-          r.setAttribute('stroke-width', '1');
-          this.routeLayer.appendChild(r);
-        }
-        r.setAttribute('cx', revealPt.x);
-        r.setAttribute('cy', revealPt.y);
-
-        let t = this.routeLayer.querySelector('.debug-traveler');
-        if (!t) {
-          t = document.createElementNS(svgns, 'circle');
-          t.setAttribute('class', 'debug-traveler');
-          t.setAttribute('r', '4');
-          t.setAttribute('fill', 'rgba(0,255,0,0.85)');
-          t.setAttribute('stroke', '#000');
-          t.setAttribute('stroke-width', '1');
-          this.routeLayer.appendChild(t);
-        }
-        t.setAttribute('cx', pt.x);
-        t.setAttribute('cy', pt.y);
-        console.log('hotd map: clampedL=', clampedL, 'dashOff=', dashOff, 'revealLen=', revealLen);
-      } else {
-        const rr = this.routeLayer.querySelector('.debug-reveal'); if (rr) rr.remove();
-        const tt = this.routeLayer.querySelector('.debug-traveler'); if (tt) tt.remove();
-      }
-    } catch (e) {}
-
 
   getTravelerPoint() {
     return this._travelerPt;

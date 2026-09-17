@@ -13,8 +13,6 @@ Disallow: /404.html
 
 # working folders that are not part of the public site
 Disallow: /assets/_sources/
-Disallow: /_codex_backup_20260706_170741_site_wordle/
-Disallow: /_codex_backup_20260706_region_journey_defaults/
 
 Sitemap: https://knownrealm.com/sitemap.xml
 Sitemap: https://knownrealm.com/sitemap-prerender.xml

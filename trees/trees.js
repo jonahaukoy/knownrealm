@@ -343,7 +343,7 @@
     const h = houseById[id]; if (!h) return;
     const col = colorFor(id);
     header.innerHTML =
-      '<div class="tree-crest"><img src="' + h.sigil + '" alt="" draggable="false"/></div>' +
+      '<div class="tree-crest"><img src="' + h.sigil + '" alt="' + escapeHTML(h.name) + '" draggable="false"/></div>' +
       '<h1 class="tree-house-name" style="color:' + col + '">' + escapeHTML(h.name) + "</h1>" +
       '<div class="tree-house-words">&ldquo;' + escapeHTML(h.words) + "&rdquo;</div>" +
       '<p class="tree-blurb">' + escapeHTML(h.blurb) + "</p>";
@@ -445,7 +445,7 @@
     const card = byId("tree-card");
     const fp = facePath(e.img);
     const portrait = fp
-      ? '<div class="char-portrait"><img src="' + fp + '" alt="" style="border-color:' + col + '" onerror="this.parentNode.innerHTML=\'<div class=&quot;char-portrait-blank&quot;>' + initials(e.n) + '</div>\'"/></div>'
+      ? '<div class="char-portrait"><img src="' + fp + '" alt="' + escapeHTML(e.n) + '" style="border-color:' + col + '" onerror="this.parentNode.innerHTML=\'<div class=&quot;char-portrait-blank&quot;>' + initials(e.n) + '</div>\'"/></div>'
       : '<div class="char-portrait"><div class="char-portrait-blank">' + initials(e.n) + "</div></div>";
     const rows = [];
     if (node._spouseOf) {
@@ -479,7 +479,7 @@
       '<button class="char-card-close" id="tree-card-close" title="Close">&times;</button>' + portrait +
       '<div class="char-name" style="color:' + col + '">' + (e.king ? '<span class="tc-crown">&#9819;</span>' : "") + escapeHTML(e.n) + "</div>" +
       (e.t ? '<div class="tree-card-title">' + escapeHTML(e.t) + "</div>" : "") +
-      '<div class="tc-house"><img src="' + h.sigil + '" alt=""/><div class="tc-house-text">' + escapeHTML(h.name) + "<i>&ldquo;" + escapeHTML(h.words) + "&rdquo;</i></div></div>" +
+      '<div class="tc-house"><img src="' + h.sigil + '" alt="' + escapeHTML(h.name) + '"/><div class="tc-house-text">' + escapeHTML(h.name) + "<i>&ldquo;" + escapeHTML(h.words) + "&rdquo;</i></div></div>" +
       (desc ? '<p class="tc-note">' + escapeHTML(desc) + "</p>" : (e.note && !node._spouseOf ? '<p class="tc-note tc-fate">' + escapeHTML(e.note) + "</p>" : "")) +
       (rows.length ? '<div class="tc-kin">' + rows.join("") + "</div>" : "") +
       '<div class="tc-actions">' +
@@ -501,7 +501,7 @@
       const b = document.createElement("button");
       b.className = "tree-pick" + (extra || ""); b.dataset.house = id;
       b.style.setProperty("--hc", colorFor(id));
-      b.innerHTML = (sigil ? '<img src="' + sigil + '" alt="" draggable="false"/>' : '<span class="tree-pick-star">&#10022;</span>') +
+      b.innerHTML = (sigil ? '<img src="' + sigil + '" alt="' + escapeHTML(name) + '" draggable="false"/>' : '<span class="tree-pick-star">&#10022;</span>') +
         '<span class="tree-pick-text"><b>' + escapeHTML(name) + "</b><i>" + escapeHTML(words) + "</i></span>";
       b.addEventListener("click", () => { showHouse(id); closeRail(); });
       return b;

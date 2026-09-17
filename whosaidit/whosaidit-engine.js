@@ -300,7 +300,7 @@
     answers.forEach((ans) => {
       const b = document.createElement("button");
       b.className = "ws-a";
-      b.innerHTML = (ans.portrait ? `<img class="ws-a-portrait" src="${ans.portrait}" alt="" />` : `<span class="ws-a-portrait"></span>`) +
+      b.innerHTML = (ans.portrait ? `<img class="ws-a-portrait" src="${ans.portrait}" alt="${ans.name}" />` : `<span class="ws-a-portrait"></span>`) +
         `<span class="ws-a-name">${ans.name}</span>`;
       b.addEventListener("click", () => pick(b, ans.right, q));
       b.dataset.right = ans.right ? "1" : "0";

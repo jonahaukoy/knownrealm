@@ -72,10 +72,17 @@ foreach ($site in $Sites) {
   $dump = Join-Path $tmp ("dump-" + $site.name + ".html")
   $profile = Join-Path $env:TEMP ("kw_edge_" + $site.name)
 
-  & $edge --headless=new --disable-gpu --no-sandbox --user-data-dir="$profile" `
-      --virtual-time-budget=45000 --dump-dom $fileUrl 2>$null | Out-File -Encoding utf8 $dump
+  # IMPORTANT: do not pipe Edge's --dump-dom output through the PowerShell string
+  # pipeline (`| Out-File`) -- PS 5.1 decodes a native process's stdout bytes using
+  # the console codepage, not UTF-8, before Out-File ever gets to re-encode them,
+  # silently mangling every em-dash/curly-quote/emoji into mojibake (the exact trap
+  # documented for Get-Content/Set-Content elsewhere in this project). Redirect at
+  # the OS level via cmd.exe instead, so Edge's UTF-8 bytes hit the file untouched,
+  # then read them back with an explicit UTF-8 decode.
+  $cmdLine = '"' + $edge + '" --headless=new --disable-gpu --no-sandbox --user-data-dir="' + $profile + '" --virtual-time-budget=45000 --dump-dom "' + $fileUrl + '" > "' + $dump + '" 2>nul'
+  cmd /c $cmdLine
 
-  $rawText = Get-Content $dump -Raw
+  $rawText = Get-Content -LiteralPath $dump -Raw -Encoding utf8
   if ($rawText -match "KW_PRERENDER_ERROR:(\S+)") { Write-Host ("  driver error: " + $Matches[1]); continue }
   if ($rawText -notmatch "KW_PRERENDER_DONE:(\d+)") { Write-Host "  no completion marker - skipped"; continue }
 

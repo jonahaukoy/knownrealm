@@ -391,6 +391,10 @@
     const p = state.p;
     const grid = ravenGrid();
 
+    if (window.KWCollection) {
+      KWCollection.record("smallcouncil", { right: won ? 1 : 0, of: 1, clean: won && state.mistakes === 0 });
+    }
+
     /* the DAILY earns a scene (and the streak); practice councils get the plain
        result so you can rattle through them */
     if (state.isDaily) {

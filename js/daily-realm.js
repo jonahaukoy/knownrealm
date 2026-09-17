@@ -92,7 +92,7 @@
     el.className = "dr-screen " + (won ? "dr-win" : "dr-lose");
     el.innerHTML =
       '<figure class="dr-figure">' +
-        '<img src="' + prefix + 'assets/scenes/' + s.img + '" alt="" />' +
+        '<img src="' + prefix + 'assets/scenes/' + s.img + '" alt="' + esc(s.title) + '" />' +
         '<figcaption class="dr-credit">Art &copy; Jon-Anders Hauk&oslash;y &middot; ' +
           '<a href="' + prefix + 'credits.html">credits</a></figcaption>' +
       '</figure>' +
